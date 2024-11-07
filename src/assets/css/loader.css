@@ -1,0 +1,28 @@
+.loader{
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    height: 90%;
+}
+.loader .rs-modal-content{
+    background: transparent;
+    border: 0px;
+    box-shadow: 0 0 transparent;
+    width: 100%;
+}
+
+/* override */
+.rs-loader-lg .rs-loader-spin{
+    width: 70px;
+    height: 70px;
+}
+.rs-loader-spin:before {
+    border: 5px solid var(--bs-white);
+}
+.rs-loader-spin:after {
+    -webkit-animation: loaderSpin .6s linear infinite;
+    animation: loaderSpin .6s linear infinite;
+    border: 5px solid var(--bs-white);
+    border-top-color: #a6a6a6;
+    border-color: var(--rs-loader-rotor) transparent transparent;
+}

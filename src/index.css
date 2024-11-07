@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root{
+    --primary:#152e6e;
+    --primary-hover:#0f1034;
+  
+    --border-head-divider:#e4eaf9;
+}
+
+.error-field{
+    box-shadow: 0 0 1px 1px red !important;
+}
