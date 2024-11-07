@@ -26,6 +26,11 @@ export type ILoader = {
     handleClose: ()=>void
 }
 
+export interface IUser {
+    id: string | number,
+    name: string
+}
+
 export interface IApp {
     loader: React.RefObject<ILoader>
 }
