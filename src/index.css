@@ -12,3 +12,11 @@
 .error-field{
     box-shadow: 0 0 1px 1px red !important;
 }
+
+/** sobreescribe */
+.rs-sidenav-nav>.rs-dropdown .rs-dropdown-toggle,
+.rs-dropdown.rs-dropdown-placement-right-start.rs-dropdown-expand .rs-dropdown-menu,
+.rs-sidenav-nav.rs-nav.rs-nav-default.rs-nav-vertical .rs-sidenav-item
+{
+    font-size: 13px;
+}

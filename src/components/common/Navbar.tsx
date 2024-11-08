@@ -7,8 +7,12 @@ import NavbarBrand from "rsuite/esm/Navbar/NavbarBrand";
 
 import AdminIcon from '@rsuite/icons/Admin';
 import MenuIcon from '@rsuite/icons/Menu';
+import ArrowRightLineIcon from '@rsuite/icons/ArrowRightLine';
+import ArrowLeftLineIcon from '@rsuite/icons/ArrowLeftLine';
+
 import { decript } from "../../utils/functions";
 import { IUser } from "../../utils/interfaces/function";
+
 
 
 interface INavbar {
@@ -44,20 +48,25 @@ const Navbar = ({
 
     return (
         <NavbarContent appearance="subtle" className="bg-white">
-            {!showOpenSide && (
-                <Nav>
-                    <Nav.Item onClick={openSide}>
+            
+            <Nav>
+                <Nav.Item onClick={openSide}>
+                    {showOpenSide ?
+                        expanded ? <ArrowLeftLineIcon /> : <ArrowRightLineIcon />
+                    :
                         <MenuIcon />
-                    </Nav.Item>
-                </Nav>
-            )}
+                    }
+                    
+                </Nav.Item>
+            </Nav>
+
             {!expanded && (
                 <NavbarBrand onClick={()=>navigate('/admin/dashboard')} className="cursor-pointer">
                     Visas Premier
                 </NavbarBrand>
             )}
             <Nav pullRight>
-                <Nav.Item>{time}</Nav.Item>
+                <Nav.Item className="hidden sm:block">{time}</Nav.Item>
                 <Nav.Menu title={user.name} icon={<AdminIcon />}>
                     <Nav.Item>Restablecer contraseña</Nav.Item>
                     <Nav.Item>Salir</Nav.Item>

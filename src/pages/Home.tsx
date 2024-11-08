@@ -1,6 +1,10 @@
+import { Grid } from "rsuite";
+
 const Home = ()=>{
     return(
-        <>Home</>
+        <Grid fluid>
+            <h1>Dashboard</h1>
+        </Grid>
     )
 }
 
