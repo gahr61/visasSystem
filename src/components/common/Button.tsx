@@ -16,7 +16,7 @@ const Button = (props: IButton)=>{
         customClass = '',
         children,
         disabled = false,
-        size = 'sm',
+        size = 'md',
         onClick
     } = props;
 

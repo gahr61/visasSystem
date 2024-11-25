@@ -43,9 +43,9 @@ const SidebarAdmin = ({expanded}:ISidebar)=>{
         ]},
         {key:'config', show:true, title:'Configuración', active:false, alignIcon:false, icon:<GearIcon />, submenus:[
             {title:'Sistema', show:true, url:'/', active:false},
-            {title:'Empleados', show:true, url:'/', active:false},
-            {title:'Permisos', show:true, url:'/', active:false},
-            {title:'Roles', show:true, url:'/', active:false},
+            {title:'Empleados', show:true, url:'/config/employees/list', active:false},
+            {title:'Permisos', show:true, url:'/config/permissions/list', active:false},
+            {title:'Roles', show:true, url:'/config/roles/list', active:false},
         ]}
     ]);
 
@@ -86,7 +86,7 @@ const SidebarAdmin = ({expanded}:ISidebar)=>{
     }
  
     return (
-        <Grid fluid className="h-[100vh]">
+        <Grid fluid className="h-[100%]]">
            <Row className="flex flex-col gap-2 justify-center">
                 <Col xs={12} xsOffset={6} md={expanded ? 12 : 22} mdOffset={expanded ? 6 : 1} className="flex justify-center">
                     <img src={logo} className="size-[100%] md:size-[30%] lg:w-full" />

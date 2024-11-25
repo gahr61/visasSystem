@@ -1,10 +1,30 @@
 import cryptoJs from 'crypto-js';
 import { IFetchRequestParams } from './interfaces/function';
 import { ILoginResponse } from './interfaces/auth';
+import Swal from 'sweetalert2';
 
 
 
 const apiUrl = import.meta.env.VITE_HOST;
+
+/**
+ * Add error highlighting to select component
+ * @param {*} id field identifier 
+ * @param {*} value field value
+ */
+export const addErrorToSelectedField = (id:string, value:string | number)=>{
+	let field = document.getElementById(id);
+	
+	if(field !== null){
+		if(value === ''){
+			field.classList.add('error');
+			return;
+		}
+
+		field.classList.remove('error');
+		
+	}
+}
 
 /*
 * gets the value of the variable in browser sessionstorage
@@ -100,7 +120,7 @@ export const fetchRequest = async <T>({
     };
 
     if(requireToken && token){
-        headers['Autorization'] = 'Bearer ' + token;
+        headers['Authorization'] = 'Bearer ' + token;
 
         if(sendFile){ //if you send file
             delete headers['Content-Type'];
@@ -223,6 +243,15 @@ export const isValidForm = (element: string): boolean =>{
 }
 
 /**
+ * Normalize a given string to camelCase notation
+ */
+export const normalizeString = (text:string)=>{
+    let transformText = text.toLocaleLowerCase()
+                            .replace(/\s+/g, '_');
+    return transformText;
+}
+
+/**
  * Stores login variables in browser storage
  * @param {object} response response login
  */
@@ -238,7 +267,7 @@ export const setDataStorage = (response: ILoginResponse | undefined)=>{
  */
 export const showCtrError = (id: string, value: string)=>{
     let valid = true;
-    console.log(value)
+    
     if(value === ''){
         document.getElementById(id)?.classList.add("error-field");
 
@@ -248,4 +277,45 @@ export const showCtrError = (id: string, value: string)=>{
     }
 
     return valid;
+}
+
+/**
+ * Displays confirmation message to delete a record
+ * @param confirmFuntion function to be executed when confirming
+ * @param cancelFunction function to be excecuted when cancel
+ * @param value value sent to confirmation function 
+ */
+export const swalConfirm = ({
+	title = 'Alert',
+	confirmFunction,
+	cancelFunction,
+	value = -1,
+	text,
+	confirmText
+}:{
+    title?: string,
+    confirmFunction:(value: number)=>void,
+    cancelFunction?:(value?: number | null)=>void,
+    value: number,
+    text: string,
+    confirmText: string
+})=>{
+	Swal.fire({
+		title: title,
+		text:text,
+		icon:'warning',
+		showConfirmButton: true,
+		showCancelButton: true,
+		confirmButtonText: confirmText,
+		confirmButtonColor: 'var(--rs-color-red)',
+		cancelButtonText: 'No, Cancel',
+	}).then(result =>{
+		if(result.isConfirmed){
+			confirmFunction(value);
+		}else{
+			if(cancelFunction){
+				cancelFunction(value);
+			}
+		}
+	});
 }

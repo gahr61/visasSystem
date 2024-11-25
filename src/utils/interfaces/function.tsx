@@ -18,7 +18,7 @@ export type IFetchResponse = {
 export type IResponse<T> = {
     success: boolean,
     message: string,
-    data?: T
+    data: T
 }
 
 export type ILoader = {

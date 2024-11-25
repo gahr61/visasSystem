@@ -4,7 +4,8 @@ import { isEmail, isPhone, showCtrError } from "../../utils/functions";
 
 interface IInput extends InputHTMLAttributes<HTMLInputElement>{
     setErrorEmail?: (e: any)=>void,
-    customClass?:string
+    customClass?:string,
+    onKeyPress?: (e: React.KeyboardEvent<HTMLInputElement>)=>void
 }
 
 const Input = (props:IInput)=>{
@@ -15,7 +16,10 @@ const Input = (props:IInput)=>{
         setErrorEmail,
         disabled = false,
         required = false,
-        customClass = ''
+        customClass = '',
+        placeholder = '',
+        onKeyPress = ()=>{},
+        value = ''
     } = props;
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>)=>{
@@ -47,11 +51,14 @@ const Input = (props:IInput)=>{
 
     }
 
+
+
     return(
         <input 
             type={type}
             id={id}
             name={id}
+            value={value}
             className={`
                 ${customClass}
                 py-1 px-2 block w-full border outline-0 rounded-lg text-sm 
@@ -59,8 +66,11 @@ const Input = (props:IInput)=>{
                 disabled:opacity-50 disabled:bg-neutral-100 disabled:cursor-no-drop
             `}
             onChange={handleChange}
+            onKeyDown={onKeyPress}
             disabled={disabled}
             required={required}
+            placeholder={placeholder}
+            autoComplete="off"
         />
     )
 }

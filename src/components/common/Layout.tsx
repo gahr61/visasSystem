@@ -28,12 +28,11 @@ const Layout = ()=>{
         onResizeWindow();
 
         window.addEventListener('resize', ()=>{ onResizeWindow(); });
-    },[])
-
+    },[]);
 
     return (
         <Grid fluid className="h-[100vh] w-full">
-            <Row className="h-full">
+            <Row className="">
                 {showSidebar ? 
                     <Col xsHidden lg={expanded ? 3 : 1} className="relative">
                         <SidebarAdmin expanded={expanded}/>
@@ -51,7 +50,7 @@ const Layout = ()=>{
                             openSide={onOpenSidebar}
                         />
                     </Col>
-                    <Col xs={24} style={{height: 'calc(100vh - '+document.getElementById('header-content')?.offsetHeight+'px)'}}>
+                    <Col xs={24} >
                         <Outlet />
                     </Col>
                 </Col>
