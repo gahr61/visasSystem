@@ -18,12 +18,12 @@ import logo from '../../assets/images/logo.png';
 const Login = ({loader}: IApp)=>{
     /** verify is session is stated */
     if(isAuth()){
-        window.location.href = '/';
+        //window.location.href = '/';
     }
 
     const [ data, setData ] = useState<ILogin>({
-        email: '',
-        password: ''
+        email: 'sistemas@visas-premier.com',
+        password: 'qwer1234'
     });
 
     const [ errorEmail, setErrorEmail ] = useState('');
@@ -80,7 +80,7 @@ const Login = ({loader}: IApp)=>{
     return(
         <Grid fluid className="h-[100vh]">
             <Row className="h-full flex justify-center items-center">
-                <Col xs={22} sm={20} md={12} lg={8}>
+                <Col xs={22} sm={20} md={12} lg={8} xxl={6}>
                     <Panel bordered>
                         <Row>
                             <Col xsOffset={5} xs={14} mdOffset={7} md={10} className="flex justify-center">
@@ -119,6 +119,7 @@ const Login = ({loader}: IApp)=>{
                                                 type="password"
                                                 value={data.password}
                                                 onChange={handleChange}
+                                                onKeyPress={(e)=>e.key === 'Enter' ? onSubmit(e) : {}}
                                                 required
                                             />
                                         </Col>

@@ -13,9 +13,19 @@ import Login from "./pages/auth/Login";
 /** EMPLOYEES */
 import UsersList from "./pages/config/employees/List";
 import UsersNew from "./pages/config/employees/New";
-import PermissionsList from "./pages/config/permissions/List";
-import RolesList from "./pages/config/roles/List";
 import UsersEdit from "./pages/config/employees/Edit";
+
+/** PERMISSIONS */
+import PermissionsList from "./pages/config/permissions/List";
+
+/** ROLES */
+import RolesList from "./pages/config/roles/List";
+
+/** SYSTEM */
+import SystemLayout from "./components/ui/config/system/Layout";
+
+/** COMISSIONS */
+import Commissions from "./pages/config/system/Commissions";
 
 const AppRoutes = (props:IApp)=>{
     return(
@@ -35,6 +45,10 @@ const AppRoutes = (props:IApp)=>{
                         <Route path="permissions/list" element={<PermissionsList />} />
 
                         <Route path="roles/list" element={<RolesList {...props} />} />
+
+                        <Route element={<SystemLayout />}>
+                            <Route path="commissions/list" element={<Commissions {...props} />} />
+                        </Route>
                     </Route>
                 </Route>
                 

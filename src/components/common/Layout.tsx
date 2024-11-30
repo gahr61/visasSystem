@@ -34,7 +34,7 @@ const Layout = ()=>{
         <Grid fluid className="h-[100vh] w-full">
             <Row className="">
                 {showSidebar ? 
-                    <Col xsHidden lg={expanded ? 3 : 1} className="relative">
+                    <Col xsHidden lg={expanded ? 3 : 1} className="relative flex justify-center">
                         <SidebarAdmin expanded={expanded}/>
                     </Col>
                 :
