@@ -13,22 +13,24 @@ export interface Columns {
 type Props ={
     columns: Columns[],
     data: any[],
-    height?: string | number
+    height?: number,
+    autoHeight?: boolean
 }
 
 const Table = ({
     columns,
     data = [],
-    height = 'auto'
+    height = 300,
+    autoHeight = false
 }: Props)=>{
     const [loading, setLoading] = useState(true);
 
     useEffect(()=>{
-        if(data.length === 0){
+        //if(data.length === 0){
             setTimeout(()=>{
                 setLoading(false)
             },1000);
-        }
+        //}
     },[]);
 
 
@@ -38,11 +40,11 @@ const Table = ({
                 <TableContent 
                     loading={loading}
                     data={data}
+                    autoHeight={data.length === 0 || autoHeight}
                     headerHeight={30}
-                    height={height === 'auto' ? 
-                        document.getElementById('header-content')?.offsetHeight || 60 
-                    : window.innerHeight - 200}
+                    height={height || 200}
                     hover
+                    className="border rounded-lg"
                 >
                     {columns.map((column, index)=>
                         <Column key={index} flexGrow={column.grow}>

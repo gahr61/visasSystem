@@ -1,3 +1,4 @@
+import { ISelectOptions } from "../../components/common/Select";
 import { fetchRequest } from "../functions";
 import { IResponse } from "../interfaces/function";
 import { Roles } from "../interfaces/system";
@@ -7,11 +8,15 @@ export const roles = ():Promise<IResponse<Roles[] | []>> => {
 }
 
 export const rolesDelete = (id: number):Promise<IResponse<undefined>> => {
-    return fetchRequest({url:`roles/${id}`, method:'DELETE'});
+    return fetchRequest({url:`roles/${id}/delete`, method:'DELETE'});
 }
 
 export const rolesId = (id:string | number):Promise<IResponse<Roles>>=>{
-    return fetchRequest({url:`roles/${id}`});
+    return fetchRequest({url:`roles/${id}/edit`});
+}
+
+export const rolesList = ():Promise<IResponse<ISelectOptions[]>> => {
+    return fetchRequest({url:'roles/list'});
 }
 
 export const rolesStore = (obj:Roles):Promise<IResponse<undefined>> => {
@@ -19,5 +24,5 @@ export const rolesStore = (obj:Roles):Promise<IResponse<undefined>> => {
 }
 
 export const rolesUpdate = (id: string | number, obj:Roles):Promise<IResponse<undefined>> => {
-    return fetchRequest({url:`roles/${id}`, method:'PUT', body:obj});
+    return fetchRequest({url:`roles/${id}/update`, method:'PUT', body:obj});
 }

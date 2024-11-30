@@ -8,12 +8,12 @@ export interface Column {
 }
 
 export interface Commissions {
-    id?:string,
+    id?:string | number | null,
     concept: string;
 }
 
 export interface Modal {
-    handleShow: (id: number | undefined, name?: string)=>void
+    handleShow: (id: number | undefined, name?: string, row?:any)=>void
 }
 
 export interface Permissions {

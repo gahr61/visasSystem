@@ -15,6 +15,7 @@ import UsersList from "./pages/config/employees/List";
 import UsersNew from "./pages/config/employees/New";
 import PermissionsList from "./pages/config/permissions/List";
 import RolesList from "./pages/config/roles/List";
+import UsersEdit from "./pages/config/employees/Edit";
 
 const AppRoutes = (props:IApp)=>{
     return(
@@ -27,8 +28,9 @@ const AppRoutes = (props:IApp)=>{
                     <Route path="/" element={<Home />} />
 
                     <Route path="/config">
-                        <Route path="employees/list" element={<UsersList />} />
-                        <Route path="employees/new" element={<UsersNew />} />
+                        <Route path="employees/list" element={<UsersList {...props} />} />
+                        <Route path="employees/new" element={<UsersNew {...props} />} />
+                        <Route path="employees/edit/:id" element={<UsersEdit {...props} />} />
 
                         <Route path="permissions/list" element={<PermissionsList />} />
 

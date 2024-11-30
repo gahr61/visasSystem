@@ -94,11 +94,12 @@ const SelectForm = ({
             styles={customStyles} 
             id={id}
             name={id}
+            inputId={'select_'+id}
             options={options}
             required={required}
             isDisabled={disabled}
             isMulti={multiple}
-            value={value === null ? '' : options.find(obj => obj.value === value)}
+            value={value === null || value === ''? '' : options.find(obj => obj.value.toString() === value.toString())}
             placeholder="Select..."
             isClearable={true}
             onChange={(e: any)=>onChangeValue(e)}

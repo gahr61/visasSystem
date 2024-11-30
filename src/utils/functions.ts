@@ -14,14 +14,14 @@ const apiUrl = import.meta.env.VITE_HOST;
  */
 export const addErrorToSelectedField = (id:string, value:string | number)=>{
 	let field = document.getElementById(id);
-	
+    
 	if(field !== null){
 		if(value === ''){
-			field.classList.add('error');
+			field.classList.add('error-field');
 			return;
 		}
 
-		field.classList.remove('error');
+		field.classList.remove('error-field');
 		
 	}
 }
@@ -67,30 +67,6 @@ export const encript = (name:string, value:string)=>{
 	}
 
 	sessionStorage.setItem(encriptedName, encriptedValue);
-}
-
-
-/*
-* Find a variable in sessionstorage
-* @param {string | name} variable's name
-* @return string
-*/
-const findInStorage = (name:string)=>{
-	let value = '';
-	let sessions = Object.keys(sessionStorage);
-
-	if(sessions.length > 0){
-		sessions.forEach((key) => {
-			let bytes = cryptoJs.AES.decrypt(key, import.meta.env.VITE_SECRET);
-			let decriptedName = bytes.toString(cryptoJs.enc.Utf8);
-
-			if(decriptedName === name){
-				value = key;
-			}
-		});
-	}
-
-	return value;
 }
 
 /**
@@ -173,6 +149,38 @@ export const fetchRequest = async <T>({
 }
 
 /*
+* Find a variable in sessionstorage
+* @param {string | name} variable's name
+* @return string
+*/
+const findInStorage = (name:string)=>{
+	let value = '';
+	let sessions = Object.keys(sessionStorage);
+
+	if(sessions.length > 0){
+		sessions.forEach((key) => {
+			let bytes = cryptoJs.AES.decrypt(key, import.meta.env.VITE_SECRET);
+			let decriptedName = bytes.toString(cryptoJs.enc.Utf8);
+
+			if(decriptedName === name){
+				value = key;
+			}
+		});
+	}
+
+	return value;
+}
+
+/**
+ * Tansform price number into price format
+ * @param price 
+ * @returns 
+ */
+export const formatPrice = (price: string | number)=>{
+    return parseInt(price.toString()).toLocaleString('en-US', {style:'currency', currency:'USD'});
+}
+
+/*
 * Verify if user is autheticated
 * return boolean
 */
@@ -222,16 +230,31 @@ export const isPhone = (value: string)=>{
  */
 export const isValidForm = (element: string): boolean =>{
     
-    let ctrls:any = [];
-    let isFormValid =  true;
+    let ctrls: NodeListOf<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement> = document.querySelectorAll('input');
 
     const select = document.querySelector(element);
-
+    let isFormValid =  true;
     if(select){
-        ctrls = select.querySelectorAll('input, select, textarea');   
+        ctrls = select.querySelectorAll('input, select, textarea') as NodeListOf<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>;   
 
-        ctrls.forEach((ctrl: any) => {
-            if(ctrl.required){
+        ctrls.forEach((ctrl) => {
+            const ariaRequired = ctrl.getAttribute('aria-required');
+
+            if(ariaRequired !== null && ariaRequired === 'true'){
+                const name = ctrl.id.replace('select_', '');
+                
+				const control = document.getElementsByName(name) as NodeListOf<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>;
+				let value = '';
+				
+				if(control.length > 0){
+					value = control[0].value;
+				}
+				
+				if(value === ''){
+                    addErrorToSelectedField(name, value);
+					isFormValid = false;
+				}
+            }else if(ctrl.required){
                 if(ctrl.value === ''){
                     isFormValid = showCtrError(ctrl.id, ctrl.value);
                 }

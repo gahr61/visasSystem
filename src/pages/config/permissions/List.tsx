@@ -9,7 +9,7 @@ import { Column, Permissions } from "../../../utils/interfaces/system";
 import { permissions } from "../../../utils/services/permissions";
 
 const PermissionsList = ()=>{
-    const height = document.getElementById('header-content')?.offsetHeight || 60;
+    const height = (window.innerHeight - 170 ) - (document.getElementById('header-content')?.offsetHeight || 60);
 
     const [ search, setSearch ] = useState('');
     const [ data, setData ] = useState<Permissions[]>([]);

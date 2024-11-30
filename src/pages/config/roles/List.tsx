@@ -21,10 +21,10 @@ import ModalPermissions from "./MoralRolePemissions";
 
 
 const RolesList = ({loader}:IApp)=>{
+    const height = (window.innerHeight - 170 ) - (document.getElementById('header-content')?.offsetHeight || 60);
+
     const rolesRef = useRef<Modal>(null);
     const permissionsRef = useRef<Modal>(null);
-
-    const height = document.getElementById('header-content')?.offsetHeight || 60;
 
     const [ search, setSearch ] = useState('');
     const [data, setData] = useState<Roles[]>([]);
@@ -114,6 +114,7 @@ const RolesList = ({loader}:IApp)=>{
             url="/config/employees/list"
             page="Empleados"
             subpage="Listado"
+            title="Roles - Listado"
         >
             <>
                 <Row>
