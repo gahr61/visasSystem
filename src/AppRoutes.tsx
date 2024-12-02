@@ -27,6 +27,9 @@ import SystemLayout from "./components/ui/config/system/Layout";
 /** COMISSIONS */
 import Commissions from "./pages/config/system/Commissions";
 
+/** BRANCH OFFICE */
+import BranchOffices from "./pages/config/system/BrancOffice";
+
 const AppRoutes = (props:IApp)=>{
     return(
         <Routes>
@@ -48,6 +51,8 @@ const AppRoutes = (props:IApp)=>{
 
                         <Route element={<SystemLayout />}>
                             <Route path="commissions/list" element={<Commissions {...props} />} />
+
+                            <Route path="branch_offices/list" element={<BranchOffices {...props} />} />
                         </Route>
                     </Route>
                 </Route>

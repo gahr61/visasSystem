@@ -1,11 +1,9 @@
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet,  useNavigate } from "react-router-dom";
 import { Col, Grid, Nav, Row, Sidenav } from "rsuite"
 import Content from "../../../common/Content";
 
 const SystemLayout = ()=>{
-    const location = useLocation();
-
-    console.log(location);
+    const navigate = useNavigate();
 
     return (
         <Content
@@ -20,7 +18,8 @@ const SystemLayout = ()=>{
                         <Sidenav>
                             <Sidenav.Body>
                                 <Nav>
-                                    <Nav.Item active>Comisiones</Nav.Item>
+                                    <Nav.Item onClick={()=>navigate('/config/commissions/list')}>Comisiones</Nav.Item>
+                                    <Nav.Item onClick={()=>navigate('/config/branch_offices/list')}>Sucursales</Nav.Item>
                                 </Nav>
                             </Sidenav.Body>
                         </Sidenav>

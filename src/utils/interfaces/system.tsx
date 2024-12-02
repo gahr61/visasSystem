@@ -1,5 +1,13 @@
 import { ReactElement } from "react";
 
+export interface BranchOffice {
+    id: number,
+    name: string,
+    location: string
+}
+
+export type BranchOfficeForm = Omit<BranchOffice, 'id'>;
+
 export interface Column {
     key: string;
     title: string;
