@@ -34,3 +34,11 @@ export interface IUser {
 export interface IApp {
     loader: React.RefObject<ILoader>
 }
+
+export interface IModal  {
+    handleShow: (id?: string) => void
+}
+
+export interface IModalResetPassword {
+    handleShow:(id?: string, type?: string, response?: null | any) => void
+}

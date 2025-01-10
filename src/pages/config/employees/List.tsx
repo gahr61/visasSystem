@@ -18,12 +18,15 @@ import { useNavigate } from "react-router-dom";
 import { formatPrice, swalConfirm } from "../../../utils/functions";
 import Toast from "../../../components/common/Toast";
 import { IApp } from "../../../utils/interfaces/function";
+import { appContext } from "../../../context/appContext";
 
 
 const UsersList = ({loader}:IApp)=>{
     const height = (window.innerHeight - 170 ) - (document.getElementById('header-content')?.offsetHeight || 60);
 
     const navigate = useNavigate();
+
+    const {resetPassword} = appContext();
 
     const refCommisions = useRef<IModalCommission>(null);
 
@@ -32,7 +35,7 @@ const UsersList = ({loader}:IApp)=>{
 
     const columns:Column[]= [
         {key:'name', title:'Nombre', grow:2, render:(row: EmployeeList)=>row.fullName},
-        {key:'email', title:'Correo', grow:1, render:(row: EmployeeList)=>row.email},
+        {key:'email', title:'Correo', grow:2, render:(row: EmployeeList)=>row.email},
         {key:'goal', title:'Meta', grow:1, render:(row: EmployeeList)=>formatPrice(row.goal)},
         {key:'commission', title:'Comisión', grow:1, render:(row: EmployeeList)=>
             <Whisper placement="bottom" controlId="comission" speaker={
@@ -59,7 +62,7 @@ const UsersList = ({loader}:IApp)=>{
                     title="Restablecer contraseña"
                     controlId="key"
                     icon={<FaKey />}
-                    onClick={()=>{}}
+                    onClick={()=>openResetPassword(row.id)}
                 />
                 <ButtonTable 
                     title="Editar"
@@ -125,6 +128,10 @@ const UsersList = ({loader}:IApp)=>{
             value: id,
             confirmText:'Si, Eliminar'
         });
+    }
+
+    const openResetPassword = (id:number)=>{
+        resetPassword?.handleShow(id.toString());
     }
 
     useEffect(()=>{

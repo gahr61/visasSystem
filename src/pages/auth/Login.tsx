@@ -14,6 +14,7 @@ import { encript, isAuth, isValidForm, setDataStorage } from "../../utils/functi
 import { login } from "../../utils/services/auth";
 
 import logo from '../../assets/images/logo.png';
+import { appContext } from "../../context/appContext";
 
 const Login = ({loader}: IApp)=>{
     /** verify is session is stated */
@@ -21,9 +22,11 @@ const Login = ({loader}: IApp)=>{
         //window.location.href = '/';
     }
 
+    const {resetPassword} = appContext();
+
     const [ data, setData ] = useState<ILogin>({
-        email: 'sistemas@visas-premier.com',
-        password: 'qwer1234'
+        email: '',
+        password: ''
     });
 
     const [ errorEmail, setErrorEmail ] = useState('');
@@ -65,7 +68,7 @@ const Login = ({loader}: IApp)=>{
 
 
                 if(response.data?.user?.change_password_required){
-
+                    resetPassword?.handleShow(response.data.user.id.toString(), 'change', response);
                 }else{
                     setDataStorage(response.data);
 

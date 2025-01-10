@@ -12,6 +12,7 @@ import ArrowLeftLineIcon from '@rsuite/icons/ArrowLeftLine';
 
 import { decript } from "../../utils/functions";
 import { IUser } from "../../utils/interfaces/function";
+import { appContext } from "../../context/appContext";
 
 
 
@@ -28,6 +29,8 @@ const Navbar = ({
 }: INavbar)=>{
     const navigate = useNavigate();
 
+    const {resetPassword} = appContext();
+ 
     const user: IUser = decript('user') !== '' ? JSON.parse(decript('user')) : {id:0, name:''};
 
     const [ time, setTime ] = useState(moment().local().format('HH:mm:ss a'));
@@ -41,6 +44,11 @@ const Navbar = ({
             getTime();
         }, 1000);
     };
+
+
+    const openResetPassword = ()=>{        
+        resetPassword?.handleShow();
+    }
 
     useEffect(()=>{
         getTime();
@@ -68,7 +76,7 @@ const Navbar = ({
             <Nav pullRight>
                 <Nav.Item className="hidden sm:block">{time}</Nav.Item>
                 <Nav.Menu title={user.name} icon={<AdminIcon />}>
-                    <Nav.Item>Restablecer contraseña</Nav.Item>
+                    <Nav.Item onClick={()=>openResetPassword()}>Restablecer contraseña</Nav.Item>
                     <Nav.Item>Salir</Nav.Item>
                 </Nav.Menu>
             </Nav>

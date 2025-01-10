@@ -14,3 +14,9 @@ type ILoginUser = {
     name: string,
     change_password_required: boolean
 }
+
+export interface PasswordReset {
+    users_id: string | null;
+    password: string;
+    password_confirmation: string;
+}
