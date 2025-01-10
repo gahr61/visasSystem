@@ -12,7 +12,22 @@ export interface Column {
     key: string;
     title: string;
     grow: number,
+    colSpan?: number,
     render: (row: any)=>ReactElement | string
+}
+
+export type PriceHistory = {
+    price: number,
+    date: string
+}
+
+export type CatalogList = Catalog & {
+    id: number
+}
+
+export interface Catalog {
+    name: string;
+    price: number;
 }
 
 export interface Commissions {

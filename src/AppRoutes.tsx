@@ -25,6 +25,7 @@ import RolesList from "./pages/config/roles/List";
 import SystemLayout from "./components/ui/config/system/Layout";
 
 /** COMISSIONS */
+import Catalogs from "./pages/config/system/Catalog";
 import Commissions from "./pages/config/system/Commissions";
 
 /** BRANCH OFFICE */
@@ -50,6 +51,7 @@ const AppRoutes = (props:IApp)=>{
                         <Route path="roles/list" element={<RolesList {...props} />} />
 
                         <Route element={<SystemLayout />}>
+                            <Route path="catalog/list" element={<Catalogs {...props} />} />
                             <Route path="commissions/list" element={<Commissions {...props} />} />
 
                             <Route path="branch_offices/list" element={<BranchOffices {...props} />} />
