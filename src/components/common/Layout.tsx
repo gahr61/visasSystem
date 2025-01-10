@@ -35,11 +35,11 @@ const Layout = ()=>{
             <Row className="">
                 {showSidebar ? 
                     <Col xsHidden lg={expanded ? 3 : 1} className="relative flex justify-center">
-                        <SidebarAdmin expanded={expanded}/>
+                        <SidebarAdmin expanded={expanded} setExpanded={setExpanded} />
                     </Col>
                 :
                     <Drawer placement="left" open={expanded} onClose={()=>setExpanded(false)} size={'70%'}>
-                        <SidebarAdmin expanded={true} />
+                        <SidebarAdmin expanded={true} setExpanded={setExpanded} />
                     </Drawer>
                 }
                 <Col xs={24} lg={expanded ? 21 : 23} className="p-0 h-full">

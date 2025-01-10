@@ -27,10 +27,11 @@ interface IMenuItem {
 }
 
 interface ISidebar {
-    expanded: boolean
+    expanded: boolean,
+    setExpanded?: (value: boolean)=>void
 } 
 
-const SidebarAdmin = ({expanded}:ISidebar)=>{
+const SidebarAdmin = ({expanded, setExpanded}:ISidebar)=>{
     const navigate = useNavigate();
 
     const [ activeKey, setActiveKey ] = useState('dashboard');
@@ -38,8 +39,8 @@ const SidebarAdmin = ({expanded}:ISidebar)=>{
     const [ menus, setMenus ] = useState<IMenuItem[]>([
         {key:'dashboard', show:true, title:'Dashboard', active:false, alignIcon:false, icon:<DashboardIcon />, url:'/', submenus:[]},
         {key:'procedures', show:true, title:'Trámites', active:false, alignIcon:true, icon:<DocPassIcon />, submenus:[
-            {title:'Pasaporte', show:true, url:'/', active:false},
-            {title:'Visa', show:true, url:'/', active:false}
+            {title:'Pasaporte', show:true, url:'/procedures/passport/list', active:false},
+            {title:'Visa', show:true, url:'/procedures/visa/list', active:false}
         ]},
         {key:'config', show:true, title:'Configuración', active:false, alignIcon:false, icon:<GearIcon />, submenus:[
             {title:'Sistema', show:true, url:'/config/commissions/list', active:false},
@@ -82,7 +83,12 @@ const SidebarAdmin = ({expanded}:ISidebar)=>{
     const onSelectMenu = (url: string)=>{
         navigate(url);
 
-        updateMenu()
+        updateMenu();
+
+        if(setExpanded){
+            setExpanded(false);
+        }
+        
     }
  
     return (
