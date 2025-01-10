@@ -12,19 +12,16 @@ const EmployeeForm = ({
     errorEmail, 
     setErrorEmail,
     password,
-    setPassword,
-    handleChange,
+    setPassword
 }:{
     employee: Employee,
     setEmployee: (e: Employee) => void,
     errorEmail: string,
     setErrorEmail: (e: string) => void,
     password: string,
-    setPassword: (e: string) => void,
-    handleChange: (e: React.FormEvent<HTMLInputElement>) => void
+    setPassword: (e: string) => void
 })=>{
     const [roles, setRoles] = useState<ISelectOptions[]>([]);
-    const [editable, setEditable] = useState(false);
 
     const onLoad = async ()=>{
         let response = await rolesList();
@@ -32,10 +29,15 @@ const EmployeeForm = ({
             setRoles(response.data);
         }
 
-        console.log(employee.id)
-        if(employee.id){
-            setEditable(true);
-        }
+    }
+
+    const handleChange = (e: React.FormEvent<HTMLInputElement>)=>{
+        const {name, value} = e.currentTarget;
+      
+        setEmployee({
+            ...employee,
+            [name]: value
+        });
     }
 
     useEffect(()=>{

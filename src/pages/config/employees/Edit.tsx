@@ -29,6 +29,7 @@ const UsersEdit = ({loader}:IApp)=>{
     });
     const [password, setPassword] = useState<string>('');
     const [errorEmail, setErrorEmail] = useState<string>('');
+    const [saving, setSaving] = useState<boolean>(false)
 
     const onLoad = async ()=>{
         loader.current?.handleShow('Cargando...');
@@ -45,20 +46,13 @@ const UsersEdit = ({loader}:IApp)=>{
         Toast.fire('Error', response.message, 'error');
     }
 
-    const handleChange = (e: React.FormEvent<HTMLInputElement>)=>{
-        const {name, value} = e.currentTarget;
-      
-        setEmployee({
-            ...employee,
-            [name]: value
-        });
-    }
-
     const handleSubmit = async ()=>{
         if(!isValidForm('div.user-form')){
             Toast.fire('Error', 'Campos requeridos', 'error');
             return;
         }
+
+        setSaving(true);
 
         loader.current?.handleShow('Guardando...');
 
@@ -79,6 +73,8 @@ const UsersEdit = ({loader}:IApp)=>{
 
             return;
         }
+
+        setSaving(false);
 
         Toast.fire('Error', response.message, 'error');
     }
@@ -104,12 +100,11 @@ const UsersEdit = ({loader}:IApp)=>{
                         setErrorEmail={setErrorEmail}
                         password={password}
                         setPassword={setPassword}
-                        handleChange={handleChange}
                     />
                 </Col>
                 <Col xs={24} className="flex mt-3 justify-center">
-                    <Button appearance="default">Cancelar</Button>
-                    <Button onClick={handleSubmit}>Guardar</Button>
+                    <Button appearance="default" onClick={()=>navigate('/config/employees/list')}>Cancelar</Button>
+                    <Button onClick={handleSubmit} disabled={saving}>Guardar</Button>
                 </Col>
             </Grid>
         </Content>

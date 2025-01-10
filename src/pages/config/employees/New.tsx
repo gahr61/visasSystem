@@ -27,22 +27,16 @@ const UsersNew = ({loader}:IApp)=>{
     });
     const [password, setPassword] = useState<string>('');
     const [errorEmail, setErrorEmail] = useState<string>('');
-
-    const handleChange = (e: React.FormEvent<HTMLInputElement>)=>{
-        const {name, value} = e.currentTarget;
-      
-        setEmployee({
-            ...employee,
-            [name]: value
-        });
-    }
+    const [saving, setSaving] = useState(false);
 
     const handleSubmit = async ()=>{
+        setSaving(true);
         if(!isValidForm('div.user-form')){
             Toast.fire('Error', 'Campos requeridos', 'error');
+
             return;
         }
-
+        
         loader.current?.handleShow('Guardando...');
 
         let obj: Employee & {
@@ -62,6 +56,8 @@ const UsersNew = ({loader}:IApp)=>{
 
             return;
         }
+
+        setSaving(false);
 
         Toast.fire('Error', response.message, 'error');
     }
@@ -83,12 +79,11 @@ const UsersNew = ({loader}:IApp)=>{
                         setErrorEmail={setErrorEmail}
                         password={password}
                         setPassword={setPassword}
-                        handleChange={handleChange}
                     />
                 </Col>
                 <Col xs={24} className="flex mt-4 justify-center">
-                    <Button appearance="default">Cancelar</Button>
-                    <Button onClick={handleSubmit}>Guardar</Button>
+                    <Button appearance="default" onClick={()=>navigate('/config/employees/list')}>Cancelar</Button>
+                    <Button onClick={handleSubmit} disabled={saving}>Guardar</Button>
                 </Col>
             </Grid>
         </Content>
