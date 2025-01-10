@@ -45,6 +45,7 @@ const Table = ({
                     height={height || 200}
                     hover
                     className="border rounded-lg"
+                    renderEmpty={()=><div className="flex justify-center items-center h-full"><span className="text-gray-500">No se encontraron resultados</span></div>}
                 >
                     {columns.map((column, index)=>
                         <Column key={index} flexGrow={column.grow}>

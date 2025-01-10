@@ -4,7 +4,8 @@ import {Button as Btn} from 'rsuite';
 interface IButton {
     appearance?: 'default' | 'primary' | 'subtle' | 'ghost',
     customClass?: string,
-    size?: 'lg' | 'md' | 'sm' | 'xs'
+    size?: 'lg' | 'md' | 'sm' | 'xs',
+    color?: 'red' | 'blue',
     disabled?: boolean,
     children: ReactElement | string
     onClick?: (e:any)=>void
@@ -16,7 +17,8 @@ const Button = (props: IButton)=>{
         customClass = '',
         children,
         disabled = false,
-        size = 'md',
+        size = 'sm',
+        color="blue",
         onClick
     } = props;
 
@@ -26,6 +28,7 @@ const Button = (props: IButton)=>{
             size={size}
             className={`${customClass}`}
             disabled={disabled}
+            color={color}
             onClick={onClick}
         >
             {children}

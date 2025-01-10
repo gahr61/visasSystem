@@ -51,6 +51,7 @@ const customStyles = {
     }),
     menu:(provided:any)=>({
         ...provided,
+        marginTop:2,
         zIndex:999
     })
 }
@@ -100,9 +101,10 @@ const SelectForm = ({
             isDisabled={disabled}
             isMulti={multiple}
             value={value === null || value === ''? '' : options.find(obj => obj.value.toString() === value.toString())}
-            placeholder="Select..."
+            placeholder="Seleccione..."
             isClearable={true}
             onChange={(e: any)=>onChangeValue(e)}
+            noOptionsMessage={()=>'Sin resultados'}
         />
     )
 }

@@ -11,6 +11,7 @@ interface IInput extends InputHTMLAttributes<HTMLInputElement>{
 const Input = (props:IInput)=>{
     const { 
         id, 
+        name,
         onChange, 
         type = 'text', 
         setErrorEmail,
@@ -23,7 +24,7 @@ const Input = (props:IInput)=>{
     } = props;
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>)=>{
-        let {id, value} = e.target;
+        let {id, name, value} = e.target;
 
          // if tyoe is tel, we apply number mask
         if (type === 'tel') {
@@ -33,7 +34,7 @@ const Input = (props:IInput)=>{
         if(type === 'email'){
             if(setErrorEmail){
                 if(!isEmail(value) && value !== ''){
-                    setErrorEmail('Correo electrónico no valido');
+                    setErrorEmail('Correo no valido');
                 }else{
                     setErrorEmail('');
                 }
@@ -46,18 +47,15 @@ const Input = (props:IInput)=>{
 
          // call onChange function (if exist)
          if (onChange) {
-            onChange({ ...e, currentTarget: { ...e.currentTarget, value, name:id } });
+            onChange({ ...e, currentTarget: { ...e.currentTarget, value, name } });
         }
-
     }
-
-
 
     return(
         <input 
             type={type}
             id={id}
-            name={id}
+            name={name || id}
             value={value}
             className={`
                 ${customClass}
