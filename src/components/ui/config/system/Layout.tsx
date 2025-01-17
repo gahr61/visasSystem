@@ -18,7 +18,7 @@ const SystemLayout = ()=>{
                         <Sidenav>
                             <Sidenav.Body>
                                 <Nav>
-                                    <Nav.Item onClick={()=>navigate('/config/catalog/list')}>Catalogo</Nav.Item>
+                                    <Nav.Item onClick={()=>navigate('/config/concepts/list')}>Conceptos</Nav.Item>
                                     <Nav.Item onClick={()=>navigate('/config/commissions/list')}>Comisiones</Nav.Item>
                                     <Nav.Item onClick={()=>navigate('/config/branch_offices/list')}>Sucursales</Nav.Item>
                                 </Nav>

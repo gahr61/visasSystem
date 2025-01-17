@@ -4,7 +4,7 @@ import Table, { Columns } from "../../../common/Table";
 import { PriceHistory } from "../../../../utils/interfaces/system";
 import moment from "moment";
 import { IApp } from "../../../../utils/interfaces/function";
-import { catalogHistory } from "../../../../utils/services/catalog";
+import { conceptsHistory } from "../../../../utils/services/concepts";
 
 const ModalPriceHistory = forwardRef(({loader}:IApp, ref)=>{
     const [open, setOpen] = useState(false);
@@ -19,7 +19,7 @@ const ModalPriceHistory = forwardRef(({loader}:IApp, ref)=>{
     const handleShow = async (id: number, name: string)=>{
         loader.current?.handleShow('Cargando...');
 
-        const response = await catalogHistory(id);
+        const response = await conceptsHistory(id);
 
         loader.current?.handleClose();
         if(response && response.success){

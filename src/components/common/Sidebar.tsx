@@ -43,7 +43,7 @@ const SidebarAdmin = ({expanded, setExpanded}:ISidebar)=>{
             {title:'Visa', show:true, url:'/procedures/visa/list', active:false}
         ]},
         {key:'config', show:true, title:'Configuración', active:false, alignIcon:false, icon:<GearIcon />, submenus:[
-            {title:'Sistema', show:true, url:'/config/commissions/list', active:false},
+            {title:'Sistema', show:true, url:'/config/concepts/list', active:false},
             {title:'Empleados', show:true, url:'/config/employees/list', active:false},
             {title:'Permisos', show:true, url:'/config/permissions/list', active:false},
             {title:'Roles', show:true, url:'/config/roles/list', active:false},

@@ -7,13 +7,13 @@ import Button from "../../../common/Button";
 import { IApp } from "../../../../utils/interfaces/function";
 import Toast from "../../../common/Toast";
 import { isValidForm } from "../../../../utils/functions";
-import { catalogId, catalogStore, catalogUpdate } from "../../../../utils/services/catalog";
+import { conceptsId, conceptsStore, conceptsUpdate } from "../../../../utils/services/concepts";
 
 interface Props extends IApp{
     getList: ()=>void
 }
 
-const ModalCatalog = forwardRef(({loader, getList}:Props, ref)=>{
+const ModalConcepts = forwardRef(({loader, getList}:Props, ref)=>{
     const [open, setOpen] = useState(false);
     const [id, setId] = useState<number | undefined>(undefined);
     const [dataForm, setDataForm] = useState({
@@ -25,7 +25,7 @@ const ModalCatalog = forwardRef(({loader, getList}:Props, ref)=>{
         if(id){
             setId(id);
 
-            const response = await catalogId(id);
+            const response = await conceptsId(id);
 
             if(response && response.success){
                 setDataForm(response.data);
@@ -61,9 +61,9 @@ const ModalCatalog = forwardRef(({loader, getList}:Props, ref)=>{
         let response;
 
         if(id){
-            response = await catalogUpdate(id, dataForm);
+            response = await conceptsUpdate(id, dataForm);
         }else{
-            response = await catalogStore(dataForm);
+            response = await conceptsStore(dataForm);
         }
 
         loader.current?.handleClose();
@@ -115,4 +115,4 @@ const ModalCatalog = forwardRef(({loader, getList}:Props, ref)=>{
     )
 });
 
-export default ModalCatalog;
+export default ModalConcepts;
