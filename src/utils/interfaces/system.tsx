@@ -21,11 +21,11 @@ export type PriceHistory = {
     date: string
 }
 
-export type CatalogList = Catalog & {
+export type ConceptsList = Concept & {
     id: number
 }
 
-export interface Catalog {
+export interface Concept {
     name: string;
     price: number;
 }

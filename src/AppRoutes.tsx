@@ -25,11 +25,20 @@ import RolesList from "./pages/config/roles/List";
 import SystemLayout from "./components/ui/config/system/Layout";
 
 /** COMISSIONS */
-import Catalogs from "./pages/config/system/Catalog";
+import Concepts from "./pages/config/system/Concepts";
 import Commissions from "./pages/config/system/Commissions";
 
 /** BRANCH OFFICE */
 import BranchOffices from "./pages/config/system/BrancOffice";
+
+/** PROCEDURES */
+/** VISA */
+import VisasList from "./pages/procedures/visas/List";
+import VisasNew from "./pages/procedures/visas/New";
+
+/** PASSPORT */
+import PassportList from "./pages/procedures/passport/List";
+
 
 const AppRoutes = (props:IApp)=>{
     return(
@@ -51,11 +60,18 @@ const AppRoutes = (props:IApp)=>{
                         <Route path="roles/list" element={<RolesList {...props} />} />
 
                         <Route element={<SystemLayout />}>
-                            <Route path="catalog/list" element={<Catalogs {...props} />} />
+                            <Route path="concepts/list" element={<Concepts {...props} />} />
                             <Route path="commissions/list" element={<Commissions {...props} />} />
 
                             <Route path="branch_offices/list" element={<BranchOffices {...props} />} />
                         </Route>
+                    </Route>
+
+                    <Route path="/procedures">
+                        <Route path="passport/list" element={<PassportList />} />
+
+                        <Route path="visa/list" element={<VisasList />} />
+                        <Route path="visa/new" element={<VisasNew {...props} />} />
                     </Route>
                 </Route>
                 
