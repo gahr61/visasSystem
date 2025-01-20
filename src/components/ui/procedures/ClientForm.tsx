@@ -29,14 +29,14 @@ const ClientForm = ({
     const onLoad = async ()=>{
         let response = await getCountries();
 
-        if(response){
-            setCountries(response);
+        if(response && response.success){
+            setCountries(response.data);
         }
 
         response = await getStates(42);
 
-        if(response){
-            setStates(response);
+        if(response && response.success){
+            setStates(response.data);
         }
     }
 
