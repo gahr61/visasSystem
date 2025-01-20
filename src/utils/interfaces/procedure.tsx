@@ -50,7 +50,7 @@ export interface Passport {
     expirations: PassportExpirations;
 }
 
-export type Passports = {
+export type Procedure = {
     id: number;
     folio: string;
     date: string;

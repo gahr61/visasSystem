@@ -2,6 +2,7 @@ import cryptoJs from 'crypto-js';
 import { IFetchRequestParams } from './interfaces/function';
 import { ILoginResponse } from './interfaces/auth';
 import Swal from 'sweetalert2';
+import moment from 'moment';
 
 
 
@@ -180,6 +181,20 @@ export const formatPrice = (price: string | number)=>{
     return parseInt(price.toString()).toLocaleString('en-US', {style:'currency', currency:'USD'});
 }
 
+/**
+ * Calculate age
+ * @param date 
+ * @returns 
+ */
+export const calculateAge = (date: string)=>{
+    let today = moment();
+    let birthdate = moment(date);
+
+    let years = today.diff(birthdate, 'years');
+
+    return years;
+}
+
 /*
 * Verify if user is autheticated
 * return boolean
@@ -319,7 +334,7 @@ export const swalConfirm = ({
     title?: string,
     confirmFunction:(value: number)=>void,
     cancelFunction?:(value?: number | null)=>void,
-    value: number,
+    value?: number,
     text: string,
     confirmText: string
 })=>{
@@ -331,7 +346,7 @@ export const swalConfirm = ({
 		showCancelButton: true,
 		confirmButtonText: confirmText,
 		confirmButtonColor: 'var(--rs-color-red)',
-		cancelButtonText: 'No, Cancel',
+		cancelButtonText: 'No, Cancelar',
 	}).then(result =>{
 		if(result.isConfirmed){
 			confirmFunction(value);
