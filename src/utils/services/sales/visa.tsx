@@ -9,3 +9,12 @@ export const visasSalesList = ():Promise<IResponse<Procedure[]>> => {
 export const visaSalesStore = (obj:any):Promise<IResponse<undefined>> => {
     return fetchRequest({url:'sales/visa', method:'POST', body:obj});
 }
+
+export const visaSalesPaymentSend = (obj: any):Promise<IResponse<undefined>> => {
+    return fetchRequest({
+        url:'sales/visa/payment',
+        method:'POST',
+        body: obj,
+        sendFile: true
+    });
+}

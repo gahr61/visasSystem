@@ -124,7 +124,7 @@ export const fetchRequest = async <T>({
         const res = await fetch(apiUrl + url, fetchOptions);
 
         if(res.ok){
-            if(sendFile || printFile){
+            if(printFile){
                 const blob = await res.blob();
 
                 return { file: blob } as unknown as T;
@@ -141,6 +141,7 @@ export const fetchRequest = async <T>({
                data:''} as unknown as T;
         }
     }catch(error: any){
+        console.log(error)
         return {
             success:false,
             message:'Error de conexión, contacte al administrador',

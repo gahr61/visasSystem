@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Col, Row} from "rsuite";
 
@@ -15,9 +15,15 @@ import { Column } from "../../../utils/interfaces/system";
 import { IApp } from "../../../utils/interfaces/function";
 import { Procedure } from "../../../utils/interfaces/procedure";
 import { visasSalesList } from "../../../utils/services/sales/visa";
+import ModalSendVisaTicket from "../../../components/ui/modals/SendVisaTicket";
+
+type ModalTicket = {
+    handleShow: (id: number, type: string, option:string) => void
+}
 
 const VisasList = ({loader}:IApp)=>{
     const navigate = useNavigate();
+    const ticketModal = useRef<ModalTicket>(null);
 
     const height = (window.innerHeight - 170 ) - (document.getElementById('header-content')?.offsetHeight || 60);
     
@@ -121,8 +127,12 @@ const VisasList = ({loader}:IApp)=>{
         }
     }
 
-    const onSendTicket = (row: Procedure, option:string)=>{
-        console.log(row, option)
+    const onSendTicket = (row: Procedure, option:number)=>{
+        if(option === 1){
+            ticketModal.current?.handleShow(row.id, 'visa', 'send');
+        }else{
+            ticketModal.current?.handleShow(row.id, 'visa', 'deliver');
+        }
     }
 
     useEffect(()=>{
@@ -155,6 +165,8 @@ const VisasList = ({loader}:IApp)=>{
                     data={data}
                     height={height}
                 />
+
+                <ModalSendVisaTicket loader={loader} getList={getList} ref={ticketModal} />
             </>
         </Content>
     )
