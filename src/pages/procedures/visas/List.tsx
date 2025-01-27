@@ -16,14 +16,20 @@ import { IApp } from "../../../utils/interfaces/function";
 import { Procedure } from "../../../utils/interfaces/procedure";
 import { visasSalesList } from "../../../utils/services/sales/visa";
 import ModalSendVisaTicket from "../../../components/ui/modals/SendVisaTicket";
+import ModalConfirmVisaPayment from "../../../components/ui/modals/ConfirmVisaPayment";
 
 type ModalTicket = {
     handleShow: (id: number, type: string, option:string) => void
 }
 
+type ModalConfirm = {
+    handleShow: (id: number) => void
+}
+
 const VisasList = ({loader}:IApp)=>{
     const navigate = useNavigate();
     const ticketModal = useRef<ModalTicket>(null);
+    const confirmModal = useRef<ModalConfirm>(null);
 
     const height = (window.innerHeight - 170 ) - (document.getElementById('header-content')?.offsetHeight || 60);
     
@@ -75,7 +81,7 @@ const VisasList = ({loader}:IApp)=>{
                             title="Confirmar pago de ficha"
                             controlId="confirm"
                             icon={<FaCheck />}
-                            onClick={()=>{}}
+                            onClick={()=>onConfirmTicket(row.id)}
                         />
                     </>
                     
@@ -134,6 +140,10 @@ const VisasList = ({loader}:IApp)=>{
             ticketModal.current?.handleShow(row.id, 'visa', 'deliver');
         }
     }
+    
+    const onConfirmTicket = (id: number)=>{
+        confirmModal.current?.handleShow(id);
+    }
 
     useEffect(()=>{
         getList();
@@ -167,6 +177,7 @@ const VisasList = ({loader}:IApp)=>{
                 />
 
                 <ModalSendVisaTicket loader={loader} getList={getList} ref={ticketModal} />
+                <ModalConfirmVisaPayment loader={loader} getList={getList} ref={confirmModal} />
             </>
         </Content>
     )

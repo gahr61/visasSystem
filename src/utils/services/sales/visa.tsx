@@ -10,6 +10,10 @@ export const visaSalesStore = (obj:any):Promise<IResponse<undefined>> => {
     return fetchRequest({url:'sales/visa', method:'POST', body:obj});
 }
 
+export const visaSalesPaymentList = (id: number):Promise<IResponse<any>> => {
+    return fetchRequest({url:'sales/visa/payment/list/'+id});
+}
+
 export const visaSalesPaymentSend = (obj: any):Promise<IResponse<undefined>> => {
     return fetchRequest({
         url:'sales/visa/payment',
@@ -17,4 +21,8 @@ export const visaSalesPaymentSend = (obj: any):Promise<IResponse<undefined>> => 
         body: obj,
         sendFile: true
     });
+}
+
+export const visaSalesPaymentUpdate = (obj:any):Promise<IResponse<undefined>> => {
+    return  fetchRequest({url:'sales/visa/payment/confirm', method:'PUT', body:obj});
 }
