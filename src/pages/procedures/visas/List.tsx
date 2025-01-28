@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Col, Row} from "rsuite";
+import moment from "moment";
 
 import { FaFileAlt, FaTrashAlt } from "react-icons/fa";
 import { FaCheck, FaEnvelope, FaInfo, FaShare } from "react-icons/fa6";
@@ -10,13 +11,14 @@ import ButtonTable from "../../../components/common/ButtonTable";
 import Input from "../../../components/common/Input";
 import Button from "../../../components/common/Button";
 import Table from "../../../components/common/Table";
+import ModalSendVisaTicket from "../../../components/ui/modals/SendVisaTicket";
+import ModalConfirmVisaPayment from "../../../components/ui/modals/ConfirmVisaPayment";
+import ModalInfoVisa from "../../../components/ui/modals/InfoVisa";
 
 import { Column } from "../../../utils/interfaces/system";
 import { IApp } from "../../../utils/interfaces/function";
 import { Procedure } from "../../../utils/interfaces/procedure";
 import { visasSalesList } from "../../../utils/services/sales/visa";
-import ModalSendVisaTicket from "../../../components/ui/modals/SendVisaTicket";
-import ModalConfirmVisaPayment from "../../../components/ui/modals/ConfirmVisaPayment";
 
 type ModalTicket = {
     handleShow: (id: number, type: string, option:string) => void
@@ -26,16 +28,21 @@ type ModalConfirm = {
     handleShow: (id: number) => void
 }
 
+type ModalDetails = {
+    handleShow: (id: number)=>void
+}
+
 const VisasList = ({loader}:IApp)=>{
     const navigate = useNavigate();
     const ticketModal = useRef<ModalTicket>(null);
     const confirmModal = useRef<ModalConfirm>(null);
+    const detailsModal = useRef<ModalDetails>(null);
 
     const height = (window.innerHeight - 170 ) - (document.getElementById('header-content')?.offsetHeight || 60);
     
     const columns:Column[]= [
         {key:'folio', title:'Folio', grow:1, render:(row: Procedure)=> row.folio },
-        {key:'date', title:'Fecha', grow:1, render:(row: Procedure)=> row.date },
+        {key:'date', title:'Fecha', grow:1, render:(row: Procedure)=> moment(row.date, 'YYYY-MM-DD').format('DD/MM/YYYY') },
         {key:'applicant', title:'No. Solicitantes', grow:1, render:(row: Procedure)=> row.no_applicants.toString() },
         {key:'client', title:'Cliente', grow:2, render:(row: Procedure)=> row.client },
         {key:'email', title:'Correo', grow:1, render:(row: Procedure)=> row.email },
@@ -46,7 +53,7 @@ const VisasList = ({loader}:IApp)=>{
                     title="Detalles"
                     controlId="details"
                     icon={<FaInfo />}
-                    onClick={()=>{}}
+                    onClick={()=>onOpenDetails(row.id)}
                 />
                 {row.status === 'Ficha pendiente' && (
                     <ButtonTable
@@ -133,6 +140,10 @@ const VisasList = ({loader}:IApp)=>{
         }
     }
 
+    const onOpenDetails = (id: number) => {
+        detailsModal.current?.handleShow(id);
+    }
+
     const onSendTicket = (row: Procedure, option:number)=>{
         if(option === 1){
             ticketModal.current?.handleShow(row.id, 'visa', 'send');
@@ -178,6 +189,7 @@ const VisasList = ({loader}:IApp)=>{
 
                 <ModalSendVisaTicket loader={loader} getList={getList} ref={ticketModal} />
                 <ModalConfirmVisaPayment loader={loader} getList={getList} ref={confirmModal} />
+                <ModalInfoVisa loader={loader} ref={detailsModal} />
             </>
         </Content>
     )

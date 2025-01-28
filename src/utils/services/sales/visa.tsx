@@ -1,6 +1,11 @@
 import { fetchRequest } from "../../functions";
 import { IResponse } from "../../interfaces/function";
 import { Procedure } from "../../interfaces/procedure";
+import { SalesInfo } from "../../interfaces/sales";
+
+export const visasSalesInfo = (id: number):Promise<IResponse<SalesInfo>> => {
+    return fetchRequest({url:'sales/'+id+'/details'});
+}
 
 export const visasSalesList = ():Promise<IResponse<Procedure[]>> => {
     return fetchRequest({url:'sales/visa/list'});
