@@ -99,14 +99,15 @@ export const fetchRequest = async <T>({
     if(requireToken && token){
         headers['Authorization'] = 'Bearer ' + token;
 
-        if(sendFile){ //if you send file
-            delete headers['Content-Type'];
-        }
-
         if(printFile){ //if you print file
             headers['Accept'] = 'application/pdf';    
         }
     }
+
+    if(sendFile){
+        delete headers['Content-Type'];
+    }
+    
 
     let bodyObject: string | BodyInit | null = body !== null ? JSON.stringify(body) : null;
 

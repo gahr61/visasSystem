@@ -38,13 +38,17 @@ import VisasNew from "./pages/procedures/visas/New";
 
 /** PASSPORT */
 import PassportList from "./pages/procedures/passport/List";
+import VisaDetails from "./pages/procedures/visas/Details";
+import VisaConfirm from "./pages/procedures/visas/Confirm";
 
 
 const AppRoutes = (props:IApp)=>{
     return(
         <Routes>
             
-            <Route path="/login" element={<Login {...props} />} />   
+            <Route path="/login" element={<Login {...props} />} />
+            
+            <Route path='/sales/visa/confirm/:token' element={<VisaConfirm {...props} />} />
 
             <Route element={<ProtectedRoute />}>
                 <Route element={<Layout />}>
@@ -71,7 +75,7 @@ const AppRoutes = (props:IApp)=>{
                         <Route path="passport/list" element={<PassportList />} />
 
                         <Route path="visa/list" element={<VisasList {...props} />} />
-                        <Route path="visa/new" element={<VisasNew {...props} />} />
+                        <Route path="visa/new" element={<VisasNew {...props} />} />                        
                     </Route>
                 </Route>
                 

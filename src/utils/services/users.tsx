@@ -4,6 +4,10 @@ import { PasswordReset } from "../interfaces/auth";
 import { Employee, EmployeeList } from "../interfaces/employee"
 import { IResponse } from "../interfaces/function"
 
+export const usersConfirmPayment = (obj:any):Promise<IResponse<undefined>> => {
+    return fetchRequest({url:'users/confirm/payment', method:'POST', body:obj, sendFile:true});
+}
+
 export const usersDelete = (id: number):Promise<IResponse<undefined>> => {
     return fetchRequest({url:'users/'+id+'/delete', method:'DELETE'});
 }

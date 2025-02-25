@@ -29,5 +29,5 @@ export const visaSalesPaymentSend = (obj: any):Promise<IResponse<undefined>> => 
 }
 
 export const visaSalesPaymentUpdate = (obj:any):Promise<IResponse<undefined>> => {
-    return  fetchRequest({url:'sales/visa/payment/confirm', method:'PUT', body:obj});
+    return  fetchRequest({url:'sales/visa/payment/confirm', method:'POST', body:obj, sendFile:true});
 }
