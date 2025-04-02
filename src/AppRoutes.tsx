@@ -75,7 +75,8 @@ const AppRoutes = (props:IApp)=>{
                         <Route path="passport/list" element={<PassportList />} />
 
                         <Route path="visa/list" element={<VisasList {...props} />} />
-                        <Route path="visa/new" element={<VisasNew {...props} />} />                        
+                        <Route path="visa/new" element={<VisasNew {...props} />} />
+                        <Route path="visa/:id/details" element={<VisaDetails {...props} />} />
                     </Route>
                 </Route>
                 

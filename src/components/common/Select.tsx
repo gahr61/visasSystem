@@ -12,7 +12,7 @@ const customStyles = {
         ...provided,
         height: 'calc(1.5em + 0.5rem + 2.6px)',
         minHeight: 'calc(1.5em + 0.5rem + 2.5px)',
-        fontSize: '0.75rem',
+        fontSize: '0.79rem',
         borderColor: '#d8dbe0',
         boxShadow: 'inset 0 1px 1px rgba(0, 0, 0, 0.075)',
         transition: 'background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out',

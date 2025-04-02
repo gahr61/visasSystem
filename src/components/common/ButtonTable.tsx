@@ -9,7 +9,7 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement>{
     appearance?: 'default' | 'primary' | 'ghost',
     customClass?: string,
     icon: ReactElement,
-    onClick: (e: any)=>void,
+    onClick?: (e: any)=>void,
     options?: any[],
     onSelect?: (e:any) => void
 }
@@ -21,7 +21,7 @@ const ButtonTable = ({
     size = 'sm',
     appearance = 'ghost',
     customClass = '',
-    onClick,
+    onClick = ()=>{},
     icon,
     options = [],
     onSelect = ()=>{}

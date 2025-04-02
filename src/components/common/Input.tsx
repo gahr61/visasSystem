@@ -59,7 +59,7 @@ const Input = (props:IInput)=>{
             value={value}
             className={`
                 ${customClass}
-                py-1 px-2 block w-full border outline-0 rounded-lg text-sm 
+                py-1 px-2 block w-full border outline-0 rounded-lg text-sm h-[1.82rem]
                 focus:border-blue-500 focus:ring-blue-500
                 disabled:opacity-50 disabled:bg-neutral-100 disabled:cursor-no-drop
             `}

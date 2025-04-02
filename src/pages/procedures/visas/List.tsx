@@ -53,7 +53,7 @@ const VisasList = ({loader}:IApp)=>{
                     title="Detalles"
                     controlId="details"
                     icon={<FaInfo />}
-                    onClick={()=>onOpenDetails(row.id)}
+                    onClick={()=>onOpenInfo(row.id)}
                 />
                 {row.status === 'Ficha pendiente' && (
                     <ButtonTable
@@ -104,8 +104,8 @@ const VisasList = ({loader}:IApp)=>{
                             {key:1, label:'Enviar formulario'},
                             {key:2, label:'Llenar formulario'}
                         ]}
-                        onClick={()=>{}}
-                        onSelect={(option)=>onSendTicket(row, option)}
+                        //onClick={()=>navigate('/procedures/visa/'+row.id+'/details')}
+                        onSelect={(option)=>onOpenDetails(row, option)}
                     />
                 )}
                 
@@ -140,7 +140,7 @@ const VisasList = ({loader}:IApp)=>{
         }
     }
 
-    const onOpenDetails = (id: number) => {
+    const onOpenInfo = (id: number) => {
         detailsModal.current?.handleShow(id);
     }
 
@@ -150,6 +150,15 @@ const VisasList = ({loader}:IApp)=>{
         }else{
             ticketModal.current?.handleShow(row.id, 'visa', 'deliver');
         }
+    }
+
+    const onOpenDetails = (row:Procedure, option:number)=>{
+        if(option === 1){
+
+        }else{
+            navigate('/procedures/visa/'+row.id+'/details');
+        }
+        console.log(row, option);
     }
     
     const onConfirmTicket = (id: number)=>{
