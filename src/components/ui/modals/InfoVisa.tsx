@@ -16,6 +16,7 @@ import Table, { Columns } from "../../common/Table";
 import { useNavigate } from "react-router-dom";
 import ModalDS160 from "./DS160Form";
 import ModalAccount from "./AccountData";
+import ModalSchedule from "./Schedule";
 
 type ModalUpdateRef = {
     handleShow:(list:any)=>void
@@ -24,6 +25,7 @@ type ModalUpdateRef = {
 const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
     const dsRef = useRef<ModalUpdateRef>(null);
     const accountRef = useRef<ModalUpdateRef>(null);
+    const scheduleRef = useRef<ModalUpdateRef>(null);
 
     const navigate = useNavigate();
 
@@ -188,6 +190,30 @@ const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
          accountRef.current?.handleShow(list);
     }
 
+    const handleOpenScheduleModal = ()=>{
+        let list:any = [];
+
+        console.log(sale)
+         
+         sale.clients.forEach((client)=>{
+                let consulado = client.schedule.find(obj => obj.office === 'Consulado');
+                let cas = client.schedule.find(obj => obj.office === 'CAS');
+
+                const item = {
+                    client_id: client.clients_id,
+                    client: client.names+' '+client.lastname1+(client.lastname2 !== null ? ' '+client.lastname2 : ''),
+                    consulado: consulado ? consulado.appointment_date : '',
+                    consulado_time: consulado ? consulado.schedule : '',
+                    cas: cas ? cas.appointment_date : '',
+                    cas_time: cas ? cas.schedule : ''
+                }
+
+                list.push(item);
+        })
+
+         scheduleRef.current?.handleShow(list);
+    }
+
     useImperativeHandle(ref, ()=>({
         handleShow
     }));
@@ -313,7 +339,7 @@ const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
                                 controlId="schedule"
                                 title="Agendar cita"
                                 icon={<IoCalendarOutline />}
-                                onClick={()=>{}}
+                                onClick={()=>handleOpenScheduleModal()}
                             />
                             <ButtonTable 
                                     controlId="details"
@@ -348,6 +374,13 @@ const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
             onLoad={onLoadDataInfo}
             loader={loader}
             ref={accountRef} 
+        />
+
+        <ModalSchedule 
+            id={sale.id}
+            onLoad={onLoadDataInfo}
+            loader={loader}
+            ref={scheduleRef}
         />
         </>
     )
