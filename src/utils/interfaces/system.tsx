@@ -53,4 +53,8 @@ export interface Roles {
     description: string;
 }
 
+export interface Occupations {
+    id:number,
+    name:string
+}
 

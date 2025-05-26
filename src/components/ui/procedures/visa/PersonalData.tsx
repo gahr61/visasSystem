@@ -2,7 +2,8 @@ import { Col, Row } from "rsuite"
 import Input from "../../../common/Input";
 import SelectForm, { ISelectOptions } from "../../../common/Select";
 import { useEffect, useState } from "react";
-import { getCountries, getStates } from "../../../../utils/services/countries";
+import { getStates } from "../../../../utils/services/countries";
+import { useAddressStore } from "../../../../utils/stores/useAddressStore";
 
 type Props = {
     personalInfo: any,
@@ -14,18 +15,14 @@ const PersonalData = ({
     handleChange
 }:Props)=>{
 
-    const [countries, setCountries] = useState<ISelectOptions[]>([]);
+    const countries = useAddressStore(state => state.countries);
+
     const [states, setStates] = useState<ISelectOptions[]>([]);
     const [passportStates, setPassportStates] = useState<ISelectOptions[]>([]);
 
     const onLoad = async ()=>{
-        let response = await getCountries();
-        if(response && response.success){
-            setCountries(response.data);
-
-            onLoadStates(personalInfo.birthplace.country, 'birthplace')
-        }
-        
+        onLoadStates(personalInfo.birthplace.country || 42, 'birthplace');
+        onLoadStates(personalInfo.passport.country_expedition || 42, 'passport');
     }
 
     const onChangeField = (name: string, value: string, field:string)=>{
@@ -69,7 +66,7 @@ const PersonalData = ({
 
 
     return(
-        <>
+        <div className="personal-form">
             <fieldset>
                 <legend className="font-semibold">Cliente</legend>
                 <Row>
@@ -104,9 +101,10 @@ const PersonalData = ({
                         <label>F. Nacimiento</label>
                         <Input 
                             type="date"  
-                            id="birtdate"  
-                            value={personalInfo.birtdate}
+                            id="birthdate"  
+                            value={personalInfo.birthdate}
                             onChange={handleChange}
+                            required
                         />
                     </Col>
                     <Col xs={24} lg={6}>
@@ -136,13 +134,13 @@ const PersonalData = ({
                         <SelectForm 
                             id="civilStatus" 
                             options={[
-                                {label: "Soltero/a", value: "soltero"},
-                                {label: "Casado/a", value: "casado"},
-                                {label: "Divorciado/a", value: "divorciado"},
-                                {label: "Viudo/a", value: "viudo"},
-                                {label: "En unión libre", value: "unionLibre"},
-                                {label: "Separado/a", value: "separado"},
-                                {label: "Otro", value: "otro"}
+                                {label: "Soltero/a", value: "Soltero"},
+                                {label: "Casado/a", value: "Casado"},
+                                {label: "Divorciado/a", value: "Divorciado"},
+                                {label: "Viudo/a", value: "Viudo"},
+                                {label: "En unión libre", value: "Union libre"},
+                                {label: "Separado/a", value: "Separado"},
+                                {label: "Otro", value: "Otro"}
                             ]} 
                             value={personalInfo.civilStatus} 
                             handleChange={(e)=>handleChange({currentTarget:{name:'civilStatus', value: e}})} 
@@ -179,7 +177,7 @@ const PersonalData = ({
                         <Input 
                             id="city"  
                             value={personalInfo.birthplace.city}
-                            onChange={(e:any)=>onChangeField('city', e.current.value, 'birthplace')}
+                            onChange={(e:any)=>onChangeField('city', e.currentTarget.value.toUpperCase(), 'birthplace')}
                             required
                         />
                     </Col>
@@ -188,7 +186,7 @@ const PersonalData = ({
                         <Input 
                             id="nationality"  
                             value={personalInfo.birthplace.nationality}
-                            onChange={(e:any)=>onChangeField('nationality', e.current.value, 'birthplace')}
+                            onChange={(e:any)=>onChangeField('nationality', e.currentTarget.value.toUpperCase(), 'birthplace')}
                         />
                     </Col>
                 </Row>
@@ -202,7 +200,7 @@ const PersonalData = ({
                         <Input 
                             id="number"  
                             value={personalInfo.passport.number}
-                            onChange={(e:any)=>onChangeField('number', e.current.value, 'passport')}
+                            onChange={(e:any)=>onChangeField('number', e.currentTarget.value, 'passport')}
                             required
                         />
                     </Col>
@@ -212,7 +210,7 @@ const PersonalData = ({
                             type="date" 
                             id="expedition_date"  
                             value={personalInfo.passport.expedition_date}
-                            onChange={(e:any)=>onChangeField('expedition_date', e.current.value, 'passport')}
+                            onChange={(e:any)=>onChangeField('expedition_date', e.currentTarget.value, 'passport')}
                             required
                         />
                     </Col>
@@ -222,7 +220,7 @@ const PersonalData = ({
                             type="date" 
                             id="expiration_date"  
                             value={personalInfo.passport.expiration_date}
-                            onChange={(e:any)=>onChangeField('expiration_date', e.current.value, 'passport')}
+                            onChange={(e:any)=>onChangeField('expiration_date', e.currentTarget.value, 'passport')}
                             required
                         />
                     </Col>
@@ -231,17 +229,26 @@ const PersonalData = ({
                         <SelectForm 
                             id="country_passport" 
                             options={countries} 
-                            value={personalInfo.passport.country} 
-                            handleChange={(value)=>onChangeField('country', value, 'passport')} 
+                            value={personalInfo.passport.country_expedition} 
+                            handleChange={(value)=>onChangeField('country_expedition', value, 'passport')} 
                         />
                     </Col>
                     <Col xs={24} lg={6}>
                         <label>Estado expedición</label>
-                        <SelectForm id="" options={[]} value="" handleChange={()=>{}} />
+                        <SelectForm 
+                            id="state_expedition" 
+                            options={passportStates} 
+                            value={personalInfo.passport.state_expedition} 
+                            handleChange={(value)=>onChangeField('state_expedition', value, 'passport')}  
+                        />
                     </Col>
                     <Col xs={24} lg={6}>
                         <label>Ciudad expedición</label>
-                        <Input />
+                        <Input 
+                            id="expedition_city"
+                            value={personalInfo.passport.expedition_city}
+                            onChange={(e:any)=>onChangeField('expedition_city', e.target.value.toUpperCase(), 'passport')}  
+                        />
                     </Col>
                     {/*<Col xs={24} lg={6}>
                         <label>País emisor</label>
@@ -249,7 +256,7 @@ const PersonalData = ({
                     </Col>*/}
                 </Row>
             </fieldset>
-        </> 
+        </div> 
     )
 }
 
