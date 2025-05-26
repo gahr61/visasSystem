@@ -57,6 +57,7 @@ export type Procedure = {
     no_applicants: number;
     client: string;
     email: string;
+    phone: string;
     status: string;
 }
 

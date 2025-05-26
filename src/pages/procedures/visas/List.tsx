@@ -154,15 +154,28 @@ const VisasList = ({loader}:IApp)=>{
 
     const onOpenDetails = (row:Procedure, option:number)=>{
         if(option === 1){
-
+            handleSendMessageApp(row.phone);
         }else{
             navigate('/procedures/visa/'+row.id+'/details');
         }
-        console.log(row, option);
     }
     
     const onConfirmTicket = (id: number)=>{
         confirmModal.current?.handleShow(id);
+    }
+
+    const handleSendMessageApp = (phone: string)=>{
+        const number = phone.replace(/-/g, '');
+
+        const phoneNumber = '521'+number;
+        const message = 'Hola, para continuar con el proceso, por favor ingresa al siguiente enlace, '+
+                        'inicia sesión en la plataforma y llena el formulario correspondiente: '+
+                        'http://localhost:5173';
+
+        const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+
+        window.open(url, '_blamk');
+
     }
 
     useEffect(()=>{
