@@ -40,6 +40,7 @@ import VisasNew from "./pages/procedures/visas/New";
 import PassportList from "./pages/procedures/passport/List";
 import VisaDetails from "./pages/procedures/visas/Details";
 import VisaConfirm from "./pages/procedures/visas/Confirm";
+import OccupationsList from "./pages/config/system/Occupations";
 
 
 const AppRoutes = (props:IApp)=>{
@@ -66,6 +67,7 @@ const AppRoutes = (props:IApp)=>{
                         <Route element={<SystemLayout />}>
                             <Route path="concepts/list" element={<Concepts {...props} />} />
                             <Route path="commissions/list" element={<Commissions {...props} />} />
+                            <Route path="occupations/list" element={<OccupationsList {...props} />} />
 
                             <Route path="branch_offices/list" element={<BranchOffices {...props} />} />
                         </Route>
