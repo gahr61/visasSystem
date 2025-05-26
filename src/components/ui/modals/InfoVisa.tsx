@@ -4,7 +4,7 @@ import { SalesClientsInfo, SalesInfo } from "../../../utils/interfaces/sales";
 import { visasSalesInfo } from "../../../utils/services/sales/visa";
 import { IApp } from "../../../utils/interfaces/function";
 import moment from "moment";
-import { formatPrice } from "../../../utils/functions";
+import { encryptString, formatPrice } from "../../../utils/functions";
 import { FaDollarSign, FaHandHoldingDollar } from "react-icons/fa6";
 import ButtonTable from "../../common/ButtonTable";
 import { AiOutlineFileSearch } from "react-icons/ai";
@@ -15,13 +15,15 @@ import { RiFileUserLine } from "react-icons/ri";
 import Table, { Columns } from "../../common/Table";
 import { useNavigate } from "react-router-dom";
 import ModalDS160 from "./DS160Form";
+import ModalAccount from "./AccountData";
 
-type ModalDS160Ref = {
+type ModalUpdateRef = {
     handleShow:(list:any)=>void
 }
 
 const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
-    const dsRef = useRef<ModalDS160Ref>(null)
+    const dsRef = useRef<ModalUpdateRef>(null);
+    const accountRef = useRef<ModalUpdateRef>(null);
 
     const navigate = useNavigate();
 
@@ -123,6 +125,7 @@ const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
                 (row.option_type !== null ? ' - '+row.option_type : '')
             },
             {key:'email', title:'Correo', grow:3, render:(row: SalesClientsInfo) => row.email !== null ? row.email : '' },
+            {key:'ds160', title:'DS160', grow:1, render:(row:SalesClientsInfo) => row.ds_160},
             {key:'status', title:'Estatus', grow:1, render:(row:SalesClientsInfo) => row.complete ? 'Completo' : 'Incompleto'}
         ]);
         setSale({
@@ -167,13 +170,31 @@ const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
          dsRef.current?.handleShow(list);
     }
 
+    const handleOpenAccountModal = ()=>{
+        let list:any = [];
+         
+         sale.clients.forEach((client)=>{
+                const item = {
+                    process_id: client.process_id,
+                    client_id: client.clients_id,
+                    client: client.names+' '+client.lastname1+(client.lastname2 !== null ? ' '+client.lastname2 : ''),
+                    user: client.email,
+                    password: client.password ? encryptString(client.password) : ''
+                }
+
+                list.push(item);
+        })
+
+         accountRef.current?.handleShow(list);
+    }
+
     useImperativeHandle(ref, ()=>({
         handleShow
     }));
 
     return(
         <>
-        <Modal size={'90%'} open={open} onClose={handleClose}>
+        <Modal size={'80%'} open={open} onClose={handleClose}>
             <Modal.Header>
                 <Modal.Title>Detalles</Modal.Title>
             </Modal.Header>
@@ -286,7 +307,7 @@ const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
                                 controlId="add_user"
                                 title="Agregar usuario"
                                 icon={<RiUserAddLine />}
-                                onClick={()=>{}}
+                                onClick={()=>handleOpenAccountModal()}
                             />
                             <ButtonTable 
                                 controlId="schedule"
@@ -320,6 +341,13 @@ const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
             onLoad={onLoadDataInfo}
             loader={loader}
             ref={dsRef} 
+        />
+
+        <ModalAccount 
+            id={sale.id}  
+            onLoad={onLoadDataInfo}
+            loader={loader}
+            ref={accountRef} 
         />
         </>
     )

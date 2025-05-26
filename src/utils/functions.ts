@@ -70,6 +70,18 @@ export const encript = (name:string, value:string)=>{
 	sessionStorage.setItem(encriptedName, encriptedValue);
 }
 
+
+// Encriptar un string
+export const encryptString = (text:string) => {
+    return cryptoJs.AES.encrypt(text, import.meta.env.VITE_SECRET).toString();
+}
+
+// Desencriptar un string
+export const decryptString = (ciphertext:string) => {
+    const bytes = cryptoJs.AES.decrypt(ciphertext, import.meta.env.VITE_SECRET);
+    return bytes.toString(cryptoJs.enc.Utf8);
+}
+
 /**
  * General function to call API services
  * @param {string | url} url endpoint

@@ -20,6 +20,7 @@ export type SalesClientsInfo = {
     visa_type: string | null,
     complete: boolean,
     email: string | null,
+    password: string | null | undefined,
     schedule: ScheduleClient[],
     ds_160: string | null
 }
