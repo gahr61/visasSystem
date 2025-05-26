@@ -133,7 +133,7 @@ const DetailsForm = ({client, updateClient, index}: Props)=>{
 
                     <div className="flex justify-end gap-2 mt-5">
                         <ButtonGroup>
-                            <Button appearance="default">Cancelar</Button>
+                            
                             {currentStep > 0 && (
                                 <Button appearance="ghost" onClick={changeToPrevStep}>Atras</Button>
                             )}

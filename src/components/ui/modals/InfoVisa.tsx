@@ -1,4 +1,4 @@
-import { forwardRef, useImperativeHandle, useState } from "react";
+import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { Col, Grid, Modal, Row } from "rsuite";
 import { SalesClientsInfo, SalesInfo } from "../../../utils/interfaces/sales";
 import { visasSalesInfo } from "../../../utils/services/sales/visa";
@@ -10,9 +10,21 @@ import ButtonTable from "../../common/ButtonTable";
 import { AiOutlineFileSearch } from "react-icons/ai";
 import { RiUserAddLine } from "react-icons/ri";
 import { IoCalendarOutline } from "react-icons/io5";
+import { RiFileUserLine } from "react-icons/ri";
+
 import Table, { Columns } from "../../common/Table";
+import { useNavigate } from "react-router-dom";
+import ModalDS160 from "./DS160Form";
+
+type ModalDS160Ref = {
+    handleShow:(list:any)=>void
+}
 
 const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
+    const dsRef = useRef<ModalDS160Ref>(null)
+
+    const navigate = useNavigate();
+
     const [columns, setColumns] = useState<Columns[]> ([
         {key:'client', title:'Nombre', grow:2, render:(row: SalesClientsInfo) => row.names+' '+row.lastname1+(row.lastname2 !== null ? ' '+row.lastname2 : '')},
         {key:'procedure', title:'Trámite', grow:3, render:(row:SalesClientsInfo) => 
@@ -21,6 +33,7 @@ const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
             (row.option_type !== null ? ' - '+row.option_type : '')
         },
         {key:'email', title:'Correo', grow:3, render:(row: SalesClientsInfo) => row.email !== null ? row.email : '' },
+        {key:'ds160', title:'DS160', grow:1, render:(row:SalesClientsInfo) => row.ds_160},
         {key:'status', title:'Estatus', grow:1, render:(row:SalesClientsInfo) => row.complete ? 'Completo' : 'Incompleto'}
     ]);
     const [open, setOpen] = useState(false);
@@ -37,10 +50,16 @@ const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
         lastname1:'',
         lastname2:'',
         phone:'',
-        clients:[]
+        clients:[],
+        type:''
     });
     
     const handleShow = async (id:number)=>{
+        await onLoadDataInfo(id);
+        setOpen(true);
+    }
+
+    const onLoadDataInfo = async (id:number)=>{
         loader.current?.handleShow('Cargando...');
 
         let response = await visasSalesInfo(id);
@@ -92,7 +111,6 @@ const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
             });
 
         }
-        setOpen(true);
     }
 
     const handleClose = ()=>{
@@ -120,15 +138,41 @@ const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
             lastname1:'',
             lastname2:'',
             phone:'',
-            clients:[]
+            clients:[],
+            type:''
         })
     };
+
+    const handleOpenFormDetails = ()=>{
+        navigate('/procedures/visa/'+sale.id+'/details');
+        handleClose();
+    }
+
+    const handleAddDs160 = ()=>{
+         let list:any = [];
+         
+         sale.clients.forEach((client)=>{
+            //if(client.ds_160 === null){
+                const item = {
+                    process_id: client.process_id,
+                    client_id: client.clients_id,
+                    client: client.names+' '+client.lastname1+(client.lastname2 !== null ? ' '+client.lastname2 : ''),
+                    ds160: client.ds_160 || ''
+                }
+
+                list.push(item);
+            //}
+        })
+
+         dsRef.current?.handleShow(list);
+    }
 
     useImperativeHandle(ref, ()=>({
         handleShow
     }));
 
     return(
+        <>
         <Modal size={'90%'} open={open} onClose={handleClose}>
             <Modal.Header>
                 <Modal.Title>Detalles</Modal.Title>
@@ -137,7 +181,15 @@ const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
                 <Grid fluid>
                     <fieldset>
                         <legend className="text-lg font-bold">Trámite</legend>
-                        <Row className="flex items-end">
+                        <Row>
+                            <Col xs={24} lg={8}>
+                                <div className="flex flex-col">
+                                    <label className="font-semibold">Tipo de trámite</label>
+                                    <span>{sale.type}</span>
+                                </div>
+                            </Col>
+                        </Row>
+                        <Row className="flex items-end">                            
                             <Col xs={24} lg={8}>
                                 <div className="flex flex-col">
                                     <label className="font-semibold">Oficina</label>
@@ -225,6 +277,12 @@ const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
                         <legend className="text-lg font-bold">Clientes</legend>
                         <div className="flex justify-end gap-2 p-2">
                             <ButtonTable 
+                                controlId="add_ds160"
+                                title="Agregar DS160"
+                                icon={<RiFileUserLine />}
+                                onClick={()=>handleAddDs160()}
+                            />
+                            <ButtonTable 
                                 controlId="add_user"
                                 title="Agregar usuario"
                                 icon={<RiUserAddLine />}
@@ -240,7 +298,7 @@ const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
                                     controlId="details"
                                     title="Detalles"
                                     icon={<AiOutlineFileSearch />}
-                                    onClick={()=>{}}
+                                    onClick={()=>handleOpenFormDetails()}
                                 />
                         </div>
                         <Row>
@@ -256,6 +314,14 @@ const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
                 </Grid>
             </Modal.Body>
         </Modal>
+
+        <ModalDS160 
+            id={sale.id}  
+            onLoad={onLoadDataInfo}
+            loader={loader}
+            ref={dsRef} 
+        />
+        </>
     )
 });
 

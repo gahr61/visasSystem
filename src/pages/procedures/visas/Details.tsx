@@ -669,7 +669,8 @@ const VisaDetails = ({loader}:IApp)=>{
                         )}
                     </Tabs>
 
-                    <div className="my-3 flex justify-end">
+                    <div className="my-3 flex justify-end gap-2">
+                        <Button appearance="default" onClick={()=>navigate('/procedures/visa/list')}>Cancelar</Button>
                         <Button onClick={handleSubmit}>Guardar</Button>
                     </div>
                 </div>

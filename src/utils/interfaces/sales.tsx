@@ -8,6 +8,7 @@ type ScheduleClient = {
 
 export type SalesClientsInfo = {
     clients_id: number,
+    process_id: number,
     names: string,
     lastname1: string,
     lastname2: string | null,
@@ -19,7 +20,8 @@ export type SalesClientsInfo = {
     visa_type: string | null,
     complete: boolean,
     email: string | null,
-    schedule: ScheduleClient[]
+    schedule: ScheduleClient[],
+    ds_160: string | null
 }
 export type SalesInfo = {
     id: number,
@@ -34,5 +36,6 @@ export type SalesInfo = {
     lastname1: string,
     lastname2: string | null,
     phone: string,
-    clients: SalesClientsInfo[]
+    clients: SalesClientsInfo[],
+    type: string
 }
