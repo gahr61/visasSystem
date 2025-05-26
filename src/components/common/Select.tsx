@@ -10,8 +10,8 @@ const customStyles = {
     }),
     control:  (provided:any, state:any) => ({
         ...provided,
-        height: 'calc(1.5em + 0.5rem + 2.6px)',
-        minHeight: 'calc(1.5em + 0.5rem + 2.5px)',
+        height: '1.85rem',
+        minHeight: 'calc(1.5em + 0.4rem + 2.5px)',
         fontSize: '0.79rem',
         borderColor: '#d8dbe0',
         boxShadow: 'inset 0 1px 1px rgba(0, 0, 0, 0.075)',

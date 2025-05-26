@@ -20,7 +20,8 @@ const Input = (props:IInput)=>{
         customClass = '',
         placeholder = '',
         onKeyPress = ()=>{},
-        value = ''
+        value = '',
+        maxLength
     } = props;
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>)=>{
@@ -58,8 +59,8 @@ const Input = (props:IInput)=>{
             name={name || id}
             value={value}
             className={`
-                ${customClass}
-                py-1 px-2 block w-full border outline-0 rounded-lg text-sm h-[1.82rem]
+                ${customClass}                
+                py-1 px-2 block w-full border outline-0 rounded-lg text-sm h-[1.85rem]
                 focus:border-blue-500 focus:ring-blue-500
                 disabled:opacity-50 disabled:bg-neutral-100 disabled:cursor-no-drop
             `}
@@ -69,6 +70,7 @@ const Input = (props:IInput)=>{
             required={required}
             placeholder={placeholder}
             autoComplete="off"
+            maxLength={maxLength}
         />
     )
 }
