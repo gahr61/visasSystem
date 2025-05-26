@@ -262,23 +262,12 @@ const VisaDetails = ({loader}:IApp)=>{
                                 lastVisit: item.process_details.date_visit_eeuu ? true : false, 
                                 dateLastVisit: item.process_details.date_visit_eeuu || '', 
                                 timeLastVisit: item.process_details.time_visit_eeuu || '',
-                                observations: item.process_details.observations || '',                                 
-                                ds160: item.process_details.item.clave_ds_160 || '',
+                                observations: item.process_details.observations || '',    
                                 travel_before: item.process_details.travel_before || '',
                                 travel_before_countries: item.process_details.travel_before_countries || ''
                             }
                                 
                             
-                        }
-                    }
-                }
-
-                if(item.account !== null){
-                    data = {
-                        ...data,
-                        generalInformation:{
-                            ...data.generalInformation,
-                            account: item.account
                         }
                     }
                 }
