@@ -21,6 +21,7 @@ const UsersNew = ({loader}:IApp)=>{
         lastname2:'',
         email:'',
         role:'',
+        role_text:'',
         goal:'',
         salary:'',
         commissions:[]
@@ -43,6 +44,7 @@ const UsersNew = ({loader}:IApp)=>{
             password: string
         } = {
             ...employee,
+            role: employee.role_text.toLowerCase().replace(/ /g, '_'),
             password: password
         }
 

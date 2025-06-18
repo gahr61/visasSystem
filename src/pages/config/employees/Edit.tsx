@@ -23,6 +23,7 @@ const UsersEdit = ({loader}:IApp)=>{
         lastname2:'',
         email:'',
         role:'',
+        role_text:'',
         goal:'',
         salary:'',
         commissions:[]
@@ -60,7 +61,8 @@ const UsersEdit = ({loader}:IApp)=>{
             password: string
         } = {
             ...employee,
-            password: password
+            role: employee.role_text.toLowerCase().replace(/ /g, '_'),
+            password: password,
         }
 
         let response = await usersUpdate(id ?? '', obj);

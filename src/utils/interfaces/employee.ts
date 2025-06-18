@@ -11,6 +11,7 @@ export type Employee = {
     lastname2?: string,
     email: string,
     role: string,
+    role_text: string,
     goal: string,
     salary: string,
     commissions: EmployeeCommission[]

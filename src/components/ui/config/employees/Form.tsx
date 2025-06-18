@@ -79,10 +79,14 @@ const EmployeeForm = ({
                         id="role"
                         options={roles}
                         value={employee.role}
-                        handleChange={(value:string)=>setEmployee({
-                            ...employee,
-                            role: value
-                        })}
+                        handleChange={(value: string) => {
+                            const selectedRole = roles.find((obj: any) => obj.value === value);
+                            setEmployee({
+                                ...employee,
+                                role: value,
+                                role_text: selectedRole?.label || ''
+                            });
+                        }}
                         required
                     />
                 </Col>

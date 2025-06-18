@@ -105,8 +105,6 @@ const VisaDetails = ({loader}:IApp)=>{
         if(response && response.success){
             let data = dataForm;
             let clientsList:any = [];
-
-            console.log(data)
             
             response.data.clients.forEach((item:any)=>{
                 data = {
@@ -277,7 +275,6 @@ const VisaDetails = ({loader}:IApp)=>{
 
             setClients(clientsList);
             setCurrentKey('0');
-            
         }
 
         loader.current?.handleClose()
