@@ -17,15 +17,21 @@ import { useNavigate } from "react-router-dom";
 import ModalDS160 from "./DS160Form";
 import ModalAccount from "./AccountData";
 import ModalSchedule from "./Schedule";
+import ModalPaymentProcedure from "./PaymentProcedure";
 
 type ModalUpdateRef = {
     handleShow:(list:any)=>void
+}
+
+type ModalPaymentRef = {
+    handleShow: ()=>void
 }
 
 const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
     const dsRef = useRef<ModalUpdateRef>(null);
     const accountRef = useRef<ModalUpdateRef>(null);
     const scheduleRef = useRef<ModalUpdateRef>(null);
+    const paymentRef = useRef<ModalPaymentRef>(null);
 
     const navigate = useNavigate();
 
@@ -55,7 +61,8 @@ const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
         lastname2:'',
         phone:'',
         clients:[],
-        type:''
+        type:'',
+        payments:''
     });
     
     const handleShow = async (id:number)=>{
@@ -76,6 +83,7 @@ const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
 
             response.data = {
                 ...response.data,
+                payable: (parseFloat(response.data.total) - parseFloat(response.data.payments)).toString(),
                 clients: response.data.clients.map((client)=>{ 
                     client.schedule.forEach((data)=>{
                         const find = dataColumns.find(obj => obj.key.toLowerCase() === data.schedule.toLocaleLowerCase());
@@ -144,7 +152,8 @@ const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
             lastname2:'',
             phone:'',
             clients:[],
-            type:''
+            type:'',
+            payments:''
         })
     };
 
@@ -192,8 +201,6 @@ const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
 
     const handleOpenScheduleModal = ()=>{
         let list:any = [];
-
-        console.log(sale)
          
          sale.clients.forEach((client)=>{
                 let consulado = client.schedule.find(obj => obj.office === 'Consulado');
@@ -212,6 +219,10 @@ const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
         })
 
          scheduleRef.current?.handleShow(list);
+    }
+
+    const handleOpenPayment = ()=>{
+        paymentRef.current?.handleShow();
     }
 
     useImperativeHandle(ref, ()=>({
@@ -274,7 +285,7 @@ const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
                             <Col xs={24} lg={6}>
                                 <div className="flex flex-col">
                                     <label className="font-semibold">Pagado</label>
-                                    <span>{formatPrice(sale.advance_payment)}</span>
+                                    <span>{formatPrice(sale.payments)}</span>
                                 </div>
                             </Col>
                             <Col xs={24} lg={4}>
@@ -288,7 +299,7 @@ const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
                                     controlId="pay"
                                     title="Abonar"
                                     icon={<FaDollarSign />}
-                                    onClick={()=>{}}
+                                    onClick={()=>handleOpenPayment()}
                                 />
                             </Col>
                         </Row>
@@ -381,6 +392,13 @@ const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
             onLoad={onLoadDataInfo}
             loader={loader}
             ref={scheduleRef}
+        />
+        
+        <ModalPaymentProcedure 
+            id={sale.id}
+            onLoad={onLoadDataInfo}
+            loader={loader}
+            ref={paymentRef}
         />
         </>
     )

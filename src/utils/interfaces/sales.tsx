@@ -38,5 +38,6 @@ export type SalesInfo = {
     lastname2: string | null,
     phone: string,
     clients: SalesClientsInfo[],
-    type: string
+    type: string,
+    payments: string;
 }
