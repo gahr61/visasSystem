@@ -6,13 +6,14 @@ export interface ILogin{
 export type ILoginResponse =  {
     access_token: string,
     user: ILoginUser,
-    expires_at: string
+    expires_at: string,
+    permissions: string[]
 }
 
 type ILoginUser = {
     id: number,
     name: string,
-    change_password_required: boolean
+    change_password_required: boolean | string
 }
 
 export interface PasswordReset {

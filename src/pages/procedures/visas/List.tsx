@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { Col, Row} from "rsuite";
 import moment from "moment";
 
@@ -19,6 +19,7 @@ import { Column } from "../../../utils/interfaces/system";
 import { IApp } from "../../../utils/interfaces/function";
 import { Procedure } from "../../../utils/interfaces/procedure";
 import { visasSalesList } from "../../../utils/services/sales/visa";
+import { usePermissionsStore } from "../../../utils/stores/usePermissionsStore";
 
 type ModalTicket = {
     handleShow: (id: number, type: string, option:string) => void
@@ -33,6 +34,13 @@ type ModalDetails = {
 }
 
 const VisasList = ({loader}:IApp)=>{
+    const hasPermission = usePermissionsStore(state => state.hasPermission);
+
+    if(!hasPermission('procedure_visa')){
+        <Navigate to="/login" />
+    }
+
+
     const navigate = useNavigate();
     const ticketModal = useRef<ModalTicket>(null);
     const confirmModal = useRef<ModalConfirm>(null);
@@ -109,12 +117,15 @@ const VisasList = ({loader}:IApp)=>{
                     />
                 )}
                 
-                <ButtonTable 
-                    title="Eliminar"
-                    controlId="delete"
-                    icon={<FaTrashAlt />}
-                    onClick={()=>{}}
-                />
+                {hasPermission('procedure_visa_delete') && (
+                    <ButtonTable 
+                        title="Eliminar"
+                        controlId="delete"
+                        icon={<FaTrashAlt />}
+                        onClick={()=>{}}
+                    />
+                )}
+                
             </div>
         },
     ];
@@ -168,9 +179,10 @@ const VisasList = ({loader}:IApp)=>{
         const number = phone.replace(/-/g, '');
 
         const phoneNumber = '521'+number;
+       
         const message = 'Hola, para continuar con el proceso, por favor ingresa al siguiente enlace, '+
                         'inicia sesión en la plataforma y llena el formulario correspondiente: '+
-                        'http://localhost:5173';
+                        window.location.origin;
 
         const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
 

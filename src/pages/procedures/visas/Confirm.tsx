@@ -38,6 +38,7 @@ const VisaConfirm = ({loader}:IApp)=>{
     const {token} = useParams();
 
     const [data, setData] = useState<ConfirmList[]>([]);
+    const [folio, setFolio] = useState<string>('');
 
     const columns: Columns[] = [
         {key:'client', title:'Cliente', grow:4, render:(row:ConfirmList)=> row.client},
@@ -72,7 +73,7 @@ const VisaConfirm = ({loader}:IApp)=>{
         }
     ]
 
-    const onLoad = async ()=>{
+    const onLoad = async ()=>{        
         if(token){
             getData(token);
         }
@@ -109,13 +110,14 @@ const VisaConfirm = ({loader}:IApp)=>{
 
             setData(items);
 
+
             return;
         }
 
         if(response.data?.canShow === false){
             Swal.fire('Error', response.message, 'error').then((result)=>{
                 if(result.isConfirmed){
-                    window.location.href = 'http://www.visas-premier.com';
+                    window.location.href = 'https://www.visas-premier.com';
                 }
             });            
         }
@@ -233,7 +235,7 @@ const VisaConfirm = ({loader}:IApp)=>{
                                 <Row>
                                     <Col xs={24} lg={12}>
                                         <label>Folio</label>
-                                        <Input />
+                                        <Input value={folio} onChange={(e)=>setFolio(e.currentTarget.value)} />
                                     </Col>                                        
                                 </Row>    
                                 <hr className="my-2" />

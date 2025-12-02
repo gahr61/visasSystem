@@ -5,7 +5,7 @@ import { visasSalesInfo } from "../../../utils/services/sales/visa";
 import { IApp } from "../../../utils/interfaces/function";
 import moment from "moment";
 import { encryptString, formatPrice } from "../../../utils/functions";
-import { FaDollarSign, FaHandHoldingDollar } from "react-icons/fa6";
+import { FaDollarSign } from "react-icons/fa6";
 import ButtonTable from "../../common/ButtonTable";
 import { AiOutlineFileSearch } from "react-icons/ai";
 import { RiUserAddLine } from "react-icons/ri";
@@ -266,14 +266,14 @@ const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
                                     <span>{sale.date}</span>
                                 </div>
                             </Col>
-                            <Col xs={24} lg={4}>
+                            {/* <Col xs={24} lg={4}>
                                 <ButtonTable 
                                     controlId="aditiona_service"
                                     title="Servicios adicionales"
                                     icon={<FaHandHoldingDollar />}
                                     onClick={()=>{}}
                                 />
-                            </Col>
+                            </Col> */}
                         </Row>
                         <Row className="flex items-end">
                             <Col xs={24} lg={8}>

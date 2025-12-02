@@ -5,23 +5,23 @@ import { Column } from "../../../utils/interfaces/system";
 import ButtonTable from "../../../components/common/ButtonTable";
 import { FaPencil } from "react-icons/fa6";
 import { FaTrashAlt } from "react-icons/fa";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Input from "../../../components/common/Input";
 import Button from "../../../components/common/Button";
 import Table from "../../../components/common/Table";
-import { Passports } from "../../../utils/interfaces/procedure";
+import { Procedure } from "../../../utils/interfaces/procedure";
 
 const PassportList = ()=>{
     const height = (window.innerHeight - 170 ) - (document.getElementById('header-content')?.offsetHeight || 60);
     
     const columns:Column[]= [
-        {key:'folio', title:'Folio', grow:1, render:(row: Passports)=> row.folio },
-        {key:'date', title:'Fecha', grow:1, render:(row: Passports)=> row.date },
-        {key:'applicant', title:'No. Solicitantes', grow:1, render:(row: Passports)=> row.no_applicants.toString() },
-        {key:'client', title:'Cliente', grow:2, render:(row: Passports)=> row.client },
-        {key:'email', title:'Correo', grow:1, render:(row: Passports)=> row.email },
-        {key:'status', title:'Estatus', grow:1, render:(row: Passports)=> row.status },
-        {key:'', title:'Acciones', grow:1, render:(row: Passports)=>
+        {key:'folio', title:'Folio', grow:1, render:(row: Procedure)=> row.folio },
+        {key:'date', title:'Fecha', grow:1, render:(row: Procedure)=> row.date },
+        {key:'applicant', title:'No. Solicitantes', grow:1, render:(row: Procedure)=> row.no_applicants.toString() },
+        {key:'client', title:'Cliente', grow:2, render:(row: Procedure)=> row.client },
+        {key:'email', title:'Correo', grow:1, render:(row: Procedure)=> row.email },
+        {key:'status', title:'Estatus', grow:1, render:(row: Procedure)=> row.status },
+        {key:'', title:'Acciones', grow:1, render:()=>
             <div className="flex gap-2">
                 <ButtonTable
                     title="Editar"
@@ -39,7 +39,7 @@ const PassportList = ()=>{
         },
     ];
 
-    const [data, setData] = useState<Passports[]>([]);
+    const [data, setData] = useState<Procedure[]>([]);
     const [ search, setSearch ] = useState('');
 
     const onSearch = (e: React.FormEvent<HTMLInputElement>)=>{
@@ -47,6 +47,14 @@ const PassportList = ()=>{
 
         setSearch(value);
     }
+
+    const onLoad = ()=>{
+        setData([]);
+    }
+
+    useEffect(()=>{
+        onLoad();
+    },[])
 
     return(
         <Content

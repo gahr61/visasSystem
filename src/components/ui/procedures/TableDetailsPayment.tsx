@@ -11,7 +11,7 @@ const TableDetailsPayment = ({
     dataPayment:any,
     setDataPayment:(e:any)=>void
 })=>{
-    const columns = ['Tráamite', 'Concepto', 'Cantidad', 'Precio', 'Total'];
+    const columns = ['Trámite', 'Concepto', 'Cantidad', 'Precio', 'Total'];
     const [showDetails, setShowDetails] = useState(false);
     const [concepts, setConcepts] = useState<any[]>([]);
 
@@ -52,12 +52,12 @@ const TableDetailsPayment = ({
                 ...dataPayment.options,
                 minPayment: true,
                 otherPayment: false,
-                minPrice: amount * 500,
-                otherPrice: amount * 500,
+                minPrice: amount * 700,
+                otherPrice: amount * 700,
                 totalProcedure: total,
-                totalPay:  dataPayment.options.minPayment ? total - (amount * 500): 
+                totalPay:  dataPayment.options.minPayment ? total - (amount * 700): 
                 dataPayment.options.otherPayment ? total - dataPayment.options.otherPrice : 0,
-                totalPerPay: dataPayment.options.minPayment ? (amount * 500): 
+                totalPerPay: dataPayment.options.minPayment ? (amount * 700): 
                     dataPayment.options.otherPayment ? dataPayment.options.otherPrice : 0
             }
         }
@@ -148,7 +148,7 @@ const TableDetailsPayment = ({
                             </td>
                             <td colSpan={3} className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-80">
                                 <div className="flex flex-col">
-                                    <span>Pago por inicio de tramite</span>
+                                    <span>Pago por inicio de trámite</span>
                                     <span>se descuenta del total a pagar</span>
                                 </div>
                             </td>
@@ -178,7 +178,7 @@ const TableDetailsPayment = ({
                         </tr>
                         <tr>
                             <td colSpan={4} className="px-6 py-2 whitespace-nowrap text-end text-sm font-medium text-gray-80">
-                                Total de tramite
+                                Total de trámite
                             </td>
                             <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-80 text-end">
                                 {formatPrice(dataPayment.options.totalProcedure)}

@@ -10,11 +10,11 @@ import MenuIcon from '@rsuite/icons/Menu';
 import ArrowRightLineIcon from '@rsuite/icons/ArrowRightLine';
 import ArrowLeftLineIcon from '@rsuite/icons/ArrowLeftLine';
 
-import { decript } from "../../utils/functions";
 import { IUser } from "../../utils/interfaces/function";
 import { appContext } from "../../context/appContext";
-
-
+import { logout } from "../../utils/services/auth";
+import Toast from "./Toast";
+import { useUserStore } from "../../utils/stores/useUserStore";
 
 interface INavbar {
     expanded: boolean,
@@ -31,8 +31,7 @@ const Navbar = ({
 
     const {resetPassword} = appContext();
  
-    const user: IUser = decript('user') !== '' ? JSON.parse(decript('user')) : {id:0, name:''};
-
+    const user: IUser = useUserStore(state => state.user);
     const [ time, setTime ] = useState(moment().local().format('HH:mm:ss a'));
 
     /**
@@ -48,6 +47,24 @@ const Navbar = ({
 
     const openResetPassword = ()=>{        
         resetPassword?.handleShow();
+    }
+
+    const handleLogout = async ()=>{
+        
+        const response =  await logout();
+
+        if(response){
+            localStorage.clear();
+            sessionStorage.clear();
+
+            navigate('/login');
+
+            Toast.fire('Correcto', 'La sesión se funalizo correctamente', 'success');
+
+            return;
+        }
+        
+        Toast.fire('Error', 'Error al intentar cerrar sesión', 'error');
     }
 
     useEffect(()=>{
@@ -77,7 +94,7 @@ const Navbar = ({
                 <Nav.Item className="hidden sm:block">{time}</Nav.Item>
                 <Nav.Menu title={user.name} icon={<AdminIcon />}>
                     <Nav.Item onClick={()=>openResetPassword()}>Restablecer contraseña</Nav.Item>
-                    <Nav.Item>Salir</Nav.Item>
+                    <Nav.Item onClick={()=>handleLogout()}>Salir</Nav.Item>
                 </Nav.Menu>
             </Nav>
         </NavbarContent>

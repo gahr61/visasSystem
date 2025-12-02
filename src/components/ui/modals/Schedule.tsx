@@ -24,15 +24,33 @@ interface Props extends IApp{
 const ModalSchedule = forwardRef(({loader, id, onLoad}:Props, ref)=>{
     const [open, setOpen] = useState(false);
     const [data, setData] = useState<ScheduleTable[]>([]);
+    const [isFocused, setIsFocused] = useState(false);
+
     const columns:Columns[] = [
         {key:'client', title:'Nombre', grow:3, render:(row: ScheduleTable) => row.client},
         {key:'consulado', title:'Consulado', grow:4, render:(row: ScheduleTable) => 
             <Row>
                 <Col xs={24} md={12}>
-                    <Input type="date" name="consulado" value={row.consulado} onChange={(e:any)=>handleChange(e, row.client_id)} />
+                    <Input 
+                        isFocused={isFocused} 
+                        type="date" 
+                        name="consulado" 
+                        value={row.consulado} 
+                        onChange={(e:any)=>handleChange(e, row.client_id)} 
+                        onFocus={()=>setIsFocused(true)}
+                        onBlur={()=>setIsFocused(false)}
+                    />
                 </Col>
                 <Col xs={24} md={12}>
-                    <Input type="time" name="consulado_time" value={row.consulado_time} onChange={(e:any)=>handleChange(e, row.client_id)} />
+                    <Input 
+                        isFocused={isFocused} 
+                        type="time" 
+                        name="consulado_time" 
+                        value={row.consulado_time} 
+                        onChange={(e:any)=>handleChange(e, row.client_id)} 
+                        onFocus={()=>setIsFocused(true)}
+                        onBlur={()=>setIsFocused(false)}
+                    />
                 </Col>
             </Row>
             
@@ -40,10 +58,26 @@ const ModalSchedule = forwardRef(({loader, id, onLoad}:Props, ref)=>{
         {key:'cas', title:'CAS', grow:4, render:(row: ScheduleTable) => 
             <Row>
                 <Col xs={24} md={12}>
-                    <Input type="date" name="cas" value={row.cas} onChange={(e:any)=>handleChange(e, row.client_id)} />
+                    <Input 
+                        isFocused={isFocused} 
+                        type="date" 
+                        name="cas" 
+                        value={row.cas} 
+                        onChange={(e:any)=>handleChange(e, row.client_id)} 
+                        onFocus={()=>setIsFocused(true)}
+                        onBlur={()=>setIsFocused(false)}
+                    />
                 </Col>
                 <Col xs={24} md={12}>
-                    <Input type="time" name="cas_time" value={row.cas} onChange={(e:any)=>handleChange(e, row.client_id)} />
+                    <Input 
+                        isFocused={isFocused} 
+                        type="time" 
+                        name="cas_time" 
+                        value={row.cas_time} 
+                        onChange={(e:any)=>handleChange(e, row.client_id)} 
+                        onFocus={()=>setIsFocused(true)}
+                        onBlur={()=>setIsFocused(false)}
+                    />
                 </Col>
             </Row>
             
@@ -62,6 +96,8 @@ const ModalSchedule = forwardRef(({loader, id, onLoad}:Props, ref)=>{
 
     const handleChange = (e:React.FormEvent<HTMLInputElement>, id:number)=>{
         const {name, value} = e.currentTarget;
+
+        console.log(name, value, id, data)
 
         const items = data.map((item:ScheduleTable)=>{
             if(id === item.client_id){

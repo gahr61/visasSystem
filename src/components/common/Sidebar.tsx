@@ -7,6 +7,7 @@ import GearIcon from '@rsuite/icons/Gear';
 import DocPassIcon from '@rsuite/icons/DocPass';
 
 import logo from '../../assets/images/logo.png';
+import { usePermissionsStore } from "../../utils/stores/usePermissionsStore";
 
 interface ISubmenuItem {
     title: string;
@@ -35,18 +36,19 @@ const SidebarAdmin = ({expanded, setExpanded}:ISidebar)=>{
     const navigate = useNavigate();
 
     const [ activeKey, setActiveKey ] = useState('dashboard');
+    const hasPermission = usePermissionsStore(state => state.hasPermission);
 
     const [ menus, setMenus ] = useState<IMenuItem[]>([
         {key:'dashboard', show:true, title:'Dashboard', active:false, alignIcon:false, icon:<DashboardIcon />, url:'/', submenus:[]},
-        {key:'procedures', show:true, title:'Trámites', active:false, alignIcon:true, icon:<DocPassIcon />, submenus:[
-            {title:'Pasaporte', show:true, url:'/procedures/passport/list', active:false},
-            {title:'Visa', show:true, url:'/procedures/visa/list', active:false}
+        {key:'procedures', show:hasPermission('procedure_menu'), title:'Trámites', active:false, alignIcon:true, icon:<DocPassIcon />, submenus:[
+            {title:'Pasaporte', show:hasPermission('procedure_passport'), url:'/procedures/passport/list', active:false},
+            {title:'Visa', show:hasPermission('procedure_visa'), url:'/procedures/visa/list', active:false}
         ]},
-        {key:'config', show:true, title:'Configuración', active:false, alignIcon:false, icon:<GearIcon />, submenus:[
-            {title:'Sistema', show:true, url:'/config/concepts/list', active:false},
-            {title:'Empleados', show:true, url:'/config/employees/list', active:false},
-            {title:'Permisos', show:true, url:'/config/permissions/list', active:false},
-            {title:'Roles', show:true, url:'/config/roles/list', active:false},
+        {key:'config', show:hasPermission('config_system_menu'), title:'Configuración', active:false, alignIcon:false, icon:<GearIcon />, submenus:[
+            {title:'Sistema', show:hasPermission('config_system_concepts'), url:'/config/concepts/list', active:false},
+            {title:'Empleados', show:hasPermission('config_system_users'), url:'/config/employees/list', active:false},
+            {title:'Permisos', show:hasPermission('config_system_permissions'), url:'/config/permissions/list', active:false},
+            {title:'Roles', show:hasPermission('config_system_roles'), url:'/config/roles/list', active:false},
         ]}
     ]);
 

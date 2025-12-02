@@ -18,7 +18,8 @@ const ModalConcepts = forwardRef(({loader, getList}:Props, ref)=>{
     const [id, setId] = useState<number | undefined>(undefined);
     const [dataForm, setDataForm] = useState({
         name:'',
-        price:0
+        price:0,
+        is_process: false
     })
     
     const handleShow = async (id: number)=>{
@@ -38,7 +39,7 @@ const ModalConcepts = forwardRef(({loader, getList}:Props, ref)=>{
     const handleClose = ()=>{
         setOpen(false);
         setId(undefined);
-        setDataForm({name:'', price:0});
+        setDataForm({name:'', price:0, is_process: false});
     }
 
     const handleChange = (e: React.FormEvent<HTMLInputElement>)=>{

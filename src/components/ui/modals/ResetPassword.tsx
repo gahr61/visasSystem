@@ -1,14 +1,19 @@
 import { forwardRef, useImperativeHandle, useState } from "react";
 import { Message, Modal } from "rsuite";
 import Button from "../../common/Button";
-import { encript, isValidForm, setDataStorage } from "../../../utils/functions";
+import { encript, isValidForm } from "../../../utils/functions";
 import Toast from "../../common/Toast";
 import { usersReset } from "../../../utils/services/users";
 import { PasswordReset } from "../../../utils/interfaces/auth";
 import PasswordChangeForm from "../common/PasswordChangeForm";
 import { logout } from "../../../utils/services/auth";
+import { useUserStore } from "../../../utils/stores/useUserStore";
+import { usePermissionsStore } from "../../../utils/stores/usePermissionsStore";
 
 const ModalResetPassword = forwardRef(({loader}:{loader:any}, ref)=>{
+    const setUser = useUserStore(state => state.setUser);
+    const setPermissions = usePermissionsStore(state => state.setPermissions);
+
     const [open, setOpen] = useState(false);
     const [userId, setUserId] = useState('');
     const [dataForm, setDataForm] = useState({
@@ -70,12 +75,17 @@ const ModalResetPassword = forwardRef(({loader}:{loader:any}, ref)=>{
         if(response && response.success){
             Toast.fire('Correcto', response.message, 'success');
 
+
             if(message !== ''){
                 encript('changePassword', '0');
 
                 if(Object.keys(data).length > 0){
-					setDataStorage(data);
-					window.location.href = '/';
+                    setUser(data.user);
+                    setPermissions(data.permissions)
+                    setTimeout(()=>{
+                        window.location.href = '/';
+                    }, 500)
+					
 				}
             }
 

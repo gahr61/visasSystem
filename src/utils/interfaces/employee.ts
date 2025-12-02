@@ -1,7 +1,7 @@
 import { Commissions } from "./system"
 
 export type EmployeeCommission = Commissions & {
-    amount: number
+    amount: number | string
 } 
 
 export type Employee = {

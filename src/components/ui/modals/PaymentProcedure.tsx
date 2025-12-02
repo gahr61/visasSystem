@@ -92,8 +92,10 @@ const ModalPaymentProcedure = forwardRef(({loader, id, onLoad}:Props, ref)=>{
                             <SelectForm
                                 id="method_payment"
                                 options={[
+                                    {value:'Depósito Bancario', label:'Depósito Bancario'},
                                     {value:'Efectivo', label:'Efectivo'},
-                                    {value:'Tarjeta', label:'Tarjeta'}
+                                    {value:'Tarjeta', label:'Tarjeta'},
+                                    {value:'Transferencia Electroníca', label:'Transferencia Electroníca'}
                                 ]}
                                 value={form.method_payment}
                                 handleChange={(value:string)=>handleChange({
@@ -105,7 +107,11 @@ const ModalPaymentProcedure = forwardRef(({loader, id, onLoad}:Props, ref)=>{
                                 required
                             />
                         </Col>
-                        {form.method_payment === 'Tarjeta' && (
+                        {(
+                            form.method_payment === 'Depósito Bancario' ||
+                            form.method_payment === 'Tarjeta' ||
+                            form.method_payment === 'Transferencia Electroníca'
+                        ) && (
                             <Col xs={24} >
                                 <label>No. Referencia</label>
                                 <Input

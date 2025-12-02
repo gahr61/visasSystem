@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { Tabs } from "rsuite";
 
 import Content from "../../../components/common/Content";
@@ -16,8 +16,15 @@ import { Client } from "../../../utils/interfaces/client";
 import { Passport } from "../../../utils/interfaces/passport";
 import { salesClientsOcuppations, salesClientsRelationships, salesClientsStudies, salesClientsUpdate, salesClientsUpdateAddress, salesClientsUpdatePhones } from "../../../utils/services/clients";
 import { passportUpdate } from "../../../utils/services/passport";
+import { usePermissionsStore } from "../../../utils/stores/usePermissionsStore";
 
 const VisaDetails = ({loader}:IApp)=>{
+    const hasPermission = usePermissionsStore(state => state.hasPermission);
+        
+    if(!hasPermission('procedure_visa_update')){
+        <Navigate to="/login" />
+    }
+
     const navigate = useNavigate();
 
     const {id} = useParams();

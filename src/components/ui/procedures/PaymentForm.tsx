@@ -26,6 +26,7 @@ const PaymentForm = ({
 }: Props)=>{
     const contacts:ISelectOptions[] = [
         {value:'Correo electrónico', label:'Correo electrónico'},
+        {value:'Recomendación', label:'Recomendación'},
         {value:'Redes sociales', label:'Redes sociales'},
         {value:'Teléfono', label:'Teléfono'},
         {value:'Volante', label:'Volante'},
@@ -144,7 +145,6 @@ const PaymentForm = ({
         
         setOptionSelected(value);
         
-
         if(value !== ''){
             const findOption = formData[parseInt(value) - 1];
 
@@ -224,6 +224,7 @@ const PaymentForm = ({
                                     required
                                 />
                             </Col>
+                            
                             {dataPayment.payment.contact === 'Volante' && (
                                 <Col xs={24} lg={6}>
                                     <label>Volanteo</label>
@@ -319,15 +320,21 @@ const PaymentForm = ({
                                 <SelectForm
                                     id="method_payment"
                                     options={[
+                                        {value:'Depósito Bancario', label:'Depósito Bancario'},
                                         {value:'Efectivo', label:'Efectivo'},
-                                        {value:'Tarjeta', label:'Tarjeta'}
+                                        {value:'Tarjeta', label:'Tarjeta'},
+                                        {value:'Transferencia Electroníca', label:'Transferencia Electroníca'}
                                     ]}
                                     value={dataPayment.payment.method_payment}
                                     handleChange={(value:string)=>handleSelect('method_payment', value, 'payment')}
                                     required
                                 />
                             </Col>
-                            {dataPayment.payment.method_payment === 'Tarjeta' && (
+                            {(
+                                dataPayment.payment.method_payment === 'Depósito Bancario' || 
+                                dataPayment.payment.method_payment === 'Transferencia Electroníca' || 
+                                dataPayment.payment.method_payment === 'Tarjeta'
+                            ) && (
                                 <Col xs={24} lg={4}>
                                     <label>No. Referencia</label>
                                     <Input 

@@ -1,11 +1,12 @@
-import { InputHTMLAttributes } from "react";
+import { InputHTMLAttributes, useState } from "react";
 import { isEmail, isPhone, showCtrError } from "../../utils/functions";
 
 
 interface IInput extends InputHTMLAttributes<HTMLInputElement>{
-    setErrorEmail?: (e: any)=>void,
-    customClass?:string,
-    onKeyPress?: (e: React.KeyboardEvent<HTMLInputElement>)=>void
+    setErrorEmail?: (e: any)=>void;
+    customClass?:string;
+    isFocused?:boolean;
+    onKeyPress?: (e: React.KeyboardEvent<HTMLInputElement>)=>void;
 }
 
 const Input = (props:IInput)=>{
@@ -21,8 +22,13 @@ const Input = (props:IInput)=>{
         placeholder = '',
         onKeyPress = ()=>{},
         value = '',
-        maxLength
+        maxLength,
+        isFocused = false,
+        onFocus = ()=>{},
+        onBlur = ()=>{}
     } = props;
+
+    const [inputValue, setInputValue] = useState(value);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>)=>{
         let {id, name, value} = e.target;
@@ -52,25 +58,37 @@ const Input = (props:IInput)=>{
         }
     }
 
+    const handleInputChange = (e:any)=>{
+        setInputValue(e.currentTarget.value);
+    }
+
+    const handleBlur = (e:any)=>{
+        onBlur(e);
+
+        handleChange(e);
+    }
+
     return(
         <input 
             type={type}
             id={id}
             name={name || id}
-            value={value}
+            value={isFocused ? inputValue : value}
             className={`
                 ${customClass}                
                 py-1 px-2 block w-full border outline-0 rounded-lg text-sm h-[1.85rem]
                 focus:border-blue-500 focus:ring-blue-500
                 disabled:opacity-50 disabled:bg-neutral-100 disabled:cursor-no-drop
             `}
-            onChange={handleChange}
+            onChange={isFocused  ? handleInputChange : handleChange}
             onKeyDown={onKeyPress}
             disabled={disabled}
             required={required}
             placeholder={placeholder}
             autoComplete="off"
             maxLength={maxLength}
+            onFocus={onFocus}
+            onBlur={(e)=>handleBlur(e)}
         />
     )
 }

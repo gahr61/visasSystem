@@ -33,3 +33,13 @@ export const salesClientsStudies = (obj:any):Promise<IResponse<undefined>> => {
 export const salesClientsTravel = (obj:any):Promise<IResponse<undefined>> => {
     return fetchRequest({url:'clients/travel', method:'POST', body:obj});
 }
+
+export const salesClientsAutocomplete = (query:string):Promise<IResponse<undefined>> =>{
+    return fetchRequest({
+        url:'clients/autocomplete?query='+query
+    });
+}
+
+export const salesClientsData = (id:number): Promise<IResponse<any>> => {
+    return fetchRequest({url:'clients/data/'+id});
+}

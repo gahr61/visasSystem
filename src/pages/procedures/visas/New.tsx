@@ -7,12 +7,19 @@ import ProcedureForm from "../../../components/ui/procedures/ProcedureForm";
 import PaymentForm from "../../../components/ui/procedures/PaymentForm";
 import { calculateAge, isValidForm } from "../../../utils/functions";
 import Toast from "../../../components/common/Toast";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import moment from "moment";
 import { visaSalesStore } from "../../../utils/services/sales/visa";
 import { IApp } from "../../../utils/interfaces/function";
+import { usePermissionsStore } from "../../../utils/stores/usePermissionsStore";
 
 const VisasNew = ({loader}:IApp)=>{
+    const hasPermission = usePermissionsStore(state => state.hasPermission);
+    
+    if(!hasPermission('procedure_visa_create')){
+        <Navigate to="/login" />
+    }
+    
     const navigate = useNavigate();
 
     const [formData, setFormData] = useState<Visas[]>([]);
@@ -243,7 +250,7 @@ const VisasNew = ({loader}:IApp)=>{
                         state_birth_id: data.client.state,
                     },                    
                     phones:[
-                        {number: data.client.phone, type:'Celular'}
+                        {id:data.client.phone_id ? data.client.phone_id : null, number: data.client.phone, type:'Celular'}
                     ],
                     process:{
                         type:'Visa',
@@ -258,6 +265,21 @@ const VisasNew = ({loader}:IApp)=>{
                         expiration_date: data.passport.passport_expiration_date
                     }
                 }
+
+                if(data.client.id){
+                    item = {
+                        ...item,
+                        client:{
+                            ...item.client,
+                            id: data.client.id
+                        },
+                        passport:{
+                            ...item.passport,
+                            id: data.passport.id
+                        }
+                    }
+                }
+                
 
                 if(data.options.option.renewal.value){
                     item = {
@@ -274,6 +296,9 @@ const VisasNew = ({loader}:IApp)=>{
                 return item;
             })
         }
+
+        loader.current?.handleClose();
+        console.log(obj);
 
         let response = await visaSalesStore(obj);
 

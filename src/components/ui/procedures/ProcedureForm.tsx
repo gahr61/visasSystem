@@ -37,7 +37,7 @@ const ProcedureForm = ({
 }:Props)=>{
     const options = [
         {value:'Familiar', label:'Familiar'},
-        {value:'Personal', label:'Personal'},
+        {value:'Individual', label:'Individual'},
         {value:'Grupo', label:'Grupo'}
     ];
 
@@ -167,7 +167,7 @@ const ProcedureForm = ({
         setErrors([]);
     }
 
-    const handleChange = (key:string, element:any,  index: number) => {
+    const handleChange = async (key:string, element:any,  index: number) => {
         let data = formData.map((form: any, i: number)=>{
             if(i === index){
                 form = {
@@ -179,9 +179,25 @@ const ProcedureForm = ({
             return form;
         })
 
-        setFormData(data);
+        await setFormData(data);
 
         setErrors([]);
+    }
+
+    const handleUpdateAfterSelect = (element:any, index:number)=>{
+        let data:any = formData.map((form:any, i: number)=>{
+            if(i === index){
+                form = {
+                    ...form,
+                    client: element.client,
+                    passport: element.passport
+                }
+            }
+
+            return form;
+        })
+
+        setFormData(data);        
     }
 
     const onAddClient = async ()=>{
@@ -265,7 +281,7 @@ const ProcedureForm = ({
                         required
                     />
                 </Col>
-                {(procedureType !== 'Personal' && procedureType !== '') && (
+                {(procedureType !== 'Individual' && procedureType !== '') && (
                     <Col xs={4}>
                         <Button size={"sm"} appearance="ghost" onClick={onAddClient}>Agregar solicitante</Button>
                     </Col>
@@ -324,6 +340,8 @@ const ProcedureForm = ({
                                                     <ClientForm 
                                                         client={item.client}  
                                                         changeData={(client:Client) => handleChange('client', client, index)}
+                                                        passport={item.passport}
+                                                        handleUpdateAfterSelect={(element:any, index:number)=>handleUpdateAfterSelect(element, index)}
                                                         index={index}
                                                         errorPhone={errorPhone}
                                                         setErrorPhone={setErrorPhone} 

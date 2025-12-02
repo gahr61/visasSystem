@@ -9,18 +9,23 @@ import Input from "../../components/common/Input";
 import { ILogin } from "../../utils/interfaces/auth";
 import { IApp } from "../../utils/interfaces/function";
 
-import { encript, isAuth, isValidForm, setDataStorage } from "../../utils/functions";
+import { encript, isAuth, isValidForm } from "../../utils/functions";
 
 import { login } from "../../utils/services/auth";
 
 import logo from '../../assets/images/logo.png';
 import { appContext } from "../../context/appContext";
+import { useUserStore } from "../../utils/stores/useUserStore";
+import { usePermissionsStore } from "../../utils/stores/usePermissionsStore";
 
 const Login = ({loader}: IApp)=>{
     /** verify is session is stated */
     if(isAuth()){
         //window.location.href = '/';
     }
+
+    const setUser = useUserStore(state => state.setUser);
+    const setPermissions = usePermissionsStore(state => state.setPermissions);
 
     const {resetPassword} = appContext();
 
@@ -67,11 +72,12 @@ const Login = ({loader}: IApp)=>{
                 encript('changePassword', response.data?.user.change_password_required.toString() ?? '');
 
 
-                if(response.data?.user?.change_password_required){
-                    resetPassword?.handleShow(response.data.user.id.toString(), 'change', response);
+                if(response.data?.user?.change_password_required === '1'){
+                    resetPassword?.handleShow(undefined, 'change', response);
                 }else{
-                    setDataStorage(response.data);
 
+                    setUser(response.data.user);
+                    setPermissions(response.data.permissions);
                     window.location.href = '/';
                 }
             }

@@ -28,10 +28,11 @@ export type ConceptsList = Concept & {
 export interface Concept {
     name: string;
     price: number;
+    is_process: boolean;
 }
 
 export interface Commissions {
-    id:number,
+    id?:number | null | string | undefined,
     concept: string;
 }
 

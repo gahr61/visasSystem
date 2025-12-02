@@ -31,7 +31,7 @@ const CommissionsList = ({loader}:IApp)=>{
                     title="Eliminar"
                     controlId="delete"
                     icon={<FaTrashAlt />}
-                    onClick={()=>handleConfirm(row.id)}
+                    onClick={()=>handleConfirm(row.id )}
                 />
             </div>
         },
@@ -78,7 +78,7 @@ const CommissionsList = ({loader}:IApp)=>{
         Toast.fire('Error', response.message, 'error');
     }
 
-    const handleConfirm = (id: number)=>{
+    const handleConfirm = (id:any = 0)=>{
         swalConfirm({
             text:'Realmente desea eliminar el registro?',
             confirmText:'Si, Eliminar',
