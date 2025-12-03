@@ -168,7 +168,7 @@ const VisasNew = ({loader}:IApp)=>{
             Toast.fire('Error', 'Existen errores en los datos capturados, verifique la información', 'error');
             return;
         }
-
+        
         loader.current?.handleShow('Guardando...');
 
         //valida si el pago es menor del pago total
@@ -297,11 +297,6 @@ const VisasNew = ({loader}:IApp)=>{
                 return item;
             })
         }
-
-        loader.current?.handleClose();
-        console.log(obj);
-
-        return
 
         let response = await visaSalesStore(obj);
 
