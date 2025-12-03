@@ -52,12 +52,12 @@ const TableDetailsPayment = ({
                 ...dataPayment.options,
                 minPayment: true,
                 otherPayment: false,
-                minPrice: amount * 700,
-                otherPrice: amount * 700,
+                minPrice: amount * 500,
+                otherPrice: amount * 500,
                 totalProcedure: total,
-                totalPay:  dataPayment.options.minPayment ? total - (amount * 700): 
+                totalPay:  dataPayment.options.minPayment ? total - (amount * 500): 
                 dataPayment.options.otherPayment ? total - dataPayment.options.otherPrice : 0,
-                totalPerPay: dataPayment.options.minPayment ? (amount * 700): 
+                totalPerPay: dataPayment.options.minPayment ? (amount * 500): 
                     dataPayment.options.otherPayment ? dataPayment.options.otherPrice : 0
             }
         }
