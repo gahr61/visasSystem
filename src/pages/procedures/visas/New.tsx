@@ -262,7 +262,8 @@ const VisasNew = ({loader}:IApp)=>{
                     passport:{
                         number: data.passport.passport_number,
                         expedition_date: data.passport.passport_expedition_date,
-                        expiration_date: data.passport.passport_expiration_date
+                        expiration_date: data.passport.passport_expiration_date,
+                        country_expedition: data.passport.passport_country_expedition
                     }
                 }
 
@@ -299,6 +300,8 @@ const VisasNew = ({loader}:IApp)=>{
 
         loader.current?.handleClose();
         console.log(obj);
+
+        return
 
         let response = await visaSalesStore(obj);
 
