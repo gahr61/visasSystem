@@ -173,7 +173,7 @@ const PersonalData = ({
                         />
                     </Col>
                     <Col xs={24} lg={6}>
-                        <label>Ciudad</label>
+                        <label>Ciudad/Municipio</label>
                         <Input 
                             id="city"  
                             value={personalInfo.birthplace.city}

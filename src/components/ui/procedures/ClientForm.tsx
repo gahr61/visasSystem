@@ -266,13 +266,13 @@ const ClientForm = ({
                     />
                 </Col>
                 <Col xs={24} md={8}>
-                    <label>Ciudad</label>
+                    <label>Ciudad/Municipio</label>
                     <Input 
                         id={"city"+index}
                         name={"city"}
                         value={client.city}
                         onChange={handleChange}
-                        placeholder="Ciudad" 
+                        placeholder="Ciudad/Municipio" 
                         required
                     />
                 </Col>
