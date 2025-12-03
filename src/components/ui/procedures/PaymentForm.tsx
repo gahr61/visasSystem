@@ -288,7 +288,7 @@ const PaymentForm = ({
                                 />
                             </Col>
                             <Col xs={24} lg={8}>
-                                <label>Correo electrónico</label>
+                                <label>Correo electrónico del cliente</label>
                                 <span className="span-required text-red-600">                                    
                                     {<span className="text-xs text-red-400 ms-2">{errorEmail}</span>}
                                 </span>
