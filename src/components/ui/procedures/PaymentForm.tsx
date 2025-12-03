@@ -26,12 +26,13 @@ const PaymentForm = ({
 }: Props)=>{
     const contacts:ISelectOptions[] = [
         {value:'Correo electrónico', label:'Correo electrónico'},
+        {value:'Familiar/amistad', label:'Familiar/amistad'},
+        {value:'Otro', label:'Otro'},
         {value:'Recomendación', label:'Recomendación'},
         {value:'Redes sociales', label:'Redes sociales'},
         {value:'Teléfono', label:'Teléfono'},
         {value:'Volante', label:'Volante'},
-        {value:'Visita presencial', label:'Visita presencial'},
-        {value:'Otro', label:'Otro'}
+        {value:'Visita presencial', label:'Visita presencial'},        
     ];
 
     const [branchOffices, setBranchOffices] = useState<ISelectOptions[]>([]);
