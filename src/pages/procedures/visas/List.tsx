@@ -63,6 +63,20 @@ const VisasList = ({loader}:IApp)=>{
                     icon={<FaInfo />}
                     onClick={()=>onOpenInfo(row.id)}
                 />
+      
+                <ButtonTable
+                    title="Enviar formulario"
+                    placement="bottom"
+                    controlId="send_form"
+                    icon={<FaFileAlt />}
+                    options={[
+                        {key:1, label:'Enviar formulario'},
+                        {key:2, label:'Llenar formulario'}
+                    ]}
+                    //onClick={()=>navigate('/procedures/visa/'+row.id+'/details')}
+                    onSelect={(option)=>onOpenDetails(row, option)}
+                />
+
                 {row.status === 'Ficha pendiente' && (
                     <ButtonTable
                         title="Enviar ficha"
@@ -99,22 +113,6 @@ const VisasList = ({loader}:IApp)=>{
                             onClick={()=>onConfirmTicket(row.id)}
                         />
                     </>
-                    
-                )}
-                
-                {row.status === 'Ficha pagada' && (
-                    <ButtonTable
-                        title="Enviar formulario"
-                        placement="bottom"
-                        controlId="send_form"
-                        icon={<FaFileAlt />}
-                        options={[
-                            {key:1, label:'Enviar formulario'},
-                            {key:2, label:'Llenar formulario'}
-                        ]}
-                        //onClick={()=>navigate('/procedures/visa/'+row.id+'/details')}
-                        onSelect={(option)=>onOpenDetails(row, option)}
-                    />
                 )}
                 
                 {hasPermission('procedure_visa_delete') && (
