@@ -81,6 +81,7 @@ const FamiliarInfo = ({
         }
     ]
 
+    const [requiredFamiliar, setRequiredFamiliar] = useState(false);
     const [familiarForm, setFamiliarForm] = useState({
         full_name:'',
         relationship:'',
@@ -98,40 +99,46 @@ const FamiliarInfo = ({
     }
 
     const handleAddFamiliar = ()=>{
-        if(!isValidForm('div.familiar-form')){
-            Toast.fire('Error', 'Campos requeridos', 'error');
-            return;
-        }
+        setRequiredFamiliar(true);
 
-        const exist = familiarInfo.relationships.find((obj:any) => obj.fullname === familiarForm.full_name);
-
-        if(exist){
-            Toast.fire('Error', 'El familiar que intenga ingresar ya se encuentra en el listado', 'error');
-            return;
-        }
-
-        let list = [...familiarInfo.relationships];
-
-        list.push({
-            name: familiarForm.full_name,
-            relationship: familiarForm.relationship.toUpperCase(),
-            birthdate: moment(familiarInfo.birthdate).local().format('DD/MM/YYYY'),
-            hasVisa: familiarForm.has_visa === 1 ? 'Si' : 'No'
-        });
-
-        handleChange({
-            currentTarget:{
-                name:'relationships',
-                value:list
+        setTimeout(()=>{
+            if(!isValidForm('div.familiar-form')){
+                Toast.fire('Error', 'Campos requeridos', 'error');
+                return;
             }
-        });
 
-        setFamiliarForm({
-            full_name:'',
-            relationship:'',
-            birthdate:'',
-            has_visa:0
-        });
+            const exist = familiarInfo.relationships.find((obj:any) => obj.fullname === familiarForm.full_name);
+
+            if(exist){
+                Toast.fire('Error', 'El familiar que intenga ingresar ya se encuentra en el listado', 'error');
+                return;
+            }
+
+            let list = [...familiarInfo.relationships];
+
+            list.push({
+                name: familiarForm.full_name,
+                relationship: familiarForm.relationship.toUpperCase(),
+                birthdate: moment(familiarInfo.birthdate).local().format('DD/MM/YYYY'),
+                hasVisa: familiarForm.has_visa === 1 ? 'Si' : 'No'
+            });
+
+            handleChange({
+                currentTarget:{
+                    name:'relationships',
+                    value:list
+                }
+            });
+
+            setFamiliarForm({
+                full_name:'',
+                relationship:'',
+                birthdate:'',
+                has_visa:0
+            });
+            setRequiredFamiliar(false);
+        }, 300);
+        
     }
 
     const handleDeleteRelatioships = (name:string)=>{
@@ -149,7 +156,7 @@ const FamiliarInfo = ({
     return(
         <Grid fluid>
             <fieldset>
-                <legend className="font-semibold">Familia</legend>
+                <legend className="font-semibold">Familia directa </legend>
                 <Row className="flex items-end familiar-form">
                     <Col xs={24} lg={10}>
                         <label>Nombre completo</label>
@@ -157,7 +164,7 @@ const FamiliarInfo = ({
                             id="fullname"
                             value={familiarForm.full_name}
                             onChange={onChangeForm}
-                            required
+                            required={requiredFamiliar}
                         />
                     </Col>
                     <Col xs={24} lg={4}>
@@ -167,7 +174,7 @@ const FamiliarInfo = ({
                             options={relationships} 
                             value={familiarForm.relationship} 
                             handleChange={(value:any)=>setFamiliarForm({...familiarForm, relationship: value})} 
-                            required
+                            required={requiredFamiliar}
                         />
                     </Col>
                     <Col xs={24} lg={4}>
@@ -177,7 +184,7 @@ const FamiliarInfo = ({
                             type="date"
                             value={familiarForm.birthdate}
                             onChange={onChangeForm}
-                            required
+                            required={requiredFamiliar}
                         />
                     </Col>
                     <Col xs={24} lg={4}>
@@ -190,7 +197,7 @@ const FamiliarInfo = ({
                             ]} 
                             value={familiarForm.has_visa} 
                             handleChange={(value:any)=>setFamiliarForm({...familiarForm, has_visa: value})} 
-                            required
+                            required={requiredFamiliar}
                         />
                     </Col>
                     <Col xs={24} lg={2}>

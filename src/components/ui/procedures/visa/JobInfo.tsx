@@ -8,6 +8,7 @@ import { FaTrashAlt } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import { occupationsList } from "../../../../utils/services/occupations";
 import Toast from "../../../common/Toast";
+import { isValidForm } from "../../../../utils/functions";
 
 type EducationForm = {
     id: number,
@@ -48,7 +49,8 @@ const JobInfo = ({
         name:'',
         address:'',
         period:''
-    })
+    });
+    const [requiredFormList, setRequiredFormList] = useState(false);
 
     const getOccupations = async ()=>{
         const response = await occupationsList();
@@ -77,29 +79,41 @@ const JobInfo = ({
     }
 
     const handleAddSchool = ()=>{
-        let list = [...jobsSchools.schools];
+        setRequiredFormList(true);
 
-        const exist = list.find((obj:any)=>obj.name === schoolForm.name);
-
-        if(exist){
-            Toast.fire('Error', 'El nombre que intenga agregar ya se encuentra en el listado', 'error');
-            return;
-        }
-
-        list.push(schoolForm);
-
-        setSchoolForm({
-            name:'',
-            address:'',
-            period:''
-        });
-
-        handleChange({
-            currentTarget:{
-                name:'schools',
-                value: list
+        setTimeout(()=>{
+            if(!isValidForm('div.school-form')){
+                Toast.fire('Error', 'Campos requeridos', 'error');
+                return;
             }
-        });
+
+            let list = [...jobsSchools.schools];
+
+            const exist = list.find((obj:any)=>obj.name === schoolForm.name);
+
+            if(exist){
+                Toast.fire('Error', 'El nombre que intenga agregar ya se encuentra en el listado', 'error');
+                return;
+            }
+
+            list.push(schoolForm);
+
+            setSchoolForm({
+                name:'',
+                address:'',
+                period:''
+            });
+
+            handleChange({
+                currentTarget:{
+                    name:'schools',
+                    value: list
+                }
+            });
+
+            setRequiredFormList(false);
+        }, 200);
+        
     }
 
     const handleDeleteSchool = (name:string)=>{
@@ -209,7 +223,7 @@ const JobInfo = ({
                             id="name"
                             value={schoolForm.name}
                             onChange={handleChangeSchool}
-                            required
+                            required={requiredFormList}
                         />
                     </Col>
                     <Col xs={24} lg={10}>
@@ -218,7 +232,7 @@ const JobInfo = ({
                             id="address"
                             value={schoolForm.address}
                             onChange={handleChangeSchool}
-                            required
+                            required={requiredFormList}
                         />
                     </Col>
                     <Col xs={24} lg={2}>
@@ -227,7 +241,7 @@ const JobInfo = ({
                             id="period"
                             value={schoolForm.period}
                             onChange={handleChangeSchool}
-                            required
+                            required={requiredFormList}
                         />
                     </Col>
                     <Col xs={24} lg={2}>

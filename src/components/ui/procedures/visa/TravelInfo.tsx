@@ -1,6 +1,14 @@
-import { Col, Grid, Row } from "rsuite"
+import { Col, Divider, Grid, Row } from "rsuite"
+
 import Input from "../../../common/Input";
 import SelectForm from "../../../common/Select";
+import { useState } from "react";
+import Button from "../../../common/Button";
+import Table, { Columns } from "../../../common/Table";
+import ButtonTable from "../../../common/ButtonTable";
+import { FaTrash } from "react-icons/fa6";
+import { randomString } from "../../../../utils/functions";
+import Toast from "../../../common/Toast";
 
 type Props = {
     generalInfo: any,
@@ -11,6 +19,43 @@ const TravelInfo = ({
     generalInfo,
     handleChange
 }:Props)=>{
+    const networks = [
+        {value:'Facebook', label:'Facebook'},
+        {value:'Instagram', label:'Instagram'},
+        {value:'X (Twitter)', label:'X (Twitter)'},
+        {value:'Linkedin', label:'Linkedin'},
+        {value:'Tiktok', label:'Tiktok'},
+        {value:'Youtube', label:'Youtube'},
+        {value:'Otra', label:'Otra'},
+    ]
+    const [socialForm, setSocialForm] = useState<any>({
+        socialNetwork:'',
+        username:'',
+        url:''
+    });
+
+    const networkColumns:Columns[] = [
+        {key:'network', title:'Red Social', grow:3, render:(row:any) => row.socialNetwork},
+        {key:'username', title:'Nombre de usuario / Página', grow:3, render:(row:any) => row.username},
+        {key:'url', title:'Enlace al perfil o página', grow:3, render:(row:any) => row.url},
+        {key:'actions', title:'', grow:1, render:(row:any) => <>
+            <ButtonTable 
+                controlId="delete"
+                title="Eliminar"
+                icon={<FaTrash />}
+                onClick={()=>handleDeleteSocial(row.id)}
+            />
+        </>}
+    ]
+
+    const handleChangeSocialForm = (e:any)=>{
+        const {name, value} = e.currentTarget;
+
+        setSocialForm({
+            ...socialForm,
+            [name]: value
+        });
+    }
 
     const onChangeData = (e:any, field:string)=>{
         const {name, value} = e.currentTarget;
@@ -24,16 +69,73 @@ const TravelInfo = ({
                 }
             }
         });
+    }
+
+    const handleAddSocial = ()=>{
+        console.log(generalInfo.details.socialNetworks)
+        let list = [...generalInfo.details.socialNetworks];
+
+        var valid = true;
+
+        Object.keys(socialForm).map((key)=>{
+            if(socialForm[key] === ''){
+                valid = false;
+            }
+        });
+
+        if(valid){
+            list.push({
+                ...socialForm,
+                id: randomString(4)
+            });
+            
+            
+            handleChange({
+                currentTarget:{
+                    name:'details',
+                    value:{
+                        ...generalInfo.details,
+                        socialNetworks: list
+                    }
+                }
+            });
+
+            setSocialForm({
+                socialNetwork:'',
+                username:'',
+                url:''
+            });
+        }else{
+            Toast.fire('Alerta', 'Los campos red social, nombre de usuario y enlace al perfil no deben estar vacios', 'error');
+        }
+
+
+        
 
     }
 
+    const handleDeleteSocial = (id:any) => {
+        let list = generalInfo.details.socialNetworks.filter((obj:any) => obj.id !== id);
+
+        handleChange({
+            currentTarget:{
+                name:'details',
+                value:{
+                    ...generalInfo.details,
+                    socialNetworks: list
+                }
+            }
+        });
+    }
+
+    console.log(generalInfo, 'info')
     return(
         <Grid fluid className="general-form">
             <fieldset>
                 <legend className="font-semibold">Hospedaje</legend>
                 <Row>
                     <Col xs={24}>
-                        <label>Nombre completo de quien lo hospeda</label>
+                        <label>Nombre completo de persona de referencia en Estdos Unidos</label>
                         <Input 
                             id="fullName"
                             value={generalInfo.residence.fullName}
@@ -50,7 +152,7 @@ const TravelInfo = ({
                             id="personalPhone"
                             value={generalInfo.residence.personalPhone}
                             onChange={(e)=>onChangeData(e, 'residence')}
-                            required    
+                            required
                         />
                     </Col>
                     <Col xs={24} lg={4}>
@@ -70,12 +172,12 @@ const TravelInfo = ({
                         />
                     </Col>
                 </Row>
-            </fieldset>
+            </fieldset>           
             <hr className="my-2" />
             <fieldset>
                 <legend className="font-semibold">Visa</legend>
                 <Row>
-                    <Col xs={24} lg={9}>
+                    <Col xs={24} lg={5}>
                         <label>¿Has intentado tramitar visa ?</label>
                         <SelectForm 
                             id="tryProcedureVisa" 
@@ -91,19 +193,39 @@ const TravelInfo = ({
                         />
                     </Col>
                     {generalInfo.history.tryProcedureVisa === '1' && (
-                        <Col xs={24} lg={4}>
-                            <label>Fecha de trámite</label>
-                            <Input type="date" 
-                                id="procedureDate"
-                                value={generalInfo.history.procedureDate}
-                                onChange={(e)=>onChangeData(e, 'history')}
-                                required
-                            />
-                        </Col>
+                        <>
+                            <Col xs={24} lg={4}>
+                                <label>Fecha de trámite</label>
+                                <Input type="date" 
+                                    id="procedureDate"
+                                    value={generalInfo.history.procedureDate}
+                                    onChange={(e)=>onChangeData(e, 'history')}
+                                    required
+                                />
+                            </Col>
+
+                            <Col xs={24} lg={4}>
+                                <label>¿La visa fue aprobada?</label>
+                                <SelectForm 
+                                    id="visaApproved" 
+                                    options={[
+                                        {value:'0', label:'No'},
+                                        {value:'1', label:'Si'}
+                                    ]} 
+                                    value={generalInfo.history.visaApproved} 
+                                    handleChange={(value)=>onChangeData({
+                                        currentTarget:{name:'visaApproved', value: value}
+                                    }, 'history')} 
+                                    required    
+                                />
+                            </Col>
+                        </>
+                        
                     )}
+
                     
                 </Row>
-                {generalInfo.history.tryProcedureVisa === '1' && (
+                {generalInfo.history.visaApproved === '1' && (
                     <Row>
                         <Col xs={24} lg={5}>
                             <label>Visa anterior</label>
@@ -224,8 +346,38 @@ const TravelInfo = ({
                                 />
                             </Col>
                         </>
+                    )}                    
+                </Row>
+                <Row>
+                    <Col xs={24} lg={5}>
+                        <label>¿Ha viajado a otros paises?</label>
+                        <SelectForm 
+                            id="other_countries" 
+                            options={[
+                                {value:'0', label:'No'},
+                                {value:'1', label:'Si'}
+                            ]} 
+                            value={generalInfo.details.other_countries} 
+                            handleChange={(value)=>onChangeData({
+                                currentTarget:{name:'other_countries', value: value}
+                            }, 'details')} 
+                            required    
+                        />
+                    </Col>
+                    {generalInfo.details.other_countries === '1' && (
+                        <>
+                            <Col xs={24} lg={19}>
+                                <label>Paises que ha visitado</label>
+                                <Input                                     
+                                    id="travelCountries"
+                                    value={generalInfo.details.travelCountries}
+                                    onChange={(e)=>onChangeData(e, 'details')}
+                                    required
+                                    placeholder="Ingrese los paises que ha visitado ej. Colombia, España, etc..."
+                                />
+                            </Col>
+                        </>
                     )}
-                    
                 </Row>
                 {/** agregar seccion de visita otros paises */}
                 <Row>
@@ -239,7 +391,53 @@ const TravelInfo = ({
                         />
                     </Col>
                 </Row>
+                           
+                
             </fieldset>
+
+             <Divider />    
+                <fieldset>
+                    <legend className="font-semibold">Redes Sociales</legend>
+                    <Row className="flex items-end">
+                        <Col xs={24} md={5}>
+                            <label>Red Social</label>
+                            <SelectForm 
+                                id="social_network"
+                                options={networks}
+                                value={socialForm.socialNetwork}
+                                handleChange={(value)=>handleChangeSocialForm({currentTarget:{name:'socialNetwork', value: value}})}
+                            />
+                        </Col>
+                        <Col xs={24} md={8}>
+                            <label>Nombre de usuario / Página</label>
+                            <Input 
+                                id="username"
+                                value={socialForm.username}
+                                onChange={handleChangeSocialForm}
+                            />
+                        </Col>
+                        <Col xs={24} md={8}>
+                            <label>Enlace al perfil o página</label>
+                            <Input 
+                                id="url"
+                                value={socialForm.url}
+                                onChange={handleChangeSocialForm}
+                            />
+                        </Col>
+                        <Col xs={24} md={3}>
+                            <Button onClick={handleAddSocial}>Agregar</Button>
+                        </Col>                    
+                    </Row>
+                    <Row>
+                        <Col xs={24}>
+                            <Table 
+                                columns={networkColumns}
+                                data={generalInfo.details.socialNetworks}
+                                height={220}
+                            />
+                        </Col>
+                    </Row>
+                </fieldset>
         </Grid>
     )
 }

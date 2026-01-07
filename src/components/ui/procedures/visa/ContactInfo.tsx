@@ -30,6 +30,7 @@ const ContactInfo = ({
 
     const countries = useAddressStore(state => state.countries);
     const [states, setStates] = useState<ISelectOptions[]>([]);
+    const [requiredPhones, setRequiredPhones] = useState(false);
     const [phonesForm, setPhonesForm] = useState({
         number:'',
         type:''        
@@ -60,7 +61,7 @@ const ContactInfo = ({
                 name:'address', 
                 value:{
                     ...contactInfo.address,
-                    [name]: value.toUpperCase()
+                    [name]: typeof value === 'number' ? value : value.toUpperCase()
                 }
             }
         });
@@ -82,40 +83,46 @@ const ContactInfo = ({
         }
     }
 
-    const handleAddPhone = ()=>{
-        if(!isValidForm('div.phones-form')){
-            Toast.fire('Error', 'Campos requeridos', 'error');
-            return;
-        }
+    const handleAddPhone = async ()=>{
+        setRequiredPhones(true);
 
-        if(phonesForm.number.length < 12){
-            Toast.fire('Error', 'El número de teléfono no tiene el formato correcto', 'error');
-            return;
-        }
-
-        let list = [...contactInfo.phones];
-
-        const exist = list.find((obj:any) => obj.number === phonesForm.number);
-
-        if(exist){
-            Toast.fire('Error', 'El número de teléfono que intenga registrar ya se encuentra en el listado', 'error');
-            return;
-        }
-
-        list.push({
-            id: Date.now(),
-            number: phonesForm.number,
-            type: phonesForm.type
-        });
-
-        handleChange({
-            currentTarget:{
-                name:'phones', 
-                value:list
+        setTimeout(()=>{
+            if(!isValidForm('div.phones-form')){
+                Toast.fire('Error', 'Campos requeridos', 'error');
+                return;
             }
-        });
+
+            if(phonesForm.number.length < 12){
+                Toast.fire('Error', 'El número de teléfono no tiene el formato correcto', 'error');
+                return;
+            }
+
+            let list = [...contactInfo.phones];
+
+            const exist = list.find((obj:any) => obj.number === phonesForm.number);
+
+            if(exist){
+                Toast.fire('Error', 'El número de teléfono que intenga registrar ya se encuentra en el listado', 'error');
+                return;
+            }
+
+            list.push({
+                id: Date.now(),
+                number: phonesForm.number,
+                type: phonesForm.type
+            });
+
+            handleChange({
+                currentTarget:{
+                    name:'phones', 
+                    value:list
+                }
+            });
+            
+            setPhonesForm({type:'', number:''});
+            setRequiredPhones(false);
+        },  300)
         
-        setPhonesForm({type:'', number:''});
     }
 
     const handleDeletePhone = (id:number) => {
@@ -208,7 +215,7 @@ const ContactInfo = ({
                         />
                     </Col>
                     <Col xs={24} lg={6}>
-                        <label>Ciudad</label>
+                        <label>Ciudad/Municipio</label>
                         <Input 
                             id="city"
                             value={contactInfo.address.city}
@@ -234,7 +241,7 @@ const ContactInfo = ({
                             ]} 
                             value={phonesForm.type}                             
                             handleChange={(value)=>setPhonesForm({...phonesForm, type: value})} 
-                            required
+                            required={requiredPhones}
                         />
                     </Col>
                     <Col xs={24} lg={4}>
@@ -244,7 +251,7 @@ const ContactInfo = ({
                             id="phone"
                             value={phonesForm.number}
                             onChange={(e:any)=>setPhonesForm({...phonesForm, number: e.currentTarget.value})} 
-                            required
+                            required={requiredPhones}
                         />
                     </Col>
                     <Col xs={24} lg={2}>
