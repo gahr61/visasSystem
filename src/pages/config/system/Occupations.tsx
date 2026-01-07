@@ -11,8 +11,16 @@ import { swalConfirm } from "../../../utils/functions";
 import Toast from "../../../components/common/Toast";
 import ModalOccupations from "../../../components/ui/config/system/modals/Occupations";
 import { occupationsDelete, occupationsList } from "../../../utils/services/occupations";
+import { useUserStore } from "../../../utils/stores/useUserStore";
+import { Navigate } from "react-router-dom";
 
 const OccupationsList = ({loader}:IApp)=>{
+    const userData = useUserStore(store => store.user);
+        
+    if(userData.role === 'cliente'){
+        <Navigate to="/procedure/visa/client/list" replace />
+    }
+
     const occupationRef = useRef<Modal>(null);
 
     const height = (window.innerHeight - 190 ) - (document.getElementById('header-content')?.offsetHeight || 60);

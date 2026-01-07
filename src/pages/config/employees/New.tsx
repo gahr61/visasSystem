@@ -1,6 +1,6 @@
 import {  useState } from "react"
 import { Col, Grid } from "rsuite"
-import { useNavigate } from "react-router-dom"
+import { Navigate, useNavigate } from "react-router-dom"
 
 import EmployeeForm from "../../../components/ui/config/employees/Form"
 import Content from "../../../components/common/Content"
@@ -11,8 +11,15 @@ import { usersStore } from "../../../utils/services/users"
 import { IApp } from "../../../utils/interfaces/function"
 import { Employee } from "../../../utils/interfaces/employee"
 import { isValidForm } from "../../../utils/functions"
+import { useUserStore } from "../../../utils/stores/useUserStore"
 
 const UsersNew = ({loader}:IApp)=>{
+    const userData = useUserStore(store => store.user);
+    
+    if(userData.role === 'cliente'){
+        <Navigate to="/procedure/visa/client/list" replace />
+    }
+
     const navigate = useNavigate();
 
     const [employee, setEmployee] = useState<Employee>({

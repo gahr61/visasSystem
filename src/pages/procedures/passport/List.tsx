@@ -10,8 +10,16 @@ import Input from "../../../components/common/Input";
 import Button from "../../../components/common/Button";
 import Table from "../../../components/common/Table";
 import { Procedure } from "../../../utils/interfaces/procedure";
+import { useUserStore } from "../../../utils/stores/useUserStore";
+import { Navigate } from "react-router-dom";
 
 const PassportList = ()=>{
+    const userData = useUserStore(store => store.user);
+        
+    if(userData.role === 'cliente'){
+        <Navigate to="/procedure/visa/client/list" replace />
+    }
+
     const height = (window.innerHeight - 170 ) - (document.getElementById('header-content')?.offsetHeight || 60);
     
     const columns:Column[]= [

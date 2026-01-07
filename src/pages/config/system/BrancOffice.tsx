@@ -15,8 +15,16 @@ import { IApp } from "../../../utils/interfaces/function";
 import { swalConfirm } from "../../../utils/functions";
 import { branchOfficeDelete, branchOfficeList } from "../../../utils/services/branchOficce";
 import ModalBranchOfficeForm from "../../../components/ui/config/system/modals/BranchOffice";
+import { useUserStore } from "../../../utils/stores/useUserStore";
+import { Navigate } from "react-router-dom";
 
 const BranchOffices = ({loader}:IApp)=>{
+    const userData = useUserStore(store => store.user);
+        
+    if(userData.role === 'cliente'){
+        <Navigate to="/procedure/visa/client/list" replace />
+    }
+
     const modalRef = useRef<Modal>(null);
 
     const height = (window.innerHeight - 190 ) - (document.getElementById('header-content')?.offsetHeight || 60);

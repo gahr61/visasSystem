@@ -20,6 +20,7 @@ import { IApp } from "../../../utils/interfaces/function";
 import { Procedure } from "../../../utils/interfaces/procedure";
 import { visasSalesList } from "../../../utils/services/sales/visa";
 import { usePermissionsStore } from "../../../utils/stores/usePermissionsStore";
+import { useUserStore } from "../../../utils/stores/useUserStore";
 
 type ModalTicket = {
     handleShow: (id: number, type: string, option:string) => void
@@ -34,10 +35,16 @@ type ModalDetails = {
 }
 
 const VisasList = ({loader}:IApp)=>{
+    const userData = useUserStore(store => store.user);
+        
+    if(userData.role === 'cliente'){
+        <Navigate to="/procedure/visa/client/list" replace />
+    }
+
     const hasPermission = usePermissionsStore(state => state.hasPermission);
 
     if(!hasPermission('procedure_visa')){
-        <Navigate to="/login" />
+        <Navigate to="/" />
     }
 
 

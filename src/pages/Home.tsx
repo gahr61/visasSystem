@@ -1,26 +1,13 @@
-import { useEffect } from "react";
 import { Grid } from "rsuite";
-import { useAddressStore } from "../utils/stores/useAddressStore";
-import { getCountries } from "../utils/services/countries";
+import { useUserStore } from "../utils/stores/useUserStore";
+import { Navigate } from "react-router-dom";
 
 const Home = ()=>{
-    const countries = useAddressStore(state => state.countries);
-    const updateCountries = useAddressStore(state => state.setCountries);
-
-    const onLoad = async ()=>{
-        const response = await getCountries();
-
-        if(response && response.success){
-            updateCountries(response.data);
-        }
+    const userData = useUserStore(store => store.user);
+    
+    if(userData.role === 'cliente'){
+        <Navigate to="/procedure/visa/client/list" replace />
     }
-
-    useEffect(()=>{
-        if(countries.length === 0){
-            onLoad();
-        }
-    },[]);
-
 
     return(
         <Grid fluid>

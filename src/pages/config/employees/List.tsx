@@ -14,14 +14,21 @@ import ModalCommissions, { IModalCommission } from "../../../components/ui/modal
 import { EmployeeList } from "../../../utils/interfaces/employee";
 import { Column } from "../../../utils/interfaces/system";
 import { usersDelete, usersList } from "../../../utils/services/users";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { formatPrice, swalConfirm } from "../../../utils/functions";
 import Toast from "../../../components/common/Toast";
 import { IApp } from "../../../utils/interfaces/function";
 import { appContext } from "../../../context/appContext";
+import { useUserStore } from "../../../utils/stores/useUserStore";
 
 
 const UsersList = ({loader}:IApp)=>{
+    const userData = useUserStore(store => store.user);
+    
+    if(userData.role === 'cliente'){
+        <Navigate to="/procedure/visa/client/list" replace />
+    }
+
     const height = (window.innerHeight - 170 ) - (document.getElementById('header-content')?.offsetHeight || 60);
 
     const navigate = useNavigate();

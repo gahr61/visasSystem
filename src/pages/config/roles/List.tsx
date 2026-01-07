@@ -18,9 +18,17 @@ import { roles, rolesDelete } from "../../../utils/services/roles";
 import { IApp } from "../../../utils/interfaces/function";
 import { swalConfirm } from "../../../utils/functions";
 import ModalPermissions from "./MoralRolePemissions";
+import { useUserStore } from "../../../utils/stores/useUserStore";
+import { Navigate } from "react-router-dom";
 
 
 const RolesList = ({loader}:IApp)=>{
+    const userData = useUserStore(store => store.user);
+        
+    if(userData.role === 'cliente'){
+        <Navigate to="/procedure/visa/client/list" replace />
+    }
+
     const height = (window.innerHeight - 170 ) - (document.getElementById('header-content')?.offsetHeight || 60);
 
     const rolesRef = useRef<Modal>(null);

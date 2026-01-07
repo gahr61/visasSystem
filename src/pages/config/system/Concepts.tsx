@@ -11,8 +11,16 @@ import { LuFileClock } from "react-icons/lu";
 import { concepts } from "../../../utils/services/concepts";
 import ModalConcepts from "../../../components/ui/config/conceps/ModalConcepts";
 import ModalPriceHistory from "../../../components/ui/config/conceps/PriceHistory";
+import { useUserStore } from "../../../utils/stores/useUserStore";
+import { Navigate } from "react-router-dom";
 
 const ConceptList = ({loader}:IApp)=>{
+    const userData = useUserStore(store => store.user);
+        
+    if(userData.role === 'cliente'){
+        <Navigate to="/procedure/visa/client/list" replace />
+    }
+
     const catalogRef = useRef<Modal>(null);
     const historyRef = useRef<Modal>(null);
 

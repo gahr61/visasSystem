@@ -11,8 +11,16 @@ import ModalCommissionsForm from "../../../components/ui/config/system/commissio
 import { IApp } from "../../../utils/interfaces/function";
 import { swalConfirm } from "../../../utils/functions";
 import Toast from "../../../components/common/Toast";
+import { useUserStore } from "../../../utils/stores/useUserStore";
+import { Navigate } from "react-router-dom";
 
 const CommissionsList = ({loader}:IApp)=>{
+    const userData = useUserStore(store => store.user);
+        
+    if(userData.role === 'cliente'){
+        <Navigate to="/procedure/visa/client/list" replace />
+    }
+
     const commissionRef = useRef<Modal>(null);
 
     const height = (window.innerHeight - 190 ) - (document.getElementById('header-content')?.offsetHeight || 60);

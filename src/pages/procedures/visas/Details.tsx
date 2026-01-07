@@ -9,20 +9,23 @@ import { IApp } from "../../../utils/interfaces/function";
 import { visasInfoDetails } from "../../../utils/services/sales/procedures";
 import { useIdleTimer } from "react-idle-timer";
 import moment from "moment";
-import { isValidForm } from "../../../utils/functions";
+import { decript, encript, isValidForm, removeFromStorage, verifyRequiredFields } from "../../../utils/functions";
 import Toast from "../../../components/common/Toast";
 import Button from "../../../components/common/Button";
 import { Client } from "../../../utils/interfaces/client";
 import { Passport } from "../../../utils/interfaces/passport";
-import { salesClientsOcuppations, salesClientsRelationships, salesClientsStudies, salesClientsUpdate, salesClientsUpdateAddress, salesClientsUpdatePhones } from "../../../utils/services/clients";
+import { salesClientsOcuppations, salesClientsRelationships, salesClientsStudies, salesClientsTravel, salesClientsUpdate, salesClientsUpdateAddress, salesClientsUpdatePhones } from "../../../utils/services/clients";
 import { passportUpdate } from "../../../utils/services/passport";
 import { usePermissionsStore } from "../../../utils/stores/usePermissionsStore";
+import {  detailsForm } from "../../../utils/requiredFields";
+import { useUserStore } from "../../../utils/stores/useUserStore";
 
 const VisaDetails = ({loader}:IApp)=>{
     const hasPermission = usePermissionsStore(state => state.hasPermission);
-        
+    const userData = useUserStore(store => store.user);
+
     if(!hasPermission('procedure_visa_update')){
-        <Navigate to="/login" />
+        <Navigate to="/" />
     }
 
     const navigate = useNavigate();
@@ -61,12 +64,13 @@ const VisaDetails = ({loader}:IApp)=>{
             residence:{
                 fullName:'', personalPhone:'', workPhone:'', celPhone:''
             },
-            history:{ tryProcedureVisa:'', procedureDate:'' },
+            history:{ tryProcedureVisa:'', procedureDate:'', visaApproved:'' },
             visa:{ lastVisa:'',expeditionDate:'', expirationDate:'' },
             details:{
                 addressEEUU:'', travelDateEEUU:'', has_visit_eeuu:'', travel_date:'',
                 timeEEUU:'', travelReason:'', coverExpenses:'', lastVisit:'', dateLastVisit:'', timeLastVisit:'',
-                observations:''
+                other_countries:'', travelCountries:'',
+                observations:'', socialNetworks:[]
             }
         }
     };
@@ -105,7 +109,16 @@ const VisaDetails = ({loader}:IApp)=>{
     };
 
     const [currentKey, setCurrentKey] = useState<string | number | undefined>('0');
+
     const onLoad = async ()=>{
+        const fromStorage = decript('clients', 'local');
+
+        if(fromStorage !== ''){
+            setClients(JSON.parse(fromStorage));
+            //return;
+        }
+
+
         loader.current?.handleShow('Cargando...')
         let response = await visasInfoDetails(id);
 
@@ -163,7 +176,15 @@ const VisaDetails = ({loader}:IApp)=>{
                         ...dataForm.jobsSchool,
                         ...data.jobsSchool,
                         schools: item.studies
-                    }
+                    },
+                    generalInformation:{
+                        ...data.generalInformation,                        
+                        residence:{
+                            ...data.generalInformation.residence,
+                            process_id: item.process.id
+                        }
+                    },
+                    process_id: item.process.id
                 }
 
                 if(item.address !== null){
@@ -188,7 +209,6 @@ const VisaDetails = ({loader}:IApp)=>{
                 }
 
                 if(item.occupation !== null){
-                    console.log(data, 'data')
                     data = {
                         ...data,
                         jobsSchools:{
@@ -211,7 +231,8 @@ const VisaDetails = ({loader}:IApp)=>{
                         generalInformation:{
                             ...data.generalInformation,
                             residence:{
-                                id: item.resicende.id,
+                                ...data.generalInformation.residence,
+                                id: item.residence.id,                                
                                 fullName: item.residence.full_name  || '', 
                                 personalPhone: item.residence.personal_phone  || '', 
                                 workPhone: item.residence.work_phone  || '', 
@@ -228,8 +249,9 @@ const VisaDetails = ({loader}:IApp)=>{
                             ...data.generalInformation,
                             history:{
                                 id: item.process_history.id,
-                                tryProcedureVisa: item.process_history.has_tried_visa,
-                                procedure_date: item.process_history.date
+                                tryProcedureVisa: item.process_history.has_tried_visa ? '1' : '0',
+                                procedureDate: item.process_history.date,
+                                visaApproved: item.process_details.visa_approved ? '1' : '0'
                             }
                         }
                     }
@@ -251,28 +273,29 @@ const VisaDetails = ({loader}:IApp)=>{
                 }
 
                 if(item.process_details !== null){
+                    const has_visit = (item.process_details.has_visit_eeuu ? '1' : '0')
                     data = {
                         ...data,
                         generalInformation:{
-                            ...data.gemeralInformation,
+                            ...data.generalInformation,
                             details:{
                                 id: item.process_details.id,
                                 travel_date: item.process_details.travel_date || '',
-                                hasVisitEEUU: item.process_details.has_visit_eeuu || false,
+                                has_visit_eeuu:  has_visit,
                                 addressEEUU: item.process_details.address_eeuu || '', 
                                 travelDateEEUU: item.process_details.travel_date_eeuu || '',
                                 timeEEUU: item.process_details.time_stay_eeuu || '', 
                                 travelReason: item.process_details.travel_reason || '', 
                                 coverExpenses: item.process_details.cover_expenses || '', 
-                                lastVisit: item.process_details.date_visit_eeuu ? true : false, 
-                                dateLastVisit: item.process_details.date_visit_eeuu || '', 
-                                timeLastVisit: item.process_details.time_visit_eeuu || '',
+                                lastVisit: item.process_details.date_visit_eeuu , 
+                                dateLastVisit: item.process_details.time_visit_eeuu || '', 
+                                timeLastVisit: item.process_details.date_visit_eeuu || '',
                                 observations: item.process_details.observations || '',    
                                 travel_before: item.process_details.travel_before || '',
-                                travel_before_countries: item.process_details.travel_before_countries || ''
+                                other_countries: item.process_details.travel_before_countries || '',
+                                travelCountries: item.process_details.travel_countries || '',
+                                socialNetworks: item.social
                             }
-                                
-                            
                         }
                     }
                 }
@@ -280,7 +303,9 @@ const VisaDetails = ({loader}:IApp)=>{
                 clientsList.push(data);
             });
 
+            console.log(clientsList)
             setClients(clientsList);
+            encript('clients', JSON.stringify(clientsList), 'local');
             setCurrentKey('0');
         }
 
@@ -289,6 +314,8 @@ const VisaDetails = ({loader}:IApp)=>{
 
     const onIdle = ()=>{
         console.log('save data')
+
+        handleSubmit();
     }
 
     const updateClient = (data:any, index:number)=>{
@@ -299,6 +326,8 @@ const VisaDetails = ({loader}:IApp)=>{
 
             return client;
         });
+
+        encript('clients', JSON.stringify(dataClients), 'local');
 
         setClients(dataClients);
     }
@@ -422,40 +451,47 @@ const VisaDetails = ({loader}:IApp)=>{
             })
         }
 
-        const addressRequest = salesClientsUpdateAddress(addressObj);
+        const validAddress = verifyRequiredFields(addressObj.address, detailsForm.address);
+
+        if(validAddress){
+            const addressRequest = salesClientsUpdateAddress(addressObj);
         
-        let responses = [addressRequest];
+            let responses = [addressRequest];
 
-        if(phonesObj.phones.length > 0){
-            const phoneRequest = salesClientsUpdatePhones(phonesObj);
-            responses.push(phoneRequest);
-        }
+            if(phonesObj.phones.length > 0){
+                const phoneRequest = salesClientsUpdatePhones(phonesObj);
+                responses.push(phoneRequest);
+            }
 
-        const [
-            addressResponse,
-            phoneResponse
-        ]:any = await Promise.allSettled(responses);
+            const [
+                addressResponse,
+                phoneResponse
+            ]:any = await Promise.allSettled(responses);
 
 
-        let error = addressResponse.value.success ? '' : addressResponse.value.message;
+            let error = addressResponse.value.success ? '' : addressResponse.value.message;
 
-        if(responses.length === 1){
-            if(addressResponse.value.success){
+            if(responses.length === 1){
+                if(addressResponse.value.success){
+                    return true;
+                }
+
+                Toast.fire('Error', addressResponse.value.message, 'error');
+                return;
+            }
+
+            if(addressResponse.value.success && phoneResponse.value.success){
                 return true;
             }
 
-            Toast.fire('Error', addressResponse.value.message, 'error');
+            error += addressResponse.value.success ? '' : ' - '+addressResponse.value.message
+
+            Toast.fire('Error', error, 'error');
+
             return;
         }
 
-        if(addressResponse.value.success && phoneResponse.value.success){
-            return true;
-        }
-
-        error += addressResponse.value.success ? '' : ' - '+addressResponse.value.message
-
-        Toast.fire('Error', error, 'error');
-
+        return true;
     }
 
     const saveUpdateRelationships = async (client:any)=>{
@@ -511,43 +547,53 @@ const VisaDetails = ({loader}:IApp)=>{
             schools: schools
         };
 
-        const jobRequest = salesClientsOcuppations(objJobs);
 
-        let responses:any = [jobRequest];
+        const validForm = verifyRequiredFields(objJobs, detailsForm.job);
+        
+        if(validForm){
+            const jobRequest = salesClientsOcuppations(objJobs);
 
-        if(schools.length > 0){
-            const schoolRequest = salesClientsStudies(objSchool);
+            let responses:any = [jobRequest];
 
-            responses.push(schoolRequest);
-        }
+            if(schools.length > 0){
+                const schoolRequest = salesClientsStudies(objSchool);
 
-        const [
-            jobResponse,
-            schoolResponse
-        ]:any = await Promise.allSettled(responses);
+                responses.push(schoolRequest);
+            }
 
-        let error = jobResponse.value.success ? '' : jobResponse.value.message;
+            const [
+                jobResponse,
+                schoolResponse
+            ]:any = await Promise.allSettled(responses);
 
-        if(responses.length === 1){
-            if(jobResponse.value.success){
+            let error = jobResponse.value.success ? '' : jobResponse.value.message;
+
+            if(responses.length === 1){
+                if(jobResponse.value.success){
+                    return true;
+                }
+
+                Toast.fire('Error', jobResponse.value.message, 'error');
+                return;
+            }
+
+            if(jobResponse.value.success && schoolResponse.value.success){
                 return true;
             }
 
-            Toast.fire('Error', jobResponse.value.message, 'error');
+            error += jobResponse.value.success ? '' : ' - '+jobResponse.value.message
+
+            Toast.fire('Error', error, 'error');
+
             return;
         }
 
-        if(jobResponse.value.success && schoolResponse.value.success){
-            return true;
-        }
-
-        error += jobResponse.value.success ? '' : ' - '+jobResponse.value.message
-
-        Toast.fire('Error', error, 'error');
+        return true;
+        
     }
 
     const saveGeneralInfo = async (client:any)=>{
-        let valid = true;
+        let valid = false;
 
         let obj:any = {
             clients_id: client.personalInformation.id,
@@ -567,10 +613,13 @@ const VisaDetails = ({loader}:IApp)=>{
                 travel_reason: client.generalInformation.details.travelReason,
                 cover_expenses: client.generalInformation.details.coverExpenses,
                 has_visit_eeuu: client.generalInformation.details.has_visit_eeuu,
-                date_visit_eeuu: client.generalInformation.details.dateLastVisit,
-                time_visit_eeuu: client.generalInformation.details.timeLastVisit,
-                travel_before: client.generalInformation.details.lastVisit,
-                //travel_before_countries: client.generalInformation.details.
+                last_visit_eeuu: client.generalInformation.details.lastVisit,
+                date_visit_eeuu: client.generalInformation.details.lastVisit,
+                time_visit_eeuu: client.generalInformation.details.dateLastVisit,
+                travel_before: client.generalInformation.details.has_visit_eeuu,
+                visa_approved: client.generalInformation.history.visaApproved,
+                travel_before_countries: client.generalInformation.details.other_countries,
+                travel_countries: client.generalInformation.details.travelCountries
             },
             history:{
                 process_id: client.process_id,
@@ -578,6 +627,14 @@ const VisaDetails = ({loader}:IApp)=>{
                 date: client.generalInformation.history.procedureDate,
                 observations: client.generalInformation.history.observations
             },
+            social_networks: client.generalInformation.details.socialNetworks.map((social:any)=>{
+                let item = {
+                    ...social,
+                    clients_id: client.personalInformation.id
+                }
+
+                return item;
+            })
         }
 
         if(client.generalInformation.history.tryProcedureVisa === '1'){
@@ -590,6 +647,12 @@ const VisaDetails = ({loader}:IApp)=>{
                 }
             }
         }
+        
+        const response = await salesClientsTravel(obj);
+
+        if(response && response.success){
+            valid = true;
+        }
 
         return valid;
     }
@@ -599,8 +662,7 @@ const VisaDetails = ({loader}:IApp)=>{
             Toast.fire('Error', 'Existen campos vacios en los clientes, que son requeridos', 'error');
             return;
         }
-
-
+    
         loader.current?.handleShow('Guardando...');
 
         const requested = await Promise.all(clients.map(async (client:any)=>{
@@ -621,23 +683,39 @@ const VisaDetails = ({loader}:IApp)=>{
         
         if(filtered.length === clients.length){
             Toast.fire('Correcto', 'Se guardaron los datos correctamente', 'success');
-            navigate('/procedures/visa/list');
+
+            if(userData.role === 'cliente'){
+                navigate('/procedures/visa/client/list');
+            }else{
+                navigate('/procedures/visa/list');
+            }
+
+            removeFromStorage('clients', 'local');
+            
             return;
         }
         
         Toast.fire('Error', 'Existe un error en el guardado de datos', 'error');
     }
 
+    const handleCancel = ()=>{
+         if(userData.role === 'cliente'){
+            navigate('/procedures/visa/client/list');
+        }else{
+            navigate('/procedures/visa/list');
+        }
+
+        removeFromStorage('clients', 'local');
+    }
+
     useIdleTimer({
         onIdle,
-        timeout:6_000 * 10, // n * 10 = seconds, 6_000 * 10 = 60 seconds
+        timeout:6_000 * 50, // n * 10 = seconds, 6_000 * 10 = 60 seconds
     })
 
     useEffect(()=>{
         onLoad();
     },[])
-
-
 
     return(
         <Content
@@ -663,7 +741,7 @@ const VisaDetails = ({loader}:IApp)=>{
                     </Tabs>
 
                     <div className="my-3 flex justify-end gap-2">
-                        <Button appearance="default" onClick={()=>navigate('/procedures/visa/list')}>Cancelar</Button>
+                        <Button appearance="default" onClick={()=>handleCancel()}>Cancelar</Button>
                         <Button onClick={handleSubmit}>Guardar</Button>
                     </div>
                 </div>

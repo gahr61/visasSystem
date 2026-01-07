@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Col, Grid, Row, Uploader } from "rsuite";
-import { Link, useParams } from "react-router-dom";
+import { Link, Navigate, useParams } from "react-router-dom";
 import ReCAPTCHA from 'react-google-recaptcha';
 
 import { FaUpload } from "react-icons/fa6";
@@ -19,6 +19,7 @@ import Swal from "sweetalert2";
 import ModalFilePreview from "../../../components/ui/modals/FilePreview";
 import Toast from "../../../components/common/Toast";
 import { salesClientsConfirm } from "../../../utils/services/clients";
+import { useUserStore } from "../../../utils/stores/useUserStore";
 
 const keySite = import.meta.env.VITE_GOOGLE_KEY;
 const host_file = import.meta.env.VITE_FILES;
@@ -32,6 +33,12 @@ interface ModalPreviewProps {
 }
 
 const VisaConfirm = ({loader}:IApp)=>{
+    const userData = useUserStore(store => store.user);
+
+    if(userData.role === 'cliente'){
+        <Navigate to="/procedure/visa/client/list" replace />
+    }
+
     const captchaRef = useRef<any>(null);
     const imageModal = useRef<ModalImageProps>(null);
     const previewModal = useRef<ModalPreviewProps>(null);

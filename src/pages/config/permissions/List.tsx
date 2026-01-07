@@ -7,8 +7,16 @@ import Table from "../../../components/common/Table";
 
 import { Column, Permissions } from "../../../utils/interfaces/system";
 import { permissions } from "../../../utils/services/permissions";
+import { useUserStore } from "../../../utils/stores/useUserStore";
+import { Navigate } from "react-router-dom";
 
 const PermissionsList = ()=>{
+    const userData = useUserStore(store => store.user);
+        
+    if(userData.role === 'cliente'){
+        <Navigate to="/procedure/visa/client/list" replace />
+    }
+
     const height = (window.innerHeight - 170 ) - (document.getElementById('header-content')?.offsetHeight || 60);
 
     const [ search, setSearch ] = useState('');
