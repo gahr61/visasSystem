@@ -302,8 +302,7 @@ const VisaDetails = ({loader}:IApp)=>{
 
                 clientsList.push(data);
             });
-
-            console.log(clientsList)
+            
             setClients(clientsList);
             encript('clients', JSON.stringify(clientsList), 'local');
             setCurrentKey('0');
@@ -605,7 +604,7 @@ const VisaDetails = ({loader}:IApp)=>{
                 personal_phone: client.generalInformation.residence.personalPhone
             },
             process_details:{
-                id: client.process_id,
+                id: client.generalInformation.details.id,
                 travel_date: client.generalInformation.details.travelDate,
                 address_eeuu: client.generalInformation.details.addressEEUU,
                 travel_date_eeuu: client.generalInformation.details.travelDateEEUU,
