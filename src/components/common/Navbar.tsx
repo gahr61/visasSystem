@@ -16,6 +16,8 @@ import { logout } from "../../utils/services/auth";
 import Toast from "./Toast";
 import { useUserStore } from "../../utils/stores/useUserStore";
 
+import logo from '../../assets/images/logo.png';
+
 interface INavbar {
     expanded: boolean,
     showOpenSide: boolean,
@@ -75,19 +77,25 @@ const Navbar = ({
         <NavbarContent appearance="subtle" className="bg-white">
             
             <Nav>
-                <Nav.Item onClick={openSide}>
-                    {showOpenSide ?
-                        expanded ? <ArrowLeftLineIcon /> : <ArrowRightLineIcon />
-                    :
-                        <MenuIcon />
-                    }
-                    
-                </Nav.Item>
+                {user.role !== 'cliente' && (
+                    <Nav.Item onClick={openSide}>
+                        {showOpenSide ?
+                            expanded ? <ArrowLeftLineIcon /> : <ArrowRightLineIcon />
+                        :
+                            <MenuIcon />
+                        }
+                        
+                    </Nav.Item>
+                )}
+                
             </Nav>
 
             {!expanded && (
-                <NavbarBrand onClick={()=>navigate('/admin/dashboard')} className="cursor-pointer">
-                    Visas Premier
+                <NavbarBrand onClick={()=>navigate('/admin/dashboard')} className="cursor-pointer flex flex-row">
+                    {user.role === 'cliente' && (
+                        <img src={logo} className="me-2 border" />
+                    )}
+                    <span className="">Visas Premier</span>
                 </NavbarBrand>
             )}
             <Nav pullRight>
