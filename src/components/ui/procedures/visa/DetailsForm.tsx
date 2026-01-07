@@ -104,8 +104,6 @@ const DetailsForm = ({client, updateClient, index}: Props)=>{
         return true;
     }
 
-    
-
     const steps = [
         {component:<PersonalData personalInfo={client.personalInformation} handleChange={(e:React.FormEvent<HTMLInputElement>)=>handleChange(e, 'personalInformation')}   />},
         {component:<ContactInfo contactInfo={client.contactInformation} handleChange={(e:React.FormEvent<HTMLInputElement>)=>handleChange(e, 'contactInformation')}/>},
@@ -119,11 +117,11 @@ const DetailsForm = ({client, updateClient, index}: Props)=>{
             <Row className="relative h-full forms" >
                 <Col xs={24} lg={4} className="h-full">
                     <Steps current={currentStep} vertical small>
-                        <Steps.Item title="Datos personales" />
-                        <Steps.Item title="Información de contacto" />
-                        <Steps.Item title="Información familiar" />
-                        <Steps.Item title="Información laboral y académica" />
-                        <Steps.Item title="Información de estancia" />
+                        <Steps.Item onClick={()=>setCurrentStep(0)} className="cursor-pointer" title="Datos personales" />
+                        <Steps.Item onClick={()=>setCurrentStep(1)} className="cursor-pointer" title="Información de contacto" />
+                        <Steps.Item onClick={()=>setCurrentStep(2)} className="cursor-pointer" title="Información familiar" />
+                        <Steps.Item onClick={()=>setCurrentStep(3)} className="cursor-pointer" title="Información laboral y académica" />
+                        <Steps.Item onClick={()=>setCurrentStep(4)} className="cursor-pointer" title="Información de estancia" />
                     </Steps>
                 </Col>
                 <Col xs={24} lg={20} className="h-full border-s-2">
