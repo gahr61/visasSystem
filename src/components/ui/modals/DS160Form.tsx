@@ -46,7 +46,7 @@ const ModalDS160 = forwardRef(({loader, id, onLoad}:Props, ref)=>{
             if(id === item.client_id){
                 item = {
                     ...item,
-                    ds160: value
+                    ds160: value.toUpperCase()
                 }
             }
 
