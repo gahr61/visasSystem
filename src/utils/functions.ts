@@ -32,9 +32,9 @@ export const addErrorToSelectedField = (id:string, value:string | number)=>{
 * @param {string | name} variable name
 * @return string
 */
-export const decript = (name: string)=>{
+export const decript = (name: string, storage = 'session')=>{
 	let value = '';
-	let sessions = Object.keys(sessionStorage);
+	let sessions = storage === 'session' ? Object.keys(sessionStorage) : Object.keys(localStorage);
 
 	if(sessions.length > 0){
 		sessions.forEach(key => {
@@ -42,7 +42,14 @@ export const decript = (name: string)=>{
 			let decriptedName = bytes.toString(cryptoJs.enc.Utf8);
 
 			if(decriptedName === name){
-				let encriptedValue = sessionStorage.getItem(key) || "";            
+				let encriptedValue:any = "";
+
+                if(storage === 'session'){
+                    encriptedValue = sessionStorage.getItem(key);
+                }else{
+                    encriptedValue = localStorage.getItem(key);
+                }
+
 				let bytesValue = cryptoJs.AES.decrypt(encriptedValue, import.meta.env.VITE_SECRET);
 				value = bytesValue.toString(cryptoJs.enc.Utf8);            
 			}
@@ -57,8 +64,8 @@ export const decript = (name: string)=>{
 * @param {string | name} variable's name
 * @param {string | value} variable's value
 */
-export const encript = (name:string, value:string)=>{
-	let found = findInStorage(name);
+export const encript = (name:string, value:string, storage = 'session')=>{
+	let found = findInStorage(name, storage);
 
 	let encriptedValue = cryptoJs.AES.encrypt(value, import.meta.env.VITE_SECRET).toString();
 	let encriptedName = cryptoJs.AES.encrypt(name, import.meta.env.VITE_SECRET).toString();
@@ -67,7 +74,12 @@ export const encript = (name:string, value:string)=>{
 		encriptedName = found;
 	}
 
-	sessionStorage.setItem(encriptedName, encriptedValue);
+    if(storage === 'session'){
+        sessionStorage.setItem(encriptedName, encriptedValue);
+    }else{
+        localStorage.setItem(encriptedName, encriptedValue);
+    }
+	
 }
 
 
@@ -168,9 +180,9 @@ export const fetchRequest = async <T>({
 * @param {string | name} variable's name
 * @return string
 */
-const findInStorage = (name:string)=>{
+const findInStorage = (name:string, storage = 'session')=>{
 	let value = '';
-	let sessions = Object.keys(sessionStorage);
+	let sessions = storage === 'session' ? Object.keys(sessionStorage) : Object.keys(localStorage);
 
 	if(sessions.length > 0){
 		sessions.forEach((key) => {
@@ -304,6 +316,41 @@ export const normalizeString = (text:string)=>{
 }
 
 /**
+ * generate random string
+ * @param length 
+ * @returns 
+ */
+export const randomString = (length:number)=>{
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for(let i = 0; i < length; i++){
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+}
+
+/**
+ * Remove element from storage
+ * @param name 
+ * @param storage 
+ */
+export const removeFromStorage = (name:string, storage = 'session')=>{
+    let found = findInStorage(name, storage);
+
+    let encriptedName = cryptoJs.AES.encrypt(name, import.meta.env.VITE_SECRET).toString();
+
+    if(found !== ''){
+		encriptedName = found;
+	}
+
+    if(storage === 'session'){
+        sessionStorage.removeItem(encriptedName);
+    }else{
+        localStorage.removeItem(encriptedName);
+    }
+}
+
+/**
  * Stores login variables in browser storage
  * @param {object} response response login
  */
@@ -370,4 +417,21 @@ export const swalConfirm = ({
 			}
 		}
 	});
+}
+
+/**
+ * Verify required fields
+ * @param obj 
+ * @param fields 
+ */
+export const verifyRequiredFields = (obj:any, fields:any)=>{
+    var valid = true;
+
+    fields.map((field:string)=>{        
+        if(obj[field] === '' || obj[field] === undefined){
+            valid = false;
+        }
+    });
+
+    return valid;
 }

@@ -4,6 +4,8 @@ import { decript, encript } from "../functions";
 interface User{
     id:number;
     name:string;
+    change_password_required:string | boolean;
+    role:string;
 }
 
 interface UserState {

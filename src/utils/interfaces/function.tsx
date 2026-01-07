@@ -28,7 +28,8 @@ export type ILoader = {
 
 export interface IUser {
     id: string | number,
-    name: string
+    name: string,
+    role?: string
 }
 
 export interface IApp {

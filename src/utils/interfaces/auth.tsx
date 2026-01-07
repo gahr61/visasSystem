@@ -13,7 +13,8 @@ export type ILoginResponse =  {
 type ILoginUser = {
     id: number,
     name: string,
-    change_password_required: boolean | string
+    change_password_required: boolean | string,
+    role: string
 }
 
 export interface PasswordReset {
