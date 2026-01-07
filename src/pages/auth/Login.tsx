@@ -78,7 +78,13 @@ const Login = ({loader}: IApp)=>{
 
                     setUser(response.data.user);
                     setPermissions(response.data.permissions);
-                    window.location.href = '/';
+
+                    if(response.data.user.role === 'cliente'){
+                        window.location.href = '/procedures/visa/client/list';
+                    }else{
+                        window.location.href = '/';
+                    }
+                    
                 }
             }
         }
