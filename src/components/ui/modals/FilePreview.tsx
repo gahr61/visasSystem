@@ -62,7 +62,7 @@ const ModalFilePreview = forwardRef(({
     }
 
     const onConfirm = ()=>{
-        if(onChange){console.log(id)
+        if(onChange){
             onChange(true, id);
         }
         

@@ -101,7 +101,6 @@ const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
                                 ['schedule_'+data.schedule.toLowerCase()]: data.office+' - '+moment(data.appointment_date, 'YYYY-MM-DD').format('DD/MM/YYYY')
                             };
     
-                            console.log(client, 'client')
                         }else{
                             client = {
                                 ...client,

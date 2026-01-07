@@ -97,8 +97,6 @@ const ModalSchedule = forwardRef(({loader, id, onLoad}:Props, ref)=>{
     const handleChange = (e:React.FormEvent<HTMLInputElement>, id:number)=>{
         const {name, value} = e.currentTarget;
 
-        console.log(name, value, id, data)
-
         const items = data.map((item:ScheduleTable)=>{
             if(id === item.client_id){
                 item = {

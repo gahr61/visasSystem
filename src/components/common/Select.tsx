@@ -103,6 +103,7 @@ const SelectForm = ({
             value={value === null || value === ''? '' : options.find(obj => obj.value.toString() === value.toString())}
             placeholder="Seleccione..."
             isClearable={true}
+            menuPlacement='auto'
             onChange={(e: any)=>onChangeValue(e)}
             noOptionsMessage={()=>'Sin resultados'}
         />

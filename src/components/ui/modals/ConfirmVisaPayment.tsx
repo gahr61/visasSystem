@@ -128,7 +128,6 @@ const ModalConfirmVisaPayment = forwardRef(({loader, getList}:Props, ref)=>{
                 return item;
             });
 
-            console.log(response.data.canConfirm, isConfirmed)
             setCanConfirm(response.data.canConfirm || isConfirmed);
 
             setList(items);
@@ -161,8 +160,6 @@ const ModalConfirmVisaPayment = forwardRef(({loader, getList}:Props, ref)=>{
 
             return data;
         });
-
-        console.log(items)
 
         setList(items);
     }
@@ -236,7 +233,7 @@ const ModalConfirmVisaPayment = forwardRef(({loader, getList}:Props, ref)=>{
         
 
         setOpen(false);
-        console.log(file, id)
+        
         previewModal.current?.handleShow(urlFile, isFile, id);
         
     } 

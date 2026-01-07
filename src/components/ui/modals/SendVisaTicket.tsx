@@ -49,7 +49,6 @@ const ModalSendVisaTicket = forwardRef(({loader, getList}:Props, ref)=>{
     const onSend = async (e:any, id: number, type: string, option: string)=>{
         if(e !== null){
             e.preventDefault();
-            console.log(type)
         }
 
         if(option === 'send'){

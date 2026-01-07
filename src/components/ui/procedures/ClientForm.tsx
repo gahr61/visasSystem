@@ -146,7 +146,6 @@ const ClientForm = ({
 
             handleUpdateAfterSelect(element, index);
 
-            console.log(element, index, 'client')
         }
     }
 

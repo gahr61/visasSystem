@@ -58,8 +58,6 @@ const Autocomplete = ({
         
     },[options]);
 
-    console.log(options)
-
     return(
         <>
             <AsyncTypeahead 

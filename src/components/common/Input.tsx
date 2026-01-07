@@ -76,7 +76,7 @@ const Input = (props:IInput)=>{
             value={isFocused ? inputValue : value}
             className={`
                 ${customClass}                
-                py-1 px-2 block w-full border outline-0 rounded-lg text-sm h-[1.85rem]
+                py-1 px-2 block w-full border border-gray-300 outline-0 rounded-lg text-sm h-[1.85rem]
                 focus:border-blue-500 focus:ring-blue-500
                 disabled:opacity-50 disabled:bg-neutral-100 disabled:cursor-no-drop
             `}
