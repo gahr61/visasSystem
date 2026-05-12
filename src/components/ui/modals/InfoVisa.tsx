@@ -210,8 +210,10 @@ const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
                     client: client.names+' '+client.lastname1+(client.lastname2 !== null ? ' '+client.lastname2 : ''),
                     consulado: consulado ? consulado.appointment_date : '',
                     consulado_time: consulado ? consulado.schedule : '',
+                    consulado_city: consulado ? consulado.city : '',
                     cas: cas ? cas.appointment_date : '',
-                    cas_time: cas ? cas.schedule : ''
+                    cas_time: cas ? cas.schedule : '',
+                    cas_city: cas ? cas.city : ''
                 }
 
                 list.push(item);

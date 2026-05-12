@@ -3,7 +3,8 @@ type ScheduleClient = {
     office: string,
     schedule: 'CAS' | 'Consulado',
     status: string,
-    observations: string | null
+    observations: string | null,
+    city: string | null
 };
 
 export type SalesClientsInfo = {
