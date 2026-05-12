@@ -28,7 +28,7 @@ const ModalAccount = forwardRef(({loader, id, onLoad}:Props, ref)=>{
     const [data, setData] = useState<AccountTable[]>([]);
     const columns:Columns[] = [
         {key:'client', title:'Nombre', grow:2, render:(row: AccountTable) => row.client},
-        {key:'user', title:'Usuario', grow:2, render:(row: AccountTable) => 
+        {key:'user', title:'Usuario generado por visas premier', grow:2, render:(row: AccountTable) => 
             <Input name='user' value={row.user || ''} onChange={(e:any)=>handleChange(e, row.client_id)} />
         },
         {key:'user', title:'Contraseña', grow:2, render:(row: AccountTable) => 

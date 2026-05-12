@@ -42,7 +42,7 @@ const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
             +row.subtype+' - '+row.age_type+
             (row.option_type !== null ? ' - '+row.option_type : '')
         },
-        {key:'email', title:'Correo', grow:3, render:(row: SalesClientsInfo) => row.email !== null ? row.email : '' },
+        {key:'email', title:'Correo generado por visas premier', grow:3, render:(row: SalesClientsInfo) => row.email !== null ? row.email : '' },
         {key:'ds160', title:'DS160', grow:1, render:(row:SalesClientsInfo) => row.ds_160},
         {key:'status', title:'Estatus', grow:1, render:(row:SalesClientsInfo) => row.complete ? 'Completo' : 'Incompleto'}
     ]);
@@ -230,7 +230,7 @@ const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
 
     return(
         <>
-        <Modal size={'80%'} open={open} onClose={handleClose}>
+        <Modal size={'95%'} open={open} onClose={handleClose}>
             <Modal.Header>
                 <Modal.Title>Detalles</Modal.Title>
             </Modal.Header>

@@ -387,7 +387,6 @@ const TravelInfo = ({
                             id="observations"
                             value={generalInfo.details.observations}
                             onChange={(e)=>onChangeData(e, 'details')}
-                            required
                         />
                     </Col>
                 </Row>
