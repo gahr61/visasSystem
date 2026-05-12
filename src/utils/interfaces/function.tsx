@@ -21,6 +21,17 @@ export type IResponse<T> = {
     data: T
 }
 
+export type IPaginatedResponse<T> = {
+    success: boolean,
+    data: T,
+    meta: {
+        total: number,
+        current_page: number,
+        last_page: number,
+        per_page: number,
+    }
+}
+
 export type ILoader = {
     handleShow: (text: string)=>void,
     handleClose: ()=>void

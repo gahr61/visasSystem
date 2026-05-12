@@ -1,14 +1,33 @@
 import { fetchRequest } from "../../functions";
-import { IResponse } from "../../interfaces/function";
+import { IResponse, IPaginatedResponse } from "../../interfaces/function";
 import { Procedure } from "../../interfaces/procedure";
 import { SalesInfo } from "../../interfaces/sales";
+
+export type VisaListParams = {
+    page?: number;
+    per_page?: number;
+    folio?: string;
+    date?: string;
+    client?: string;
+    email?: string;
+    status?: string;
+    no_applicants?: string;
+}
 
 export const visasSalesInfo = (id: number):Promise<IResponse<SalesInfo>> => {
     return fetchRequest({url:'sales/'+id+'/details'});
 }
 
-export const visasSalesList = ():Promise<IResponse<Procedure[]>> => {
-    return fetchRequest({url:'sales/visa/list'});
+export const visasSalesList = (params?: VisaListParams): Promise<IPaginatedResponse<Procedure[]>> => {
+    const qs = new URLSearchParams();
+    if(params) {
+        Object.entries(params).forEach(([key, value]) => {
+            if(value !== undefined && value !== '' && value !== null)
+                qs.append(key, String(value));
+        });
+    }
+    const query = qs.toString();
+    return fetchRequest({ url: 'sales/visa/list' + (query ? '?' + query : '') });
 }
 
 export const visasSalesClientList = ():Promise<IResponse<Procedure[]>> => {

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import { Col, Row} from "rsuite";
+import { Col, Pagination, Row } from "rsuite";
 import moment from "moment";
 
 import { FaFileAlt, FaTrashAlt } from "react-icons/fa";
@@ -18,7 +18,7 @@ import ModalInfoVisa from "../../../components/ui/modals/InfoVisa";
 import { Column } from "../../../utils/interfaces/system";
 import { IApp } from "../../../utils/interfaces/function";
 import { Procedure } from "../../../utils/interfaces/procedure";
-import { visasSalesList } from "../../../utils/services/sales/visa";
+import { visasSalesList, VisaListParams } from "../../../utils/services/sales/visa";
 import { usePermissionsStore } from "../../../utils/stores/usePermissionsStore";
 import { useUserStore } from "../../../utils/stores/useUserStore";
 
@@ -32,6 +32,15 @@ type ModalConfirm = {
 
 type ModalDetails = {
     handleShow: (id: number)=>void
+}
+
+type Filters = {
+    folio: string;
+    date: string;
+    no_applicants: string;
+    client: string;
+    email: string;
+    status: string;
 }
 
 const VisasList = ({loader}:IApp)=>{
@@ -53,7 +62,7 @@ const VisasList = ({loader}:IApp)=>{
     const confirmModal = useRef<ModalConfirm>(null);
     const detailsModal = useRef<ModalDetails>(null);
 
-    const height = (window.innerHeight - 170 ) - (document.getElementById('header-content')?.offsetHeight || 60);
+    const height = (window.innerHeight - 260) - (document.getElementById('header-content')?.offsetHeight || 60);
     
     const columns:Column[]= [
         {key:'folio', title:'Folio', grow:1, render:(row: Procedure)=> row.folio },
@@ -136,25 +145,56 @@ const VisasList = ({loader}:IApp)=>{
     ];
 
     const [data, setData] = useState<Procedure[]>([]);
-    const [ search, setSearch ] = useState('');
+    const [filters, setFilters] = useState<Filters>({
+        folio: '',
+        date: '',
+        no_applicants: '',
+        client: '',
+        email: '',
+        status: ''
+    });
+    const [page, setPage] = useState(1);
+    const [perPage, setPerPage] = useState(25);
+    const [total, setTotal] = useState(0);
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const onSearch = (e: React.FormEvent<HTMLInputElement>)=>{
-        const { value } = e.currentTarget;
-
-        setSearch(value);
-    }
-
-    const getList = async ()=>{
+    const getList = async (f: Filters, p: number, pp: number) => {
         loader.current?.handleShow('Cargando...');
-
-        let response = await visasSalesList();
-
+        const params: VisaListParams = { ...f, page: p, per_page: pp };
+        const response = await visasSalesList(params);
         loader.current?.handleClose();
-
-        if(response && response.success){
+        if(response?.success) {
             setData(response.data);
+            setTotal(response.meta.total);
         }
-    }
+    };
+
+    const onTextFilterChange = (key: keyof Omit<Filters, 'status'>) => (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.currentTarget.value;
+        const newFilters = { ...filters, [key]: value };
+        setFilters(newFilters);
+        setPage(1);
+        if(debounceRef.current) clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => getList(newFilters, 1, perPage), 400);
+    };
+
+    const onStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newFilters = { ...filters, status: e.target.value };
+        setFilters(newFilters);
+        setPage(1);
+        getList(newFilters, 1, perPage);
+    };
+
+    const onPageChange = (p: number) => {
+        setPage(p);
+        getList(filters, p, perPage);
+    };
+
+    const onLimitChange = (pp: number) => {
+        setPerPage(pp);
+        setPage(1);
+        getList(filters, 1, pp);
+    };
 
     const onOpenInfo = (id: number) => {
         detailsModal.current?.handleShow(id);
@@ -191,12 +231,12 @@ const VisasList = ({loader}:IApp)=>{
 
         const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
 
-        window.open(url, '_blamk');
+        window.open(url, '_blank');
 
     }
 
     useEffect(()=>{
-        getList();
+        getList(filters, 1, 25);
     },[]);
 
     return(
@@ -207,27 +247,67 @@ const VisasList = ({loader}:IApp)=>{
             title="Visas - Listado"
         >
             <>
-                <Row>
-                    <Col xs={4}>
-                        <Input 
-                            id="search"
-                            value={search}
-                            onChange={onSearch}
-                            placeholder="Buscar..."
-                        />
+                <Row className="mb-1">
+                    <Col xs={20}>
+                        <div className="flex gap-2">
+                            <div style={{ flex: 1 }}>
+                                <Input id="filter_folio" value={filters.folio} onChange={onTextFilterChange('folio')} placeholder="Folio" />
+                            </div>
+                            <div style={{ flex: 1 }}>
+                                <Input id="filter_date" value={filters.date} onChange={onTextFilterChange('date')} placeholder="DD/MM/AAAA" />
+                            </div>
+                            <div style={{ flex: 1 }}>
+                                <Input id="filter_no_applicants" value={filters.no_applicants} onChange={onTextFilterChange('no_applicants')} placeholder="No. Solicitantes" />
+                            </div>
+                            <div style={{ flex: 2 }}>
+                                <Input id="filter_client" value={filters.client} onChange={onTextFilterChange('client')} placeholder="Cliente" />
+                            </div>
+                            <div style={{ flex: 1 }}>
+                                <Input id="filter_email" value={filters.email} onChange={onTextFilterChange('email')} placeholder="Correo" />
+                            </div>
+                            <div style={{ flex: 1 }}>
+                                <select
+                                    value={filters.status}
+                                    onChange={onStatusChange}
+                                    className="py-1 px-2 block w-full border border-gray-300 outline-0 rounded-lg text-sm h-[1.85rem] bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 cursor-pointer"
+                                >
+                                    <option value="">Todos</option>
+                                    <option value="Activo">Activo</option>
+                                    <option value="Ficha pendiente">Ficha pendiente</option>
+                                    <option value="Con ficha">Con ficha</option>
+                                    <option value="Ficha pagada">Ficha pagada</option>
+                                    <option value="Finalizado">Finalizado</option>
+                                </select>
+                            </div>
+                        </div>
                     </Col>
-                    <Col xs={4} xsOffset={16} className="flex justify-end">
+                    <Col xs={4} className="flex justify-end">
                         <Button onClick={()=>navigate('/procedures/visa/new')}>Nuevo</Button>
                     </Col>
                 </Row>
+
                 <Table
                     columns={columns}
                     data={data}
                     height={height}
                 />
 
-                <ModalSendVisaTicket loader={loader} getList={getList} ref={ticketModal} />
-                <ModalConfirmVisaPayment loader={loader} getList={getList} ref={confirmModal} />
+                <Row className="mt-2">
+                    <Col xs={24} className="flex justify-end">
+                        <Pagination
+                            total={total}
+                            limit={perPage}
+                            limitOptions={[10, 25, 50, 100]}
+                            activePage={page}
+                            onChangePage={onPageChange}
+                            onChangeLimit={onLimitChange}
+                            layout={['total', '-', 'pager', '|', 'limit']}
+                        />
+                    </Col>
+                </Row>
+
+                <ModalSendVisaTicket loader={loader} getList={() => getList(filters, page, perPage)} ref={ticketModal} />
+                <ModalConfirmVisaPayment loader={loader} getList={() => getList(filters, page, perPage)} ref={confirmModal} />
                 <ModalInfoVisa loader={loader} ref={detailsModal} />
             </>
         </Content>
