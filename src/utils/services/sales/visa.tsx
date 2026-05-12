@@ -12,6 +12,7 @@ export type VisaListParams = {
     email?: string;
     status?: string;
     no_applicants?: string;
+    ds_160?: string;
 }
 
 export const visasSalesInfo = (id: number):Promise<IResponse<SalesInfo>> => {

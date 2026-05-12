@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import { Col, Pagination, Row } from "rsuite";
-import moment from "moment";
+import { Col, Pagination, Row, Tooltip, Whisper } from "rsuite";
 
 import { FaFileAlt, FaTrashAlt } from "react-icons/fa";
 import { FaCheck, FaEnvelope, FaInfo, FaShare } from "react-icons/fa6";
@@ -35,10 +34,9 @@ type ModalDetails = {
 }
 
 type Filters = {
-    folio: string;
-    date: string;
     no_applicants: string;
     client: string;
+    ds_160: string;
     email: string;
     status: string;
 }
@@ -65,11 +63,30 @@ const VisasList = ({loader}:IApp)=>{
     const height = (window.innerHeight - 260) - (document.getElementById('header-content')?.offsetHeight || 60);
     
     const columns:Column[]= [
-        {key:'folio', title:'Folio', grow:1, render:(row: Procedure)=> row.folio },
-        {key:'date', title:'Fecha', grow:1, render:(row: Procedure)=> moment(row.date, 'YYYY-MM-DD').format('DD/MM/YYYY') },
         {key:'applicant', title:'No. Solicitantes', grow:1, render:(row: Procedure)=> row.no_applicants.toString() },
         {key:'client', title:'Cliente', grow:2, render:(row: Procedure)=> row.client },
-        {key:'email', title:'Correo', grow:1, render:(row: Procedure)=> row.email },
+        {key:'ds_160', title:'DS-160', grow:1, render:(row: Procedure)=>
+            row.ds_160
+                ? <span className="font-mono text-xs">{row.ds_160}</span>
+                : <span className="text-gray-400">—</span>
+        },
+        {key:'account', title:'Correo', grow:2, render:(row: Procedure)=>
+            row.account_email
+                ? <Whisper
+                    placement="top"
+                    trigger="hover"
+                    speaker={
+                        <Tooltip>
+                            <span className="text-xs">Contraseña: <strong>{row.account_password}</strong></span>
+                        </Tooltip>
+                    }
+                  >
+                    <span className="cursor-help underline decoration-dotted decoration-gray-400 text-blue-600 text-xs">
+                        {row.account_email}
+                    </span>
+                  </Whisper>
+                : <span className="text-gray-400">—</span>
+        },
         {key:'status', title:'Estatus', grow:1, render:(row: Procedure)=> row.status },
         {key:'', title:'Acciones', grow:1, render:(row: Procedure)=>
             <div className="flex gap-2">
@@ -146,10 +163,9 @@ const VisasList = ({loader}:IApp)=>{
 
     const [data, setData] = useState<Procedure[]>([]);
     const [filters, setFilters] = useState<Filters>({
-        folio: '',
-        date: '',
         no_applicants: '',
         client: '',
+        ds_160: '',
         email: '',
         status: ''
     });
@@ -251,18 +267,15 @@ const VisasList = ({loader}:IApp)=>{
                     <Col xs={20}>
                         <div className="flex gap-2">
                             <div style={{ flex: 1 }}>
-                                <Input id="filter_folio" value={filters.folio} onChange={onTextFilterChange('folio')} placeholder="Folio" />
-                            </div>
-                            <div style={{ flex: 1 }}>
-                                <Input id="filter_date" value={filters.date} onChange={onTextFilterChange('date')} placeholder="DD/MM/AAAA" />
-                            </div>
-                            <div style={{ flex: 1 }}>
                                 <Input id="filter_no_applicants" value={filters.no_applicants} onChange={onTextFilterChange('no_applicants')} placeholder="No. Solicitantes" />
                             </div>
                             <div style={{ flex: 2 }}>
                                 <Input id="filter_client" value={filters.client} onChange={onTextFilterChange('client')} placeholder="Cliente" />
                             </div>
                             <div style={{ flex: 1 }}>
+                                <Input id="filter_ds_160" value={filters.ds_160} onChange={onTextFilterChange('ds_160')} placeholder="DS-160" />
+                            </div>
+                            <div style={{ flex: 2 }}>
                                 <Input id="filter_email" value={filters.email} onChange={onTextFilterChange('email')} placeholder="Correo" />
                             </div>
                             <div style={{ flex: 1 }}>

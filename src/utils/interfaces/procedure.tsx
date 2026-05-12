@@ -60,6 +60,9 @@ export type Procedure = {
     email: string;
     phone: string;
     status: string;
+    ds_160: string | null;
+    account_email: string | null;
+    account_password: string | null;
 }
 
 export type Visa = {
