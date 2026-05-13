@@ -161,6 +161,7 @@ const VisasNew = ({loader}:IApp)=>{
 
 
             setShowPayment(value)
+            setErrorPhone('');
         }
 
     }
