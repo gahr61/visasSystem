@@ -43,3 +43,7 @@ export const salesClientsAutocomplete = (query:string):Promise<IResponse<undefin
 export const salesClientsData = (id:number): Promise<IResponse<any>> => {
     return fetchRequest({url:'clients/data/'+id});
 }
+
+export const salesClientsLanguages = (obj:any):Promise<IResponse<undefined>> => {
+    return fetchRequest({url:'clients/languages', method:'POST', body:obj});
+}

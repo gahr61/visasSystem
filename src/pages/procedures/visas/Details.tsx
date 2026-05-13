@@ -14,7 +14,7 @@ import Toast from "../../../components/common/Toast";
 import Button from "../../../components/common/Button";
 import { Client } from "../../../utils/interfaces/client";
 import { Passport } from "../../../utils/interfaces/passport";
-import { salesClientsOcuppations, salesClientsRelationships, salesClientsStudies, salesClientsTravel, salesClientsUpdate, salesClientsUpdateAddress, salesClientsUpdatePhones } from "../../../utils/services/clients";
+import { salesClientsLanguages, salesClientsOcuppations, salesClientsRelationships, salesClientsStudies, salesClientsTravel, salesClientsUpdate, salesClientsUpdateAddress, salesClientsUpdatePhones } from "../../../utils/services/clients";
 import { passportUpdate } from "../../../utils/services/passport";
 import { usePermissionsStore } from "../../../utils/stores/usePermissionsStore";
 import {  detailsForm } from "../../../utils/requiredFields";
@@ -39,7 +39,7 @@ const VisaDetails = ({loader}:IApp)=>{
     const dataForm:any = {
         personalInformation:{
             id:null,
-            names:'', lastname1:'', lastname2:'', birthdate:'', sex:'', curp:'', civilStatus:'',
+            names:'', lastname1:'', lastname2:'', birthdate:'', sex:'', curp:'', civilStatus:'', languages:[],
             birthplace:{
                 country:42, state:'', city:'', nationality:''
             },
@@ -139,6 +139,7 @@ const VisaDetails = ({loader}:IApp)=>{
                         sex: item.sex || "",
                         curp: item.curp,
                         civilStatus: item.civil_status || '',
+                        languages: item.languages || [],
                         birthplace:{
                             ...data.personalInformation.birthplace,
                             country: item.country_birth_id || 42,
@@ -399,19 +400,26 @@ const VisaDetails = ({loader}:IApp)=>{
             expedition_city: client.personalInformation.passport.expedition_city || null
         }
 
+        const languagesObj = {
+            clients_id: client.personalInformation.id,
+            languages: client.personalInformation.languages || []
+        };
+
         const clientRequest = salesClientsUpdate(client.personalInformation.id, clientObj);
-        const passportRequest = passportUpdate(client.personalInformation.passport.id, passportObj)
+        const passportRequest = passportUpdate(client.personalInformation.passport.id, passportObj);
+        const languagesRequest = salesClientsLanguages(languagesObj);
 
         const [
             clientResponse,
-            passportResponse
+            passportResponse,
+            languagesResponse
         ]:any = await Promise.allSettled([
             clientRequest,
-            passportRequest
+            passportRequest,
+            languagesRequest
         ]);
 
-
-        if(clientResponse.value.success && passportResponse.value.success){
+        if(clientResponse.value.success && passportResponse.value.success && languagesResponse.value.success){
             valid = true;
 
             return valid;
