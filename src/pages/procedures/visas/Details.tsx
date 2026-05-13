@@ -19,6 +19,7 @@ import { passportUpdate } from "../../../utils/services/passport";
 import { usePermissionsStore } from "../../../utils/stores/usePermissionsStore";
 import {  detailsForm } from "../../../utils/requiredFields";
 import { useUserStore } from "../../../utils/stores/useUserStore";
+import VisaDetailPrint from "../../../components/ui/procedures/visa/VisaDetailPrint";
 
 const VisaDetails = ({loader}:IApp)=>{
     const hasPermission = usePermissionsStore(state => state.hasPermission);
@@ -109,6 +110,9 @@ const VisaDetails = ({loader}:IApp)=>{
     };
 
     const [currentKey, setCurrentKey] = useState<string | number | undefined>('0');
+    const [saleStatus, setSaleStatus] = useState('');
+    const [saleType, setSaleType] = useState('');
+    const [showPrint, setShowPrint] = useState(false);
 
     const onLoad = async ()=>{
         const fromStorage = decript('clients', 'local');
@@ -123,9 +127,12 @@ const VisaDetails = ({loader}:IApp)=>{
         let response = await visasInfoDetails(id);
 
         if(response && response.success){
+            setSaleStatus(response.data.sale_status || '');
+            setSaleType(response.data.sale_type || '');
+
             let data = dataForm;
             let clientsList:any = [];
-            
+
             response.data.clients.forEach((item:any)=>{
                 data = {
                     ...data,
@@ -185,7 +192,9 @@ const VisaDetails = ({loader}:IApp)=>{
                             process_id: item.process.id
                         }
                     },
-                    process_id: item.process.id
+                    process_id: item.process.id,
+                    account_email: item.account?.email || '',
+                    account_password: item.account?.password || '',
                 }
 
                 if(item.address !== null){
@@ -295,6 +304,7 @@ const VisaDetails = ({loader}:IApp)=>{
                                 travel_before: item.process_details.travel_before || '',
                                 other_countries: item.process_details.travel_before_countries || '',
                                 travelCountries: item.process_details.travel_countries || '',
+                                clave_ds_160: item.process_details.clave_ds_160 || '',
                                 socialNetworks: item.social
                             }
                         }
@@ -733,6 +743,13 @@ const VisaDetails = ({loader}:IApp)=>{
             autoHeight
         >
             <>
+                <VisaDetailPrint
+                    open={showPrint}
+                    onClose={() => setShowPrint(false)}
+                    clients={clients}
+                    saleStatus={saleStatus}
+                    saleType={saleType}
+                />
                 <div style={{minHeight:height}}>
                     <Tabs activeKey={currentKey} onSelect={setCurrentKey}>
                         {clients.map((client, index)=>
@@ -749,6 +766,7 @@ const VisaDetails = ({loader}:IApp)=>{
 
                     <div className="my-3 flex justify-end gap-2">
                         <Button appearance="default" onClick={()=>handleCancel()}>Cancelar</Button>
+                        <Button appearance="ghost" onClick={() => setShowPrint(true)}>Vista previa</Button>
                         <Button onClick={handleSubmit}>Guardar</Button>
                     </div>
                 </div>

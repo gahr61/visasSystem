@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { Col, Pagination, Row, Tooltip, Whisper } from "rsuite";
 
-import { FaFileAlt, FaTrashAlt } from "react-icons/fa";
+import { FaFileAlt, FaPrint, FaTrashAlt } from "react-icons/fa";
 import { FaCheck, FaEnvelope, FaInfo, FaShare } from "react-icons/fa6";
 
 import Content from "../../../components/common/Content";
@@ -13,13 +13,16 @@ import Table from "../../../components/common/Table";
 import ModalSendVisaTicket from "../../../components/ui/modals/SendVisaTicket";
 import ModalConfirmVisaPayment from "../../../components/ui/modals/ConfirmVisaPayment";
 import ModalInfoVisa from "../../../components/ui/modals/InfoVisa";
+import VisaDetailPrint from "../../../components/ui/procedures/visa/VisaDetailPrint";
 
 import { Column } from "../../../utils/interfaces/system";
 import { IApp } from "../../../utils/interfaces/function";
 import { Procedure } from "../../../utils/interfaces/procedure";
 import { visasSalesList, VisaListParams } from "../../../utils/services/sales/visa";
+import { visasInfoDetails } from "../../../utils/services/sales/procedures";
 import { usePermissionsStore } from "../../../utils/stores/usePermissionsStore";
 import { useUserStore } from "../../../utils/stores/useUserStore";
+import moment from "moment";
 
 type ModalTicket = {
     handleShow: (id: number, type: string, option:string) => void
@@ -96,7 +99,14 @@ const VisasList = ({loader}:IApp)=>{
                     icon={<FaInfo />}
                     onClick={()=>onOpenInfo(row.id)}
                 />
-      
+
+                <ButtonTable
+                    title="Vista previa / Imprimir"
+                    controlId="print"
+                    icon={<FaPrint />}
+                    onClick={() => onOpenPrint(row.id)}
+                />
+
                 <ButtonTable
                     title="Enviar formulario"
                     placement="bottom"
@@ -160,6 +170,10 @@ const VisasList = ({loader}:IApp)=>{
             </div>
         },
     ];
+
+    const [printState, setPrintState] = useState<{
+        show: boolean; clients: any[]; saleStatus: string; saleType: string;
+    }>({ show: false, clients: [], saleStatus: '', saleType: '' });
 
     const [data, setData] = useState<Procedure[]>([]);
     const [filters, setFilters] = useState<Filters>({
@@ -235,6 +249,114 @@ const VisasList = ({loader}:IApp)=>{
     const onConfirmTicket = (id: number)=>{
         confirmModal.current?.handleShow(id);
     }
+
+    const onOpenPrint = async (id: number) => {
+        loader.current?.handleShow('Cargando...');
+        const response = await visasInfoDetails(String(id));
+        loader.current?.handleClose();
+
+        if (!response?.success) return;
+
+        const mapped = response.data.clients.map((item: any) => ({
+            personalInformation: {
+                id: item.id,
+                names: item.names || '',
+                lastname1: item.lastname1 || '',
+                lastname2: item.lastname2 || '',
+                birthdate: item.birthdate || '',
+                sex: item.sex || '',
+                curp: item.curp || '',
+                civilStatus: item.civil_status || '',
+                languages: item.languages || [],
+                birthplace: {
+                    country: item.country_birth_id || 42,
+                    state: item.state_birth_id || '',
+                    city: item.city_birth || '',
+                    nationality: item.nationality || '',
+                },
+                passport: {
+                    id: item.passport?.id || '',
+                    number: item.passport?.number || '',
+                    expedition_date: item.passport?.expedition_date || '',
+                    expiration_date: item.passport?.expiration_date || '',
+                    country_expedition: item.passport?.expedition_countries_id || 42,
+                    state_expedition: item.passport?.expedition_states_id || '',
+                    city_expedition: item.passport?.expedition_city || '',
+                },
+            },
+            contactInformation: {
+                address: item.address ? {
+                    street: item.address.street || '',
+                    noInt: item.address.int_number || '',
+                    noExt: item.address.ext_number || '',
+                    postCode: item.address.postal_code || '',
+                    colony: item.address.colony || '',
+                    city: item.address.city || '',
+                    country: item.address.countries_id || '',
+                    state: item.address.states_id || '',
+                } : {},
+                phones: item.phones || [],
+            },
+            familiarInformation: {
+                relationships: (item.parents || []).map((p: any) => ({
+                    ...p,
+                    birthdate: p.birthdate ? moment(p.birthdate).format('DD/MM/YYYY') : '',
+                })),
+            },
+            jobsSchools: {
+                occupation: item.occupation?.occupations_id || '',
+                occupationName: item.occupation?.name || '',
+                occupationAddress: item.occupation?.address || '',
+                salary: item.occupation?.salary || '',
+                antiquity: item.occupation?.antiquity || '',
+                schools: item.studies || [],
+            },
+            generalInformation: {
+                residence: {
+                    fullName: item.residence?.full_name || '',
+                    personalPhone: item.residence?.personal_phone || '',
+                    workPhone: item.residence?.work_phone || '',
+                    celPhone: item.residence?.cel_phone || '',
+                },
+                history: {
+                    tryProcedureVisa: item.process_history?.has_tried_visa ? '1' : '0',
+                    procedureDate: item.process_history?.date || '',
+                    visaApproved: item.process_details?.visa_approved ? '1' : '0',
+                },
+                visa: {
+                    lastVisa: item.visa_history?.number || '',
+                    expeditionDate: item.visa_history?.expedition_date || '',
+                    expirationDate: item.visa_history?.expiration_date || '',
+                },
+                details: {
+                    travel_date: item.process_details?.travel_date || '',
+                    addressEEUU: item.process_details?.address_eeuu || '',
+                    travelDateEEUU: item.process_details?.travel_date_eeuu || '',
+                    timeEEUU: item.process_details?.time_stay_eeuu || '',
+                    travelReason: item.process_details?.travel_reason || '',
+                    coverExpenses: item.process_details?.cover_expenses || '',
+                    has_visit_eeuu: item.process_details?.has_visit_eeuu ? '1' : '0',
+                    lastVisit: item.process_details?.date_visit_eeuu || '',
+                    dateLastVisit: item.process_details?.time_visit_eeuu || '',
+                    other_countries: item.process_details?.travel_before_countries ? '1' : '0',
+                    travelCountries: item.process_details?.travel_countries || '',
+                    observations: item.process_details?.observations || '',
+                    clave_ds_160: item.process_details?.clave_ds_160 || '',
+                    socialNetworks: item.social || [],
+                },
+            },
+            process_id: item.process?.id || null,
+            account_email: item.account?.email || '',
+            account_password: item.account?.password || '',
+        }));
+
+        setPrintState({
+            show: true,
+            clients: mapped,
+            saleStatus: response.data.sale_status || '',
+            saleType: response.data.sale_type || '',
+        });
+    };
 
     const handleSendMessageApp = (phone: string)=>{
         const number = phone.replace(/-/g, '');
@@ -322,6 +444,13 @@ const VisasList = ({loader}:IApp)=>{
                 <ModalSendVisaTicket loader={loader} getList={() => getList(filters, page, perPage)} ref={ticketModal} />
                 <ModalConfirmVisaPayment loader={loader} getList={() => getList(filters, page, perPage)} ref={confirmModal} />
                 <ModalInfoVisa loader={loader} ref={detailsModal} />
+                <VisaDetailPrint
+                    open={printState.show}
+                    onClose={() => setPrintState(s => ({ ...s, show: false }))}
+                    clients={printState.clients}
+                    saleStatus={printState.saleStatus}
+                    saleType={printState.saleType}
+                />
             </>
         </Content>
     )
