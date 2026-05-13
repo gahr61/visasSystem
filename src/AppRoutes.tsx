@@ -3,6 +3,7 @@ import { Route, Routes } from "react-router-dom";
 import { IApp } from "./utils/interfaces/function";
 
 import ProtectedRoute from "./ProtextedRoute";
+import PermissionRoute from "./PermissionRoute";
 
 import Layout from "./components/common/Layout";
 
@@ -57,29 +58,52 @@ const AppRoutes = (props:IApp)=>{
                     <Route path="/" element={<Home />} />
 
                     <Route path="/config">
-                        <Route path="employees/list" element={<UsersList {...props} />} />
-                        <Route path="employees/new" element={<UsersNew {...props} />} />
-                        <Route path="employees/edit/:id" element={<UsersEdit {...props} />} />
+                        <Route element={<PermissionRoute permission="config_system_users" />}>
+                            <Route path="employees/list" element={<UsersList {...props} />} />
+                        </Route>
+                        <Route element={<PermissionRoute permission="config_system_users_create" />}>
+                            <Route path="employees/new" element={<UsersNew {...props} />} />
+                        </Route>
+                        <Route element={<PermissionRoute permission="config_system_users_update" />}>
+                            <Route path="employees/edit/:id" element={<UsersEdit {...props} />} />
+                        </Route>
 
-                        <Route path="permissions/list" element={<PermissionsList />} />
+                        <Route element={<PermissionRoute permission="config_system_permissions" />}>
+                            <Route path="permissions/list" element={<PermissionsList />} />
+                        </Route>
 
-                        <Route path="roles/list" element={<RolesList {...props} />} />
+                        <Route element={<PermissionRoute permission="config_system_roles" />}>
+                            <Route path="roles/list" element={<RolesList {...props} />} />
+                        </Route>
 
                         <Route element={<SystemLayout />}>
-                            <Route path="concepts/list" element={<Concepts {...props} />} />
-                            <Route path="commissions/list" element={<Commissions {...props} />} />
-                            <Route path="occupations/list" element={<OccupationsList {...props} />} />
-
-                            <Route path="branch_offices/list" element={<BranchOffices {...props} />} />
+                            <Route element={<PermissionRoute permission="config_system_concepts" />}>
+                                <Route path="concepts/list" element={<Concepts {...props} />} />
+                            </Route>
+                            <Route element={<PermissionRoute permission="config_system_commissions" />}>
+                                <Route path="commissions/list" element={<Commissions {...props} />} />
+                            </Route>
+                            <Route element={<PermissionRoute permission="config_system_occupation" />}>
+                                <Route path="occupations/list" element={<OccupationsList {...props} />} />
+                            </Route>
+                            <Route element={<PermissionRoute permission="config_system_sites" />}>
+                                <Route path="branch_offices/list" element={<BranchOffices {...props} />} />
+                            </Route>
                         </Route>
                     </Route>
 
                     <Route path="/procedures">
-                        <Route path="passport/list" element={<PassportList />} />
+                        <Route element={<PermissionRoute permission="procedure_passport" />}>
+                            <Route path="passport/list" element={<PassportList />} />
+                        </Route>
 
-                        <Route path="visa/list" element={<VisasList {...props} />} />
-                        <Route path="visa/new" element={<VisasNew {...props} />} />
-                        <Route path="visa/:id/details" element={<VisaDetails {...props} />} />
+                        <Route element={<PermissionRoute permission="procedure_visa" />}>
+                            <Route path="visa/list" element={<VisasList {...props} />} />
+                            <Route path="visa/:id/details" element={<VisaDetails {...props} />} />
+                        </Route>
+                        <Route element={<PermissionRoute permission="procedure_visa_create" />}>
+                            <Route path="visa/new" element={<VisasNew {...props} />} />
+                        </Route>
 
                         <Route path="visa/client/list" element={<VisasClientList {...props} />} />
                     </Route>

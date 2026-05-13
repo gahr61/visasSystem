@@ -7,26 +7,12 @@ import ProcedureForm from "../../../components/ui/procedures/ProcedureForm";
 import PaymentForm from "../../../components/ui/procedures/PaymentForm";
 import { calculateAge, isValidForm } from "../../../utils/functions";
 import Toast from "../../../components/common/Toast";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import moment from "moment";
 import { visaSalesStore } from "../../../utils/services/sales/visa";
 import { IApp } from "../../../utils/interfaces/function";
-import { usePermissionsStore } from "../../../utils/stores/usePermissionsStore";
-import { useUserStore } from "../../../utils/stores/useUserStore";
 
 const VisasNew = ({loader}:IApp)=>{
-    const userData = useUserStore(store => store.user);
-        
-    if(userData.role === 'cliente'){
-        <Navigate to="/procedure/visa/client/list" replace />
-    }
-
-    const hasPermission = usePermissionsStore(state => state.hasPermission);
-    
-    if(!hasPermission('procedure_visa_create')){
-        <Navigate to="/" />
-    }
-    
     const navigate = useNavigate();
 
     const [formData, setFormData] = useState<Visas[]>([]);
