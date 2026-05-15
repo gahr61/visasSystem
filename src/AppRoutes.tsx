@@ -38,7 +38,9 @@ import VisasList from "./pages/procedures/visas/List";
 import VisasNew from "./pages/procedures/visas/New";
 
 /** PASSPORT */
-import PassportList from "./pages/procedures/passport/List";
+import PassportList    from "./pages/procedures/passport/List";
+import PassportNew     from "./pages/procedures/passport/New";
+import PassportDetails from "./pages/procedures/passport/Details";
 import VisaDetails from "./pages/procedures/visas/Details";
 import VisaConfirm from "./pages/procedures/visas/Confirm";
 import OccupationsList from "./pages/config/system/Occupations";
@@ -94,7 +96,11 @@ const AppRoutes = (props:IApp)=>{
 
                     <Route path="/procedures">
                         <Route element={<PermissionRoute permission="procedure_passport" />}>
-                            <Route path="passport/list" element={<PassportList />} />
+                            <Route path="passport/list" element={<PassportList {...props} />} />
+                            <Route path="passport/:id/details" element={<PassportDetails {...props} />} />
+                        </Route>
+                        <Route element={<PermissionRoute permission="procedure_passport_create" />}>
+                            <Route path="passport/new" element={<PassportNew {...props} />} />
                         </Route>
 
                         <Route element={<PermissionRoute permission="procedure_visa" />}>

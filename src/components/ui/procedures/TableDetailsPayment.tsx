@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Input from "../../common/Input";
 import SelectForm from "../../common/Select";
 import { formatPrice } from "../../../utils/functions";
-import { conceptsVisaPrices } from "../../../utils/services/concepts";
+import { conceptsPassportPrices, conceptsVisaPrices } from "../../../utils/services/concepts";
 
 const TableDetailsPayment = ({
     dataPayment,
@@ -13,12 +13,19 @@ const TableDetailsPayment = ({
 })=>{
     const columns = ['Trámite', 'Concepto', 'Cantidad', 'Precio', 'Total'];
     const [showDetails, setShowDetails] = useState(false);
-    const [concepts, setConcepts] = useState<any[]>([]);
+    const [concepts, setConcepts]                   = useState<any[]>([]);
+    const [passportConcepts, setPassportConcepts]   = useState<any[]>([]);
 
     const onLoad = async ()=>{
-        const responsePrices = await conceptsVisaPrices();
+        const [responsePrices, responsePassport] = await Promise.all([
+            conceptsVisaPrices(),
+            conceptsPassportPrices()
+        ]);
         if(responsePrices && responsePrices.success){
             setConcepts(responsePrices.data);
+        }
+        if(responsePassport && responsePassport.success){
+            setPassportConcepts(responsePassport.data);
         }
     }
 
@@ -31,7 +38,8 @@ const TableDetailsPayment = ({
             if(i === index){
                 amount = item.amount;
 
-                findPrice = concepts.find(obj => obj.value === value);
+                findPrice = concepts.find(obj => obj.value === value)
+                         ?? passportConcepts.find(obj => obj.value === value);
 
                 total = findPrice ? item.amount * parseFloat(findPrice.price) : 0
                 item = {
@@ -116,10 +124,19 @@ const TableDetailsPayment = ({
                         <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-80">{procedure.procedure}</td>
                         <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-80">
                             {procedure.procedure === 'Visa' && (
-                                <SelectForm 
+                                <SelectForm
                                     id="concept"
                                     value={procedure.concept}
                                     options={concepts}
+                                    handleChange={(value)=>onSelectConcept(value, index)}
+                                    required
+                                />
+                            )}
+                            {procedure.procedure === 'Pasaporte' && (
+                                <SelectForm
+                                    id="concept"
+                                    value={procedure.concept}
+                                    options={passportConcepts}
                                     handleChange={(value)=>onSelectConcept(value, index)}
                                     required
                                 />
@@ -172,8 +189,8 @@ const TableDetailsPayment = ({
                                     <span>Pago abonado por cliente</span>
                                 </div>
                             </td>
-                            <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-80 text-end w-3">
-                                <Input type="number" name="otherPrice" value={dataPayment.options.otherPrice} onChange={onChangePrice} customClass="w-20 text-center" disabled={!dataPayment.options.otherPayment} />
+                            <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-80 text-end w-36">
+                                <Input type="number" name="otherPrice" value={dataPayment.options.otherPrice} onChange={onChangePrice} customClass="w-20 text-end" disabled={!dataPayment.options.otherPayment}  />
                             </td>
                         </tr>
                         <tr>

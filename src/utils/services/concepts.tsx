@@ -25,3 +25,7 @@ export const conceptsUpdate = (id: number, obj:Concept): Promise<IResponse<undef
 export const conceptsVisaPrices = ():Promise<IResponse<any[]>>=>{
     return fetchRequest({url:`concepts/visa`});
 }
+
+export const conceptsPassportPrices = ():Promise<IResponse<any[]>>=>{
+    return fetchRequest({url:`concepts/passport`});
+}
