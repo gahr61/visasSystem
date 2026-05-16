@@ -12,6 +12,7 @@ import {
     HiOutlineCalendarDays, HiOutlineUsers, HiOutlineBanknotes,
     HiOutlineUserGroup, HiOutlineEnvelope, HiOutlineKey,
     HiOutlineClock, HiOutlineChartBar, HiOutlineShoppingCart,
+    HiOutlineGlobeAlt, HiOutlineIdentification,
 } from "react-icons/hi2";
 import { useUserStore } from "../utils/stores/useUserStore";
 import { ILoader } from "../utils/interfaces/function";
@@ -24,6 +25,7 @@ import Loader from "../components/common/Loader";
 
 const STATUS_COLORS: Record<string, string> = {
     Inicio:      '#94a3b8',
+    Activo:      '#22c55e',
     'Por pagar': '#f59e0b',
     Informado:   '#3b82f6',
     Pagado:      '#22c55e',
@@ -353,6 +355,18 @@ const Home = () => {
                                 ))}
                             </Row>
 
+                            {/* ── Desglose visa / pasaporte ───────────── */}
+                            <Row style={{ marginBottom: 16 }}>
+                                {([
+                                    { title: 'Ventas de visa',      value: data.visa_sales?.count ?? 0,                   subtitle: `${formatPrice(data.visa_sales?.amount ?? 0)}`,     color: '#3b82f6', icon: <HiOutlineGlobeAlt /> },
+                                    { title: 'Ventas de pasaporte', value: data.passport_sales?.count ?? 0,                subtitle: `${formatPrice(data.passport_sales?.amount ?? 0)}`, color: '#6366f1', icon: <HiOutlineIdentification /> },
+                                ] as StatCardProps[]).map(card => (
+                                    <Col key={card.title} xs={24} sm={12} style={{ marginBottom: 12, paddingLeft: 6, paddingRight: 6 }}>
+                                        <StatCard {...card} />
+                                    </Col>
+                                ))}
+                            </Row>
+
                             {/* ── Gráficas de ventas ──────────────────── */}
                             <Row style={{ marginBottom: 24 }}>
                                 <Col xs={24} md={12} style={{ marginBottom: 16, paddingLeft: 6, paddingRight: 6 }}>
@@ -369,7 +383,7 @@ const Home = () => {
                                 {([
                                     { title: 'Clientes nuevos',         value: data.new_clients ?? 0,               subtitle: 'en el período', color: '#14b8a6', icon: <HiOutlineUsers /> },
                                     { title: 'Total de clientes',       value: data.total_clients ?? 0,             subtitle: undefined,       color: '#6366f1', icon: <HiOutlineUserGroup /> },
-                                    { title: 'Trámites activos',        value: data.total_active_procedures ?? 0,   subtitle: undefined,       color: '#f97316', icon: <HiOutlineDocumentText /> },
+                                    { title: 'Trámites activos',        value: data.total_active_procedures ?? 0,   subtitle: `Visa: ${data.visa_active_procedures ?? 0} · Pasaporte: ${data.passport_active_procedures ?? 0}`, color: '#f97316', icon: <HiOutlineDocumentText /> },
                                     { title: 'Citas próximas (7 días)', value: data.all_upcoming_appointments ?? 0, subtitle: undefined,       color: '#a855f7', icon: <HiOutlineCalendarDays /> },
                                 ] as StatCardProps[]).map(card => (
                                     <Col key={card.title} xs={24} sm={12} md={6} style={{ marginBottom: 12, paddingLeft: 6, paddingRight: 6 }}>
@@ -380,10 +394,13 @@ const Home = () => {
 
                             {/* ── Gráficas de trámites y empleados ────── */}
                             <Row style={{ marginBottom: 24 }}>
-                                <Col xs={24} md={12} style={{ marginBottom: 16, paddingLeft: 6, paddingRight: 6 }}>
-                                    <DonutChart items={data.all_procedures_by_status ?? []} title="Trámites por estado" />
+                                <Col xs={24} md={8} style={{ marginBottom: 16, paddingLeft: 6, paddingRight: 6 }}>
+                                    <DonutChart items={data.visa_procedures_by_status ?? []} title="Trámites de visa por estado" />
                                 </Col>
-                                <Col xs={24} md={12} style={{ marginBottom: 16, paddingLeft: 6, paddingRight: 6 }}>
+                                <Col xs={24} md={8} style={{ marginBottom: 16, paddingLeft: 6, paddingRight: 6 }}>
+                                    <DonutChart items={data.passport_procedures_by_status ?? []} title="Trámites de pasaporte por estado" />
+                                </Col>
+                                <Col xs={24} md={8} style={{ marginBottom: 16, paddingLeft: 6, paddingRight: 6 }}>
                                     <RankingChart rows={data.employees_ranking ?? []} />
                                 </Col>
                             </Row>

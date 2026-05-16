@@ -45,6 +45,14 @@ export interface IDashboardData {
     all_upcoming_appointments?: number;
     sales_by_branch?: IBranchSales[];
     sales_by_type?: ISalesType[];
+
+    // Desglose visa vs pasaporte (admin)
+    visa_sales?: { count: number; amount: number };
+    passport_sales?: { count: number; amount: number };
+    visa_procedures_by_status?: IProcedureStatus[];
+    passport_procedures_by_status?: IProcedureStatus[];
+    visa_active_procedures?: number;
+    passport_active_procedures?: number;
 }
 
 export interface IDashboardParams {
