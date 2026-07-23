@@ -19,7 +19,7 @@ const PassportNew = ({ loader }: IApp) => {
 
     const [procedureType, setProcedureType] = useState('');
     const [formData, setFormData]           = useState<PassportEntry[]>([]);
-    const [showPayment, setShowPayment]     = useState(true);
+    const [showPayment, setShowPayment]     = useState(false);
     const [errors, setErrors]               = useState<string[]>([]);
     const [errorPhone, setErrorPhone]       = useState('');
     const [errorEmail, setErrorEmail]       = useState('');

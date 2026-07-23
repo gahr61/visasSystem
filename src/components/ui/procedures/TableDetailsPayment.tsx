@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Input from "../../common/Input";
 import SelectForm from "../../common/Select";
 import { formatPrice } from "../../../utils/functions";
-import { conceptsPassportPrices, conceptsVisaPrices } from "../../../utils/services/concepts";
+import { conceptsPassportMinimumPayment, conceptsVisaPrices } from "../../../utils/services/concepts";
 
 const TableDetailsPayment = ({
     dataPayment,
@@ -14,20 +14,62 @@ const TableDetailsPayment = ({
     const columns = ['Trámite', 'Concepto', 'Cantidad', 'Precio', 'Total'];
     const [showDetails, setShowDetails] = useState(false);
     const [concepts, setConcepts]                   = useState<any[]>([]);
-    const [passportConcepts, setPassportConcepts]   = useState<any[]>([]);
+    const [passportMinPayment, setPassportMinPayment] = useState<any>(null);
+
+    const isPassportFlow = dataPayment.procedures.some((item:any)=>item.procedure === 'Pasaporte');
 
     const onLoad = async ()=>{
-        const [responsePrices, responsePassport] = await Promise.all([
+        const [responsePrices, responsePassportMin] = await Promise.all([
             conceptsVisaPrices(),
-            conceptsPassportPrices()
+            conceptsPassportMinimumPayment()
         ]);
         if(responsePrices && responsePrices.success){
             setConcepts(responsePrices.data);
         }
-        if(responsePassport && responsePassport.success){
-            setPassportConcepts(responsePassport.data);
+        if(responsePassportMin && responsePassportMin.success){
+            setPassportMinPayment(responsePassportMin.data);
         }
     }
+
+    const applyPassportMinimumPayment = ()=>{
+        if(!passportMinPayment) return;
+
+        const index = dataPayment.procedures.findIndex((item:any)=>item.procedure === 'Pasaporte');
+        if(index === -1 || dataPayment.procedures[index].concept === passportMinPayment.id) return;
+
+        const amount = dataPayment.procedures[index].amount;
+        const total  = amount * parseFloat(passportMinPayment.price);
+
+        const procedures = dataPayment.procedures.map((item:any, i:number)=>{
+            if(i !== index) return item;
+
+            return {
+                ...item,
+                concept: passportMinPayment.id,
+                price: passportMinPayment.price,
+                total: total
+            };
+        });
+
+        setDataPayment({
+            ...dataPayment,
+            procedures,
+            options:{
+                ...dataPayment.options,
+                minPayment: true,
+                otherPayment: false,
+                minPrice: total,
+                otherPrice: total,
+                totalProcedure: total,
+                totalPay: 0,
+                totalPerPay: total
+            }
+        });
+    }
+
+    useEffect(()=>{
+        applyPassportMinimumPayment();
+    }, [passportMinPayment, dataPayment.procedures]);
 
     const onSelectConcept = (value: string, index: number)=>{
         let findPrice;
@@ -38,8 +80,7 @@ const TableDetailsPayment = ({
             if(i === index){
                 amount = item.amount;
 
-                findPrice = concepts.find(obj => obj.value === value)
-                         ?? passportConcepts.find(obj => obj.value === value);
+                findPrice = concepts.find(obj => obj.value === value);
 
                 total = findPrice ? item.amount * parseFloat(findPrice.price) : 0
                 item = {
@@ -133,13 +174,7 @@ const TableDetailsPayment = ({
                                 />
                             )}
                             {procedure.procedure === 'Pasaporte' && (
-                                <SelectForm
-                                    id="concept"
-                                    value={procedure.concept}
-                                    options={passportConcepts}
-                                    handleChange={(value)=>onSelectConcept(value, index)}
-                                    required
-                                />
+                                <span>{passportMinPayment?.name}</span>
                             )}
                         </td>
                         <td className="text-start px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-80">{procedure.amount}</td>
@@ -151,16 +186,45 @@ const TableDetailsPayment = ({
                         </td>
                     </tr>
                 )}
-                {showDetails && (
+                {isPassportFlow ? (
+                    passportMinPayment && (
+                        <>
+                            <tr>
+                                <td colSpan={4} className="px-6 py-2 whitespace-nowrap text-end text-sm font-medium text-gray-80">
+                                    Total de trámite
+                                </td>
+                                <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-80 text-end">
+                                    {formatPrice(dataPayment.options.totalProcedure)}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colSpan={4} className="px-6 py-2 whitespace-nowrap text-end text-sm font-medium text-gray-80">
+                                    Total a pagar
+                                </td>
+                                <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-red-600 text-end">
+                                    {formatPrice(dataPayment.options.totalPerPay)}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colSpan={4} className="px-6 py-2 whitespace-nowrap text-end text-sm font-medium text-gray-80">
+                                    Total restante
+                                </td>
+                                <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-80 text-end">
+                                    {formatPrice(dataPayment.options.totalPay)}
+                                </td>
+                            </tr>
+                        </>
+                    )
+                ) : showDetails && (
                     <>
                         <tr className="border-b">
                             <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-80">
-                                <input 
-                                    type="radio" 
+                                <input
+                                    type="radio"
                                     name="minPayment"
                                     value={dataPayment.options.minPayment}
                                     checked={dataPayment.options.minPayment ? true : false}
-                                    onChange={onCheckOption}  
+                                    onChange={onCheckOption}
                                 />
                             </td>
                             <td colSpan={3} className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-80">
@@ -175,12 +239,12 @@ const TableDetailsPayment = ({
                         </tr>
                         <tr className="border-b">
                             <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-80">
-                                <input 
-                                    type="radio" 
+                                <input
+                                    type="radio"
                                     name="otherPayment"
-                                    value={dataPayment.options.otherPayment}    
+                                    value={dataPayment.options.otherPayment}
                                     checked={dataPayment.options.otherPayment}
-                                    onChange={onCheckOption}  
+                                    onChange={onCheckOption}
                                 />
                             </td>
                             <td colSpan={3} className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-80">
@@ -217,7 +281,7 @@ const TableDetailsPayment = ({
                                 {formatPrice(dataPayment.options.totalPay)}
                             </td>
                         </tr>
-                    
+
                     </>
                 )}
                 

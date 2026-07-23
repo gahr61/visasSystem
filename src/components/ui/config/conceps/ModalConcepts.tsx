@@ -19,9 +19,10 @@ const ModalConcepts = forwardRef(({loader, getList}:Props, ref)=>{
     const [dataForm, setDataForm] = useState({
         name:'',
         price:0,
-        is_process: false
+        is_process: false,
+        is_protected: false
     })
-    
+
     const handleShow = async (id: number)=>{
         if(id){
             setId(id);
@@ -39,7 +40,7 @@ const ModalConcepts = forwardRef(({loader, getList}:Props, ref)=>{
     const handleClose = ()=>{
         setOpen(false);
         setId(undefined);
-        setDataForm({name:'', price:0, is_process: false});
+        setDataForm({name:'', price:0, is_process: false, is_protected: false});
     }
 
     const handleChange = (e: React.FormEvent<HTMLInputElement>)=>{
@@ -96,7 +97,7 @@ const ModalConcepts = forwardRef(({loader, getList}:Props, ref)=>{
                         <Col xs={24} className="catalog-form">
                             <Col xs={18}>
                                 <label>Nombre</label>
-                                <Input id="name" value={dataForm.name} onChange={handleChange} required/>
+                                <Input id="name" value={dataForm.name} onChange={handleChange} disabled={dataForm.is_protected} required/>
                             </Col>
                             <Col xs={6}>
                                 <label>Precio</label>

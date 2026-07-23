@@ -29,3 +29,7 @@ export const conceptsVisaPrices = ():Promise<IResponse<any[]>>=>{
 export const conceptsPassportPrices = ():Promise<IResponse<any[]>>=>{
     return fetchRequest({url:`concepts/passport`});
 }
+
+export const conceptsPassportMinimumPayment = ():Promise<IResponse<any>>=>{
+    return fetchRequest({url:`concepts/passport/minimum`});
+}
