@@ -85,9 +85,9 @@ const MOCK_CLIENT = {
         occupationName:    'Empresa Tecnológica S.A. de C.V.',
         salary:            '35000',
         antiquity:         '5 años',
-        occupationAddress: 'Av. Reforma 222, Col. Juárez, CDMX',
+        address: { street: 'Av. Reforma', noExt: '222', colony: 'Juárez', city: 'CDMX' },
         schools: [
-            { name: 'Universidad Nacional Autónoma de México', address: 'Ciudad Universitaria, CDMX', period: '2008-2013' },
+            { name: 'Universidad Nacional Autónoma de México', degree_level: 'Licenciatura', period: '2008-2013', address: { street: 'Ciudad Universitaria', colony: '', city: 'CDMX' } },
         ],
     },
     generalInformation: {
@@ -334,19 +334,22 @@ const buildClientHTML = (client: any, saleStatus: string, saleType: string, idx:
         )
     );
 
+    const fmtAddress = (a: any) =>
+        [a?.street, a?.noExt, a?.colony, a?.city].filter(Boolean).join(', ');
+
     const occupationBox = box('Ocupación / Trabajo',
         row(
             cell('Ocupación',  esc(lbl.occupation || js.occupation), '50%'),
             cell('Lugar',      esc(js.occupationName),               '50%'),
             cell('Salario',    js.salary ? `$${esc(js.salary)}` : '—', '50%'),
             cell('Antigüedad', esc(js.antiquity),                    '50%'),
-            cellFull('Dirección', esc(js.occupationAddress)),
+            cellFull('Dirección', esc(fmtAddress(js.address))),
         )
     );
 
     const studiesBox = box('Estudios',
-        tbl(['Nombre', 'Dirección', 'Período'],
-            (js.schools || []).map((s: any) => [esc(s.name), esc(s.address), esc(s.period)])
+        tbl(['Nombre', 'Grado', 'Dirección', 'Período'],
+            (js.schools || []).map((s: any) => [esc(s.name), esc(s.degree_level), esc(fmtAddress(s.address)), esc(s.period)])
         )
     );
 

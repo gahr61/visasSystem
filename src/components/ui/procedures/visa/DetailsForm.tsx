@@ -98,7 +98,7 @@ const DetailsForm = ({client, updateClient, index}: Props)=>{
     }
 
     const updateJobsSchools = async ()=>{
-        if(!isValidForm('div.jbb-form')){
+        if(!isValidForm('div.job-form')){
             Toast.fire('Error', 'Campos incompletos', 'error');
             return false;
         }

@@ -344,10 +344,24 @@ const VisasList = ({loader}:IApp)=>{
             jobsSchools: {
                 occupation: item.occupation?.occupations_id || '',
                 occupationName: item.occupation?.name || '',
-                occupationAddress: item.occupation?.address || '',
                 salary: item.occupation?.salary || '',
                 antiquity: item.occupation?.antiquity || '',
-                schools: item.studies || [],
+                address: item.occupation ? {
+                    street: item.occupation.street || '',
+                    noExt: item.occupation.ext_number || '',
+                    colony: item.occupation.colony || '',
+                    city: item.occupation.city || '',
+                } : {},
+                schools: (item.studies || []).map((school:any) => ({
+                    name: school.name,
+                    degree_level: school.degree_level || '',
+                    period: school.period,
+                    address: {
+                        street: school.street || '',
+                        colony: school.colony || '',
+                        city: school.city || '',
+                    }
+                })),
             },
             generalInformation: {
                 residence: {

@@ -297,7 +297,7 @@ export const isValidForm = (element: string): boolean =>{
 				}
             }else if(ctrl.required){
                 if(ctrl.value === ''){
-                    isFormValid = showCtrError(ctrl.id, ctrl.value);
+                    isFormValid = showCtrError(ctrl.id, ctrl.value) && isFormValid;
                 }
             }
         });

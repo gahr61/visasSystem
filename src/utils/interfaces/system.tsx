@@ -29,7 +29,7 @@ export interface Concept {
     name: string;
     price: number;
     is_process: boolean;
-    is_protected?: boolean;
+    is_protected: boolean;
 }
 
 export interface Commissions {

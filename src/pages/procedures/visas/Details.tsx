@@ -146,7 +146,22 @@ const VisaDetails = ({loader}:IApp)=>{
         const fromStorage = decript('clients', 'local');
 
         if(fromStorage !== ''){
-            setClients(JSON.parse(fromStorage));
+            const cachedClients = JSON.parse(fromStorage).map((client:any) => ({
+                ...dataForm,
+                ...client,
+                personalInformation:{
+                    ...dataForm.personalInformation,
+                    ...client.personalInformation,
+                    spouse:{ ...dataForm.personalInformation.spouse, ...client.personalInformation?.spouse }
+                },
+                jobsSchools:{
+                    ...dataForm.jobsSchools,
+                    ...client.jobsSchools,
+                    address:{ ...dataForm.jobsSchools.address, ...client.jobsSchools?.address }
+                }
+            }));
+
+            setClients(cachedClients);
             //return;
         }
 
@@ -281,7 +296,21 @@ const VisaDetails = ({loader}:IApp)=>{
                                 state: item.occupation.states_id || '',
                                 city: item.occupation.city || ''
                             },
-                            schools: item.studies
+                            schools: (item.studies || []).map((school:any)=>({
+                                name: school.name,
+                                degree_level: school.degree_level || '',
+                                period: school.period,
+                                address:{
+                                    street: school.street || '',
+                                    noInt: school.int_number || '',
+                                    noExt: school.ext_number || '',
+                                    postCode: school.postal_code || '',
+                                    colony: school.colony || '',
+                                    country: school.countries_id || 42,
+                                    state: school.states_id || '',
+                                    city: school.city || ''
+                                }
+                            }))
                         }
 
                     }
@@ -634,8 +663,18 @@ const VisaDetails = ({loader}:IApp)=>{
         const schools = client.jobsSchools.schools.map((school:any)=>{
             const item = {
                 name: school.name,
-                address: school.address,
-                period: school.period
+                degree_level: school.degree_level,
+                period: school.period,
+                address:{
+                    street: school.address.street,
+                    int_number: school.address.noInt || null,
+                    ext_number: school.address.noExt,
+                    postal_code: school.address.postCode,
+                    colony: school.address.colony,
+                    city: school.address.city,
+                    countries_id: school.address.country,
+                    states_id: school.address.state
+                }
             };
 
             return item;

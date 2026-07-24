@@ -5,19 +5,19 @@ import Button from "../../../common/Button";
 import Table, { Columns } from "../../../common/Table";
 import ButtonTable from "../../../common/ButtonTable";
 import { FaTrashAlt } from "react-icons/fa";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { occupationsList } from "../../../../utils/services/occupations";
 import Toast from "../../../common/Toast";
-import { isValidForm } from "../../../../utils/functions";
-import { useAddressStore } from "../../../../utils/stores/useAddressStore";
-import { getStates } from "../../../../utils/services/countries";
 import moment from "moment";
+import ModalSchool from "./ModalSchool";
+import AddressForm from "../AddressForm";
 
 type EducationForm = {
     id: number,
     name: string,
-    address: string,
-    period: string
+    degree_level: string,
+    period: string,
+    address: any
 }
 
 type Props = {
@@ -31,32 +31,27 @@ const JobInfo = ({
 }:Props)=>{
     const columns: Columns[] = [
         {key:'school', title:'Escuela', grow:3, render:(row:EducationForm) => row.name},
-        {key:'address', title:'Dirección', grow:3, render:(row:EducationForm) => row.address},
+        {key:'degree_level', title:'Grado', grow:2, render:(row:EducationForm) => row.degree_level},
+        {key:'address', title:'Dirección', grow:3, render:(row:EducationForm) =>
+            [row.address?.street, row.address?.colony, row.address?.city].filter(Boolean).join(', ')
+        },
         {key:'period', title:'Periodo', grow:1, render:(row:EducationForm) => row.period},
-        {key:'actions', title:'', grow:3, render:(row:EducationForm) => 
+        {key:'actions', title:'', grow:1, render:(row:EducationForm) =>
             <>
-                <ButtonTable 
-                    controlId="delete" 
-                    title="Eliminar" 
-                    icon={<FaTrashAlt />} 
-                    onClick={()=>handleDeleteSchool(row.name)}    
+                <ButtonTable
+                    controlId="delete"
+                    title="Eliminar"
+                    icon={<FaTrashAlt />}
+                    onClick={()=>handleDeleteSchool(row.name)}
                 />
             </>
         },
     ]
 
-    const countries = useAddressStore(state => state.countries);
+    const schoolModalRef = useRef<any>(null);
 
     const [occupations, setOccupations] = useState<ISelectOptions[]>([]);
     const [showOtherOccupation, setShowOtherOccupation] = useState(false);
-    const [jobStates, setJobStates] = useState<ISelectOptions[]>([]);
-
-    const [schoolForm, setSchoolForm] = useState({
-        name:'',
-        address:'',
-        period:''
-    });
-    const [requiredFormList, setRequiredFormList] = useState(false);
 
     const calculateAntiquity = (hireDate: string)=>{
         if(!hireDate) return '';
@@ -72,34 +67,8 @@ const JobInfo = ({
         return parts.length > 0 ? parts.join(', ') : 'Menos de 1 mes';
     }
 
-    const onChangeAddress = (e:any)=>{
-        const {name, value} = e.currentTarget;
-
-        handleChange({
-            currentTarget:{
-                name:'address',
-                value:{
-                    ...jobsSchools.address,
-                    [name]: typeof value === 'number' ? value : value.toUpperCase()
-                }
-            }
-        });
-
-        if(name === 'country'){
-            if(value === ''){
-                setJobStates([]);
-            }else{
-                onLoadJobStates(value);
-            }
-        }
-    }
-
-    const onLoadJobStates = async (country_id:number) => {
-        const response = await getStates(country_id);
-
-        if(response && response.success){
-            setJobStates(response.data);
-        }
+    const onChangeAddress = (address:any)=>{
+        handleChange({currentTarget:{name:'address', value:address}});
     }
 
     const getOccupations = async ()=>{
@@ -119,51 +88,26 @@ const JobInfo = ({
         }
     }
 
-    const handleChangeSchool = (e:any)=>{
-        const {name, value} = e.currentTarget;
+    const handleAddSchool = (school:any)=>{
+        const list = [...jobsSchools.schools];
 
-        setSchoolForm({
-            ...schoolForm,
-            [name]: value.toUpperCase()
+        const exist = list.find((obj:any)=>obj.name === school.name);
+
+        if(exist){
+            Toast.fire('Error', 'El nombre que intenga agregar ya se encuentra en el listado', 'error');
+            return false;
+        }
+
+        list.push(school);
+
+        handleChange({
+            currentTarget:{
+                name:'schools',
+                value: list
+            }
         });
-    }
 
-    const handleAddSchool = ()=>{
-        setRequiredFormList(true);
-
-        setTimeout(()=>{
-            if(!isValidForm('div.school-form')){
-                Toast.fire('Error', 'Campos requeridos', 'error');
-                return;
-            }
-
-            let list = [...jobsSchools.schools];
-
-            const exist = list.find((obj:any)=>obj.name === schoolForm.name);
-
-            if(exist){
-                Toast.fire('Error', 'El nombre que intenga agregar ya se encuentra en el listado', 'error');
-                return;
-            }
-
-            list.push(schoolForm);
-
-            setSchoolForm({
-                name:'',
-                address:'',
-                period:''
-            });
-
-            handleChange({
-                currentTarget:{
-                    name:'schools',
-                    value: list
-                }
-            });
-
-            setRequiredFormList(false);
-        }, 200);
-        
+        return true;
     }
 
     const handleDeleteSchool = (name:string)=>{
@@ -179,10 +123,6 @@ const JobInfo = ({
 
     useEffect(()=>{
         getOccupations();
-
-        if(jobsSchools.address?.country){
-            onLoadJobStates(jobsSchools.address.country);
-        }
     },[]);
 
     useEffect(()=>{
@@ -285,125 +225,20 @@ const JobInfo = ({
                         />
                     </Col>
                 </Row>
-                <Row>
-                    <Col xs={24} lg={6}>
-                        <label>Calle</label>
-                        <Input
-                            id="street"
-                            value={jobsSchools.address?.street}
-                            onChange={onChangeAddress}
-                            required
-                        />
-                    </Col>
-                    <Col xs={24} lg={3}>
-                        <label>No. Int</label>
-                        <Input
-                            type="number"
-                            id="noInt"
-                            value={jobsSchools.address?.noInt}
-                            onChange={onChangeAddress}
-                        />
-                    </Col>
-                    <Col xs={24} lg={3}>
-                        <label>No. Ext.</label>
-                        <Input
-                            type="number"
-                            id="noExt"
-                            value={jobsSchools.address?.noExt}
-                            onChange={onChangeAddress}
-                            required
-                        />
-                    </Col>
-                    <Col xs={24} lg={6}>
-                        <label>Código postal</label>
-                        <Input
-                            id="postCode"
-                            value={jobsSchools.address?.postCode}
-                            onChange={onChangeAddress}
-                            required
-                            maxLength={5}
-                        />
-                    </Col>
-                    <Col xs={24} lg={6}>
-                        <label>Colonia</label>
-                        <Input
-                            id="colony"
-                            value={jobsSchools.address?.colony}
-                            onChange={onChangeAddress}
-                            required
-                        />
-                    </Col>
-                    <Col xs={24} lg={6}>
-                        <label>País</label>
-                        <SelectForm
-                            id="jobCountry"
-                            options={countries}
-                            value={jobsSchools.address?.country}
-                            handleChange={(value:any)=>onChangeAddress({currentTarget:{name:'country', value}})}
-                            required
-                        />
-                    </Col>
-                    <Col xs={24} lg={6}>
-                        <label>Estado</label>
-                        <SelectForm
-                            id="jobState"
-                            options={jobStates}
-                            value={jobsSchools.address?.state}
-                            handleChange={(value:any)=>onChangeAddress({currentTarget:{name:'state', value}})}
-                            required
-                        />
-                    </Col>
-                    <Col xs={24} lg={6}>
-                        <label>Ciudad/Municipio</label>
-                        <Input
-                            id="jobCity"
-                            name="city"
-                            value={jobsSchools.address?.city}
-                            onChange={onChangeAddress}
-                            required
-                        />
-                    </Col>
-                </Row>
+                <AddressForm address={jobsSchools.address} onChange={onChangeAddress} />
                 </div>
             </fieldset>
             <hr className="my-2" />
             <fieldset>
-                <legend className="font-semibold">Educación</legend>
-                <Row className="flex items-end school-form">
-                    <Col xs={24} lg={10}>
-                        <label>Escuela</label>
-                        <Input 
-                            id="name"
-                            value={schoolForm.name}
-                            onChange={handleChangeSchool}
-                            required={requiredFormList}
-                        />
-                    </Col>
-                    <Col xs={24} lg={10}>
-                        <label>Dirección</label>
-                        <Input 
-                            id="address"
-                            value={schoolForm.address}
-                            onChange={handleChangeSchool}
-                            required={requiredFormList}
-                        />
-                    </Col>
-                    <Col xs={24} lg={2}>
-                        <label>Periodo</label>
-                        <Input 
-                            id="period"
-                            value={schoolForm.period}
-                            onChange={handleChangeSchool}
-                            required={requiredFormList}
-                        />
-                    </Col>
-                    <Col xs={24} lg={2}>
-                        <Button onClick={handleAddSchool}>Agregar</Button>
-                    </Col>
-                </Row>
-                <Row className="nt-3">
+                <legend className="w-full">
+                    <span className="font-semibold">Educación</span>
+                    <div className="float-right">
+                        <Button size="sm" onClick={()=>schoolModalRef.current?.handleShow()}>Agregar</Button>
+                    </div>
+                </legend>
+                <Row className="mt-3">
                     <Col xs={24}>
-                        <Table 
+                        <Table
                             columns={columns}
                             data={jobsSchools.schools}
                             height={200}
@@ -411,6 +246,7 @@ const JobInfo = ({
                     </Col>
                 </Row>
             </fieldset>
+            <ModalSchool ref={schoolModalRef} onAdd={handleAddSchool} />
         </Grid>
     )
 }
