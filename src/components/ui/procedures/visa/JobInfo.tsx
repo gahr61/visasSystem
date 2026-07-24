@@ -9,6 +9,9 @@ import { useEffect, useState } from "react";
 import { occupationsList } from "../../../../utils/services/occupations";
 import Toast from "../../../common/Toast";
 import { isValidForm } from "../../../../utils/functions";
+import { useAddressStore } from "../../../../utils/stores/useAddressStore";
+import { getStates } from "../../../../utils/services/countries";
+import moment from "moment";
 
 type EducationForm = {
     id: number,
@@ -42,8 +45,11 @@ const JobInfo = ({
         },
     ]
 
+    const countries = useAddressStore(state => state.countries);
+
     const [occupations, setOccupations] = useState<ISelectOptions[]>([]);
     const [showOtherOccupation, setShowOtherOccupation] = useState(false);
+    const [jobStates, setJobStates] = useState<ISelectOptions[]>([]);
 
     const [schoolForm, setSchoolForm] = useState({
         name:'',
@@ -51,6 +57,50 @@ const JobInfo = ({
         period:''
     });
     const [requiredFormList, setRequiredFormList] = useState(false);
+
+    const calculateAntiquity = (hireDate: string)=>{
+        if(!hireDate) return '';
+
+        const years = moment().diff(hireDate, 'years');
+        const months = moment().diff(moment(hireDate).add(years, 'years'), 'months');
+
+        const parts = [];
+
+        if(years > 0) parts.push(years+(years === 1 ? ' año' : ' años'));
+        if(months > 0) parts.push(months+(months === 1 ? ' mes' : ' meses'));
+
+        return parts.length > 0 ? parts.join(', ') : 'Menos de 1 mes';
+    }
+
+    const onChangeAddress = (e:any)=>{
+        const {name, value} = e.currentTarget;
+
+        handleChange({
+            currentTarget:{
+                name:'address',
+                value:{
+                    ...jobsSchools.address,
+                    [name]: typeof value === 'number' ? value : value.toUpperCase()
+                }
+            }
+        });
+
+        if(name === 'country'){
+            if(value === ''){
+                setJobStates([]);
+            }else{
+                onLoadJobStates(value);
+            }
+        }
+    }
+
+    const onLoadJobStates = async (country_id:number) => {
+        const response = await getStates(country_id);
+
+        if(response && response.success){
+            setJobStates(response.data);
+        }
+    }
 
     const getOccupations = async ()=>{
         const response = await occupationsList();
@@ -129,6 +179,10 @@ const JobInfo = ({
 
     useEffect(()=>{
         getOccupations();
+
+        if(jobsSchools.address?.country){
+            onLoadJobStates(jobsSchools.address.country);
+        }
     },[]);
 
     useEffect(()=>{
@@ -142,6 +196,16 @@ const JobInfo = ({
             }
         }
     },[jobsSchools])
+
+    useEffect(()=>{
+        if(jobsSchools.hireDate){
+            const antiquity = calculateAntiquity(jobsSchools.hireDate);
+
+            if(antiquity !== jobsSchools.antiquity){
+                handleChange({currentTarget:{name:'antiquity', value: antiquity}});
+            }
+        }
+    },[jobsSchools.hireDate])
 
     return(
         <Grid fluid>
@@ -172,29 +236,39 @@ const JobInfo = ({
                     )}
                     
                     <Col xs={24} lg={4}>
-                        <label>Sueldo mensual</label>
-                        <Input 
-                            type="number" 
+                        <label>Ingreso mensual</label>
+                        <Input
+                            type="number"
                             id="salary"
                             value={jobsSchools.salary}
                             onChange={handleChange}
-                            required    
+                            required
+                        />
+                    </Col>
+                    <Col xs={24} lg={4}>
+                        <label>Fecha de ingreso</label>
+                        <Input
+                            type="date"
+                            id="hireDate"
+                            value={jobsSchools.hireDate}
+                            onChange={handleChange}
+                            required
                         />
                     </Col>
                     <Col xs={24} lg={4}>
                         <label>Antiguedad</label>
-                        <Input 
+                        <Input
                             id="antiquity"
                             value={jobsSchools.antiquity}
                             onChange={handleChange}
-                            required
+                            disabled
                         />
                     </Col>
                 </Row>
                 <Row>
                     <Col xs={24} lg={22}>
                         <label>Nombre de empleo o escuela</label>
-                        <Input 
+                        <Input
                             id="occupationName"
                             value={jobsSchools.occupationName}
                             onChange={handleChange}
@@ -202,11 +276,90 @@ const JobInfo = ({
                         />
                     </Col>
                     <Col xs={24} lg={22}>
-                        <label>Dirección de empleo o escuela</label>
-                        <Input 
-                            id="occupationAddress"
-                            value={jobsSchools.occupationAddress}
+                        <label>Descripción de actividades</label>
+                        <Input
+                            id="activitiesDescription"
+                            value={jobsSchools.activitiesDescription}
                             onChange={handleChange}
+                            required
+                        />
+                    </Col>
+                </Row>
+                <Row>
+                    <Col xs={24} lg={6}>
+                        <label>Calle</label>
+                        <Input
+                            id="street"
+                            value={jobsSchools.address?.street}
+                            onChange={onChangeAddress}
+                            required
+                        />
+                    </Col>
+                    <Col xs={24} lg={3}>
+                        <label>No. Int</label>
+                        <Input
+                            type="number"
+                            id="noInt"
+                            value={jobsSchools.address?.noInt}
+                            onChange={onChangeAddress}
+                        />
+                    </Col>
+                    <Col xs={24} lg={3}>
+                        <label>No. Ext.</label>
+                        <Input
+                            type="number"
+                            id="noExt"
+                            value={jobsSchools.address?.noExt}
+                            onChange={onChangeAddress}
+                            required
+                        />
+                    </Col>
+                    <Col xs={24} lg={6}>
+                        <label>Código postal</label>
+                        <Input
+                            id="postCode"
+                            value={jobsSchools.address?.postCode}
+                            onChange={onChangeAddress}
+                            required
+                            maxLength={5}
+                        />
+                    </Col>
+                    <Col xs={24} lg={6}>
+                        <label>Colonia</label>
+                        <Input
+                            id="colony"
+                            value={jobsSchools.address?.colony}
+                            onChange={onChangeAddress}
+                            required
+                        />
+                    </Col>
+                    <Col xs={24} lg={6}>
+                        <label>País</label>
+                        <SelectForm
+                            id="jobCountry"
+                            options={countries}
+                            value={jobsSchools.address?.country}
+                            handleChange={(value:any)=>onChangeAddress({currentTarget:{name:'country', value}})}
+                            required
+                        />
+                    </Col>
+                    <Col xs={24} lg={6}>
+                        <label>Estado</label>
+                        <SelectForm
+                            id="jobState"
+                            options={jobStates}
+                            value={jobsSchools.address?.state}
+                            handleChange={(value:any)=>onChangeAddress({currentTarget:{name:'state', value}})}
+                            required
+                        />
+                    </Col>
+                    <Col xs={24} lg={6}>
+                        <label>Ciudad/Municipio</label>
+                        <Input
+                            id="jobCity"
+                            name="city"
+                            value={jobsSchools.address?.city}
+                            onChange={onChangeAddress}
                             required
                         />
                     </Col>

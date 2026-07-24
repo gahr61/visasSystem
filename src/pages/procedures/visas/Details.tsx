@@ -21,12 +21,6 @@ import {  detailsForm } from "../../../utils/requiredFields";
 import { useUserStore } from "../../../utils/stores/useUserStore";
 import VisaDetailPrint from "../../../components/ui/procedures/visa/VisaDetailPrint";
 
-/**
- * clients_parents solo guarda un "full_name". Para poblar los campos
- * separados de nombre(s)/apellidos se parte de atrás hacia adelante:
- * la última palabra es apellido materno, la penúltima apellido paterno
- * y el resto (uno o más palabras) es el/los nombre(s).
- */
 const parseFullName = (fullName: string) => {
     const words = (fullName || '').trim().split(/\s+/).filter(Boolean);
 
@@ -89,7 +83,10 @@ const VisaDetails = ({loader}:IApp)=>{
             relationships:[]
         },
         jobsSchools:{
-            occupation:'', otherOcupation:'', salary:'', antiquity:'', ocupationName:'', ocupationAddress:'',
+            occupation:'', otherOcupation:'', salary:'', antiquity:'', hireDate:'', occupationName:'', activitiesDescription:'',
+            address:{
+                street:'', noInt:'', noExt:'', postCode:'', colony:'', country:42, state:'', city:''
+            },
             schools:[]
         },
         generalInformation:{
@@ -268,14 +265,25 @@ const VisaDetails = ({loader}:IApp)=>{
                         jobsSchools:{
                             ...data.jobSchools,
                             id: item.occupation.id,
-                            occupation: item.occupation.occupations_id, 
-                            salary: item.occupation.salary, 
-                            antiquity: item.occupation.antiquity, 
-                            occupationName: item.occupation.name, 
-                            occupationAddress: item.occupation.address,
+                            occupation: item.occupation.occupations_id,
+                            salary: item.occupation.salary,
+                            antiquity: item.occupation.antiquity,
+                            hireDate: item.occupation.hire_date || '',
+                            occupationName: item.occupation.name,
+                            activitiesDescription: item.occupation.activities_description || '',
+                            address:{
+                                street: item.occupation.street || '',
+                                noInt: item.occupation.int_number || '',
+                                noExt: item.occupation.ext_number || '',
+                                postCode: item.occupation.postal_code || '',
+                                colony: item.occupation.colony || '',
+                                country: item.occupation.countries_id || 42,
+                                state: item.occupation.states_id || '',
+                                city: item.occupation.city || ''
+                            },
                             schools: item.studies
                         }
-                        
+
                     }
                 }
 
@@ -600,14 +608,27 @@ const VisaDetails = ({loader}:IApp)=>{
 
     const updateJobsSchools = async (client:any)=>{
 
+        const jobAddress = client.jobsSchools.address;
+
         const objJobs = {
             clients_id: client.personalInformation.id,
             occupations_id: client.jobsSchools.occupation,
             name: client.jobsSchools.occupationName,
-            otherOccupation: client.jobsSchools.otherOccupation,
-            address: client.jobsSchools.occupationAddress,
+            otherOccupation: client.jobsSchools.otherOcupation,
             salary: client.jobsSchools.salary,
-            antiquity: client.jobsSchools.antiquity
+            antiquity: client.jobsSchools.antiquity,
+            hire_date: client.jobsSchools.hireDate,
+            activities_description: client.jobsSchools.activitiesDescription,
+            address:{
+                street: jobAddress.street,
+                int_number: jobAddress.noInt || null,
+                ext_number: jobAddress.noExt,
+                postal_code: jobAddress.postCode,
+                colony: jobAddress.colony,
+                city: jobAddress.city,
+                countries_id: jobAddress.country,
+                states_id: jobAddress.state
+            }
         };
 
         const schools = client.jobsSchools.schools.map((school:any)=>{
@@ -626,8 +647,8 @@ const VisaDetails = ({loader}:IApp)=>{
         };
 
 
-        const validForm = verifyRequiredFields(objJobs, detailsForm.job);
-        
+        const validForm = verifyRequiredFields(objJobs, detailsForm.job) && verifyRequiredFields(objJobs.address, detailsForm.address);
+
         if(validForm){
             const jobRequest = salesClientsOcuppations(objJobs);
 
