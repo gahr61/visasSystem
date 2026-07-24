@@ -1,10 +1,11 @@
-import { Col, Grid, Row } from "rsuite"
+import { Col, Grid, Row, Tooltip, Whisper } from "rsuite"
 import Input from "../../../common/Input";
 import SelectForm from "../../../common/Select";
 import Button from "../../../common/Button";
 import Table, { Columns } from "../../../common/Table";
 import ButtonTable from "../../../common/ButtonTable";
 import { FaTrashAlt } from "react-icons/fa";
+import { FaCircleInfo } from "react-icons/fa6";
 import React, { useState } from "react";
 import { isValidForm } from "../../../../utils/functions";
 import Toast from "../../../common/Toast";
@@ -67,7 +68,8 @@ const FamiliarInfo = ({
         {key:'parent', title:'Parentesco', grow:1, render:(row: FamiliarForm) => row.relationship},
         {key:'birtdate', title:'F. Nacimiento', grow:1, render:(row: FamiliarForm) => row.birthdate},
         {key:'hasVisa', title:'Tiene visa?', grow:1, render:(row: FamiliarForm) => row.hasVisa},
-        {key:'actions', title:'', grow:1, render:(row: FamiliarForm) => 
+        {key:'livesInUsa', title:'Vive en EEUU?', grow:1, render:(row: any) => row.livesInUsa},
+        {key:'actions', title:'', grow:1, render:(row: FamiliarForm) =>
             <>
                 <ButtonTable 
                     controlId="delete" 
@@ -84,7 +86,8 @@ const FamiliarInfo = ({
         full_name:'',
         relationship:'',
         birthdate:'',
-        has_visa:0
+        has_visa:0,
+        lives_in_usa:0
     })
 
     const onChangeForm = (e:React.FormEvent<HTMLInputElement | HTMLSelectElement>)=>{
@@ -105,7 +108,7 @@ const FamiliarInfo = ({
                 return;
             }
 
-            const exist = familiarInfo.relationships.find((obj:any) => obj.fullname === familiarForm.full_name);
+            const exist = familiarInfo.relationships.find((obj:any) => obj.full_name === familiarForm.full_name);
 
             if(exist){
                 Toast.fire('Error', 'El familiar que intenga ingresar ya se encuentra en el listado', 'error');
@@ -115,10 +118,11 @@ const FamiliarInfo = ({
             let list = [...familiarInfo.relationships];
 
             list.push({
-                name: familiarForm.full_name,
+                full_name: familiarForm.full_name,
                 relationship: familiarForm.relationship.toUpperCase(),
                 birthdate: moment(familiarInfo.birthdate).local().format('DD/MM/YYYY'),
-                hasVisa: familiarForm.has_visa === 1 ? 'Si' : 'No'
+                hasVisa: familiarForm.has_visa === 1 ? 'Si' : 'No',
+                livesInUsa: familiarForm.lives_in_usa === 1 ? 'Si' : 'No'
             });
 
             handleChange({
@@ -132,7 +136,8 @@ const FamiliarInfo = ({
                 full_name:'',
                 relationship:'',
                 birthdate:'',
-                has_visa:0
+                has_visa:0,
+                lives_in_usa:0
             });
             setRequiredFamiliar(false);
         }, 300);
@@ -141,7 +146,7 @@ const FamiliarInfo = ({
 
     const handleDeleteRelatioships = (name:string)=>{
 
-        const list = familiarInfo.relationships.filter((obj:any)=> obj.name !== name);
+        const list = familiarInfo.relationships.filter((obj:any)=> obj.full_name !== name);
 
         handleChange({
             currentTarget:{
@@ -154,12 +159,23 @@ const FamiliarInfo = ({
     return(
         <Grid fluid>
             <fieldset>
-                <legend className="font-semibold">Familia directa </legend>
+                <legend className="font-semibold flex items-center gap-2">
+                    <span>Familia directa</span>
+                    <Whisper
+                        placement="top"
+                        trigger="hover"
+                        speaker={<Tooltip>Familia directa: padre, madre, hermanos, hijos, cónyuge y otros familiares cercanos</Tooltip>}
+                    >
+                        <span className="cursor-help text-gray-400"><FaCircleInfo /></span>
+                    </Whisper>
+                </legend>
+                <p className="text-xs text-red-500 mb-2">Los datos de papá y mamá son obligatorios.</p>
                 <Row className="flex items-end familiar-form">
-                    <Col xs={24} lg={10}>
+                    <Col xs={24} lg={8}>
                         <label>Nombre completo</label>
-                        <Input 
+                        <Input
                             id="fullname"
+                            name="full_name"
                             value={familiarForm.full_name}
                             onChange={onChangeForm}
                             required={requiredFamiliar}
@@ -167,17 +183,17 @@ const FamiliarInfo = ({
                     </Col>
                     <Col xs={24} lg={4}>
                         <label>Parentesco</label>
-                        <SelectForm 
-                            id="relationship" 
-                            options={relationships} 
-                            value={familiarForm.relationship} 
-                            handleChange={(value:any)=>setFamiliarForm({...familiarForm, relationship: value})} 
+                        <SelectForm
+                            id="relationship"
+                            options={relationships}
+                            value={familiarForm.relationship}
+                            handleChange={(value:any)=>setFamiliarForm({...familiarForm, relationship: value})}
                             required={requiredFamiliar}
                         />
                     </Col>
                     <Col xs={24} lg={4}>
                         <label>F. Nacimiento</label>
-                        <Input 
+                        <Input
                             id="birthdate"
                             type="date"
                             value={familiarForm.birthdate}
@@ -185,16 +201,29 @@ const FamiliarInfo = ({
                             required={requiredFamiliar}
                         />
                     </Col>
-                    <Col xs={24} lg={4}>
+                    <Col xs={24} lg={3}>
                         <label>Tiene visa?</label>
-                        <SelectForm 
-                            id="has_visa" 
+                        <SelectForm
+                            id="has_visa"
                             options={[
                                 {value:0, label:'No'},
                                 {value:1, label:'Si'}
-                            ]} 
-                            value={familiarForm.has_visa} 
-                            handleChange={(value:any)=>setFamiliarForm({...familiarForm, has_visa: value})} 
+                            ]}
+                            value={familiarForm.has_visa}
+                            handleChange={(value:any)=>setFamiliarForm({...familiarForm, has_visa: value})}
+                            required={requiredFamiliar}
+                        />
+                    </Col>
+                    <Col xs={24} lg={3}>
+                        <label>Vive en EEUU?</label>
+                        <SelectForm
+                            id="lives_in_usa"
+                            options={[
+                                {value:0, label:'No'},
+                                {value:1, label:'Si'}
+                            ]}
+                            value={familiarForm.lives_in_usa}
+                            handleChange={(value:any)=>setFamiliarForm({...familiarForm, lives_in_usa: value})}
                             required={requiredFamiliar}
                         />
                     </Col>

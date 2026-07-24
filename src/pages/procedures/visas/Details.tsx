@@ -227,14 +227,12 @@ const VisaDetails = ({loader}:IApp)=>{
                     },
                     familiarInformation:{
                         ...data.familiarInformation,
-                        relationships: otherRelationships.map((parent:any)=>{
-                            const item = {
-                                ...parent,
-                                birthdate: moment(parent.birtdate).format('DD/MM/YYYY')
-                            }
-
-                            return item;
-                        })
+                        relationships: otherRelationships.map((parent:any)=>({
+                            ...parent,
+                            birthdate: moment(parent.birtdate).format('DD/MM/YYYY'),
+                            hasVisa: parent.has_visa ? 'Si' : 'No',
+                            livesInUsa: parent.lives_in_usa ? 'Si' : 'No'
+                        }))
                     },
                     jobsSchools:{
                         ...dataForm.jobsSchool,
@@ -598,7 +596,8 @@ const VisaDetails = ({loader}:IApp)=>{
                 relationship: relation.relationship,
                 fullname: relation.full_name,
                 birthdate: moment(relation.birthdate, 'DD/MM/YYYY').local().format('YYYY-MM-DD'),
-                has_visa: relation.hasVisa === 'No' ? false : true
+                has_visa: relation.hasVisa === 'No' ? false : true,
+                lives_in_usa: relation.livesInUsa === 'No' ? false : true
             }
 
             return item;
