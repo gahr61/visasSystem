@@ -17,12 +17,64 @@ import VisaDetailPrint from "../../../components/ui/procedures/visa/VisaDetailPr
 
 import { Column } from "../../../utils/interfaces/system";
 import { IApp } from "../../../utils/interfaces/function";
-import { Procedure } from "../../../utils/interfaces/procedure";
-import { visasSalesList, VisaListParams } from "../../../utils/services/sales/visa";
+import { Procedure, VisaAccount } from "../../../utils/interfaces/procedure";
+import { visasSalesList, visaAccountPassword, VisaListParams } from "../../../utils/services/sales/visa";
 import { visasInfoDetails } from "../../../utils/services/sales/procedures";
 import { usePermissionsStore } from "../../../utils/stores/usePermissionsStore";
 import { useUserStore } from "../../../utils/stores/useUserStore";
 import moment from "moment";
+
+const AccountCell = ({ row, canViewPassword }: { row: Procedure, canViewPassword: boolean }) => {
+    const [accounts, setAccounts] = useState<VisaAccount[] | null>(null);
+    const [loading, setLoading] = useState(false);
+
+    if(!row.account_email){
+        return <span className="text-gray-400">—</span>;
+    }
+
+    if(!canViewPassword){
+        return <span className="text-xs">{row.account_email}</span>;
+    }
+
+    const onOpen = async () => {
+        if(accounts !== null || loading) return;
+
+        setLoading(true);
+        const response = await visaAccountPassword(row.id);
+        setLoading(false);
+        setAccounts(response?.success ? response.data : []);
+    }
+
+    return (
+        <Whisper
+            placement="top"
+            trigger="hover"
+            onOpen={onOpen}
+            speaker={
+                <Tooltip>
+                    {loading && <span className="text-xs">Cargando...</span>}
+                    {!loading && accounts && accounts.length === 0 && (
+                        <span className="text-xs">Sin contraseña registrada</span>
+                    )}
+                    {!loading && accounts && accounts.length > 0 && (
+                        <div className="flex flex-col gap-1 text-start">
+                            {accounts.map((account, index) =>
+                                <span className="text-xs" key={index}>
+                                    {account.client && <strong>{account.client}: </strong>}
+                                    {account.email} — <strong>{account.password}</strong>
+                                </span>
+                            )}
+                        </div>
+                    )}
+                </Tooltip>
+            }
+        >
+            <span className="cursor-help underline decoration-dotted decoration-gray-400 text-blue-600 text-xs">
+                {row.account_email}
+            </span>
+        </Whisper>
+    );
+}
 
 type ModalTicket = {
     handleShow: (id: number, type: string, option:string) => void
@@ -74,21 +126,7 @@ const VisasList = ({loader}:IApp)=>{
                 : <span className="text-gray-400">—</span>
         },
         {key:'account', title:'Correo', grow:2, render:(row: Procedure)=>
-            row.account_email
-                ? <Whisper
-                    placement="top"
-                    trigger="hover"
-                    speaker={
-                        <Tooltip>
-                            <span className="text-xs">Contraseña: <strong>{row.account_password}</strong></span>
-                        </Tooltip>
-                    }
-                  >
-                    <span className="cursor-help underline decoration-dotted decoration-gray-400 text-blue-600 text-xs">
-                        {row.account_email}
-                    </span>
-                  </Whisper>
-                : <span className="text-gray-400">—</span>
+            <AccountCell row={row} canViewPassword={hasPermission('procedure_visa_view_password')} />
         },
         {key:'status', title:'Estatus', grow:1, render:(row: Procedure)=> row.status },
         {key:'', title:'Acciones', grow:1, render:(row: Procedure)=>

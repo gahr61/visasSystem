@@ -8,7 +8,6 @@ import { processAccountUpdate } from "../../../utils/services/process";
 import Toast from "../../common/Toast";
 import EyeCloseIcon from '@rsuite/icons/EyeClose';
 import VisibleIcon from '@rsuite/icons/Visible';
-import { encryptString } from "../../../utils/functions";
 
 interface AccountTable {
     client_id: number,
@@ -94,7 +93,7 @@ const ModalAccount = forwardRef(({loader, id, onLoad}:Props, ref)=>{
                 sales_id: id,
                 clients_id: item.client_id,
                 user: item.user,
-                password: encryptString(item.password)
+                password: item.password
             };
 
             if(item.user !== '' && item.password !== ''){

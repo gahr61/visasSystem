@@ -1,6 +1,6 @@
 import { fetchRequest } from "../../functions";
 import { IResponse, IPaginatedResponse } from "../../interfaces/function";
-import { Procedure } from "../../interfaces/procedure";
+import { Procedure, VisaAccount } from "../../interfaces/procedure";
 import { SalesInfo } from "../../interfaces/sales";
 
 export type VisaListParams = {
@@ -33,6 +33,10 @@ export const visasSalesList = (params?: VisaListParams): Promise<IPaginatedRespo
 
 export const visasSalesClientList = ():Promise<IResponse<Procedure[]>> => {
     return fetchRequest({url:'sales/visa/client/list'});
+}
+
+export const visaAccountPassword = (id: number):Promise<IResponse<VisaAccount[]>> => {
+    return fetchRequest({url:'sales/visa/'+id+'/account/password'});
 }
 
 export const visaSalesStore = (obj:any):Promise<IResponse<undefined>> => {

@@ -62,7 +62,12 @@ export type Procedure = {
     status: string;
     ds_160: string | null;
     account_email: string | null;
-    account_password: string | null;
+}
+
+export type VisaAccount = {
+    client: string;
+    email: string;
+    password: string;
 }
 
 export type Visa = {
