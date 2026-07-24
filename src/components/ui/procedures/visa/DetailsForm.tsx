@@ -21,11 +21,13 @@ const DetailsForm = ({client, updateClient, index}: Props)=>{
     const handleChange = (e: React.FormEvent<HTMLInputElement>, form:string)=>{
         const {name, value} = e.currentTarget;
 
+        const keepsOwnCase = name === 'civilStatus';
+
         const data = {
-            ...client, 
+            ...client,
             [form]:{
                 ...client[form],
-                [name]: typeof value === 'object' ? value : typeof value === 'number' ? value : value.toUpperCase()
+                [name]: typeof value === 'object' || typeof value === 'number' || keepsOwnCase ? value : value.toUpperCase()
             }
         };
 

@@ -21,6 +21,34 @@ import {  detailsForm } from "../../../utils/requiredFields";
 import { useUserStore } from "../../../utils/stores/useUserStore";
 import VisaDetailPrint from "../../../components/ui/procedures/visa/VisaDetailPrint";
 
+/**
+ * clients_parents solo guarda un "full_name". Para poblar los campos
+ * separados de nombre(s)/apellidos se parte de atrás hacia adelante:
+ * la última palabra es apellido materno, la penúltima apellido paterno
+ * y el resto (uno o más palabras) es el/los nombre(s).
+ */
+const parseFullName = (fullName: string) => {
+    const words = (fullName || '').trim().split(/\s+/).filter(Boolean);
+
+    if(words.length === 0){
+        return { names: '', lastname1: '', lastname2: '' };
+    }
+
+    if(words.length === 1){
+        return { names: words[0], lastname1: '', lastname2: '' };
+    }
+
+    if(words.length === 2){
+        return { names: words[0], lastname1: words[1], lastname2: '' };
+    }
+
+    const lastname2 = words[words.length - 1];
+    const lastname1 = words[words.length - 2];
+    const names = words.slice(0, words.length - 2).join(' ');
+
+    return { names, lastname1, lastname2 };
+}
+
 const VisaDetails = ({loader}:IApp)=>{
     const hasPermission = usePermissionsStore(state => state.hasPermission);
     const userData = useUserStore(store => store.user);
@@ -46,6 +74,9 @@ const VisaDetails = ({loader}:IApp)=>{
             },
             passport:{
                 id:null, number:'', expedition_date:'', expiration_date:'', country_expedition:42, state_expedition:'', city_expedition:''
+            },
+            spouse:{
+                id:null, names:'', lastname1:'', lastname2:'', birthdate:'', country:42, state:'', hasVisa:''
             }
         },
         contactInformation:{
@@ -134,6 +165,10 @@ const VisaDetails = ({loader}:IApp)=>{
             let clientsList:any = [];
 
             response.data.clients.forEach((item:any)=>{
+                const spouseRelationships = ['esposo', 'esposa', 'conyuge'];
+                const spouseEntry = item.parents.find((parent:any) => spouseRelationships.includes(parent.relationship));
+                const otherRelationships = item.parents.filter((parent:any) => !spouseRelationships.includes(parent.relationship));
+
                 data = {
                     ...data,
                     personalInformation:{
@@ -160,9 +195,18 @@ const VisaDetails = ({loader}:IApp)=>{
                             number: item.passport.number,
                             expedition_date: item.passport.expedition_date,
                             expiration_date: item.passport.expiration_date,
-                            country_expedition: item.passport.expedition_country_id || 42, 
-                            state_expedition: item.passport.expedition_state_id || '', 
+                            country_expedition: item.passport.expedition_country_id || 42,
+                            state_expedition: item.passport.expedition_state_id || '',
                             city_expedition: item.passport.expedition_city || ''
+                        },
+                        spouse:{
+                            ...data.personalInformation.spouse,
+                            id: spouseEntry?.id || null,
+                            ...parseFullName(spouseEntry?.full_name || ''),
+                            birthdate: spouseEntry?.birthdate || '',
+                            country: spouseEntry?.country_birth_id || 42,
+                            state: spouseEntry?.state_birth_id || '',
+                            hasVisa: spouseEntry ? (spouseEntry.has_visa ? '1' : '0') : ''
                         }
                     },
                     contactInformation:{
@@ -171,7 +215,7 @@ const VisaDetails = ({loader}:IApp)=>{
                     },
                     familiarInformation:{
                         ...data.familiarInformation,
-                        relationships: item.parents.map((parent:any)=>{
+                        relationships: otherRelationships.map((parent:any)=>{
                             const item = {
                                 ...parent,
                                 birthdate: moment(parent.birtdate).format('DD/MM/YYYY')
@@ -393,7 +437,7 @@ const VisaDetails = ({loader}:IApp)=>{
             birthdate: client.personalInformation.birthdate,
             sex: client.personalInformation.sex || null,
             curp: client.personalInformation.curp,
-            civil_status: client.personalInformation.civil_status || null,
+            civil_status: client.personalInformation.civilStatus || null,
             country_birth_id: client.personalInformation.birthplace.country || null,
             state_birth_id: client.personalInformation.birthplace.state || null,
             city_birth: client.personalInformation.birthplace.city || null,
@@ -512,18 +556,35 @@ const VisaDetails = ({loader}:IApp)=>{
     }
 
     const saveUpdateRelationships = async (client:any)=>{
+        const relationships = client.familiarInformation.relationships.map((relation:any)=>{
+            const item = {
+                relationship: relation.relationship,
+                fullname: relation.full_name,
+                birthdate: moment(relation.birthdate, 'DD/MM/YYYY').local().format('YYYY-MM-DD'),
+                has_visa: relation.hasVisa === 'No' ? false : true
+            }
+
+            return item;
+        });
+
+        const isMarried = client.personalInformation.civilStatus === 'Casado' || client.personalInformation.civilStatus === 'Union libre';
+
+        if(isMarried && client.personalInformation.spouse.names !== ''){
+            const spouse = client.personalInformation.spouse;
+
+            relationships.push({
+                relationship: 'conyuge',
+                fullname: [spouse.names, spouse.lastname1, spouse.lastname2].filter(Boolean).join(' '),
+                birthdate: spouse.birthdate,
+                has_visa: spouse.hasVisa === '1',
+                country_birth_id: spouse.country || null,
+                state_birth_id: spouse.state || null
+            });
+        }
+
         const obj = {
             clients_id: client.personalInformation.id,
-            relationships: client.familiarInformation.relationships.map((relation:any)=>{
-                const item = {
-                    relationship: relation.relationship,
-                    fullname: relation.full_name,
-                    birthdate: moment(relation.birthdate, 'DD/MM/YYYY').local().format('YYYY-MM-DD'),
-                    has_visa: relation.hasVisa === 'No' ? false : true
-                }
-
-                return item;
-            })
+            relationships
         };
 
         const response = await salesClientsRelationships(obj);

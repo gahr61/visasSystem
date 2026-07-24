@@ -31,8 +31,6 @@ const relationships = [
     { value: 'hermana', label: 'Hermana' },
     { value: 'hijo', label: 'Hijo' },
     { value: 'hija', label: 'Hija' },
-    { value: 'esposo', label: 'Esposo' },
-    { value: 'esposa', label: 'Esposa' },
     { value: 'abuelo', label: 'Abuelo' },
     { value: 'abuela', label: 'Abuela' },
     { value: 'nieto', label: 'Nieto' },

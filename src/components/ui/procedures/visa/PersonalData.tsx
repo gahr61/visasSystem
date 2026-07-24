@@ -40,6 +40,7 @@ const PersonalData = ({
 
     const [states, setStates] = useState<ISelectOptions[]>([]);
     const [passportStates, setPassportStates] = useState<ISelectOptions[]>([]);
+    const [spouseStates, setSpouseStates] = useState<ISelectOptions[]>([]);
     const [languageForm, setLanguageForm] = useState({ language: '', percentage: '' });
 
     const languageColumns: Columns[] = [
@@ -58,6 +59,10 @@ const PersonalData = ({
     const onLoad = async ()=>{
         onLoadStates(personalInfo.birthplace.country || 42, 'birthplace');
         onLoadStates(personalInfo.passport.country_expedition || 42, 'passport');
+
+        if(personalInfo.spouse?.country){
+            onLoadStates(personalInfo.spouse.country, 'spouse');
+        }
     }
 
     const onChangeField = (name: string, value: string, field:string)=>{
@@ -78,6 +83,10 @@ const PersonalData = ({
         if(name === 'country' && field === 'passport' && value !== ''){
             onLoadStates(parseInt(value), 'passport');
         }
+
+        if(name === 'country' && field === 'spouse' && value !== ''){
+            onLoadStates(parseInt(value), 'spouse');
+        }
     }
 
     const onLoadStates = async (country_id:number, field:string) => {
@@ -90,6 +99,10 @@ const PersonalData = ({
 
             if(field === 'passport'){
                 setPassportStates(response.data);
+            }
+
+            if(field === 'spouse'){
+                setSpouseStates(response.data);
             }
 
         }
@@ -208,6 +221,85 @@ const PersonalData = ({
                     </Col>
                 </Row>
             </fieldset>
+            {(personalInfo.civilStatus === 'Casado' || personalInfo.civilStatus === 'Union libre') && (
+                <>
+                    <hr className="my-2" />
+                    <fieldset>
+                        <legend className="font-semibold">Cónyuge</legend>
+                        <Row>
+                            <Col xs={24} lg={6}>
+                                <label>Nombre(s)</label>
+                                <Input
+                                    id="spouse_names"
+                                    value={personalInfo.spouse.names}
+                                    onChange={(e:any)=>onChangeField('names', e.currentTarget.value.toUpperCase(), 'spouse')}
+                                    required
+                                />
+                            </Col>
+                            <Col xs={24} lg={6}>
+                                <label>Apellido paterno</label>
+                                <Input
+                                    id="spouse_lastname1"
+                                    value={personalInfo.spouse.lastname1}
+                                    onChange={(e:any)=>onChangeField('lastname1', e.currentTarget.value.toUpperCase(), 'spouse')}
+                                    required
+                                />
+                            </Col>
+                            <Col xs={24} lg={6}>
+                                <label>Apellido materno</label>
+                                <Input
+                                    id="spouse_lastname2"
+                                    value={personalInfo.spouse.lastname2}
+                                    onChange={(e:any)=>onChangeField('lastname2', e.currentTarget.value.toUpperCase(), 'spouse')}
+                                />
+                            </Col>
+                            <Col xs={24} lg={6}>
+                                <label>F. Nacimiento</label>
+                                <Input
+                                    type="date"
+                                    id="spouse_birthdate"
+                                    value={personalInfo.spouse.birthdate}
+                                    onChange={(e:any)=>onChangeField('birthdate', e.currentTarget.value, 'spouse')}
+                                    required
+                                />
+                            </Col>
+                            <Col xs={24} lg={6}>
+                                <label>País de nacimiento</label>
+                                <SelectForm
+                                    id="spouse_country"
+                                    options={countries}
+                                    value={personalInfo.spouse.country}
+                                    handleChange={(value)=>onChangeField('country', value, 'spouse')}
+                                    required
+                                />
+                            </Col>
+                            <Col xs={24} lg={6}>
+                                <label>Estado de nacimiento</label>
+                                <SelectForm
+                                    id="spouse_state"
+                                    options={spouseStates}
+                                    value={personalInfo.spouse.state}
+                                    handleChange={(value)=>onChangeField('state', value, 'spouse')}
+                                    required
+                                />
+                            </Col>
+                            <Col xs={24} lg={6}>
+                                <label>¿Cuenta con visa?</label>
+                                <SelectForm
+                                    id="spouse_has_visa"
+                                    options={[
+                                        {label:'No', value:'0'},
+                                        {label:'Si', value:'1'}
+                                    ]}
+                                    value={personalInfo.spouse.hasVisa}
+                                    handleChange={(value)=>onChangeField('hasVisa', value, 'spouse')}
+                                    required
+                                />
+                            </Col>
+                        </Row>
+                    </fieldset>
+                </>
+            )}
             <hr className="my-2" />
             <fieldset>
                 <legend className="font-semibold">Idiomas</legend>
