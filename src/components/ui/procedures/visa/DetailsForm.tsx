@@ -5,6 +5,7 @@ import ContactInfo from "./ContactInfo";
 import FamiliarInfo from "./FamiliarInfo";
 import JobInfo from "./JobInfo";
 import TravelInfo from "./TravelInfo";
+import SocialNetworks from "./SocialNetworks";
 import { ButtonGroup, Col, Grid, Row, Steps } from "rsuite";
 import Button from "../../../common/Button";
 import { isValidForm } from "../../../../utils/functions";
@@ -53,16 +54,12 @@ const DetailsForm = ({client, updateClient, index}: Props)=>{
             }
         }
 
-        if(currentStep === 3){
+        if(currentStep === 2){
             valid = await updateJobsSchools();
 
             if(!valid){
                 return;
             }
-        }
-
-        if(currentStep === 4){
-
         }
 
         if(currentStep < steps.length - 1){
@@ -112,6 +109,7 @@ const DetailsForm = ({client, updateClient, index}: Props)=>{
         {component:<JobInfo jobsSchools={client.jobsSchools} handleChange={(e:React.FormEvent<HTMLInputElement>)=>handleChange(e, 'jobsSchools')} />},
         {component:<FamiliarInfo familiarInfo={client.familiarInformation} handleChange={(e:React.FormEvent<HTMLInputElement>)=>handleChange(e, 'familiarInformation')} />},        
         {component:<TravelInfo generalInfo={client.generalInformation} handleChange={(e:React.FormEvent<HTMLInputElement>)=>handleChange(e, 'generalInformation')} />},
+        {component:<SocialNetworks generalInfo={client.generalInformation} handleChange={(e:React.FormEvent<HTMLInputElement>)=>handleChange(e, 'generalInformation')} />},
     ];
 
     return(
@@ -124,6 +122,7 @@ const DetailsForm = ({client, updateClient, index}: Props)=>{
                         <Steps.Item onClick={()=>setCurrentStep(2)} className="cursor-pointer" title="Información laboral y académica" />
                         <Steps.Item onClick={()=>setCurrentStep(3)} className="cursor-pointer" title="Información familiar" />
                         <Steps.Item onClick={()=>setCurrentStep(4)} className="cursor-pointer" title="Información de estancia" />
+                        <Steps.Item onClick={()=>setCurrentStep(5)} className="cursor-pointer" title="Redes sociales" />
                     </Steps>
                 </Col>
                 <Col xs={24} lg={20} className="h-full border-s-2">

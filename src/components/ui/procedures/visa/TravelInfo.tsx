@@ -1,14 +1,8 @@
-import { Col, Divider, Grid, Row } from "rsuite"
+import { Col, Grid, Row } from "rsuite"
 
 import Input from "../../../common/Input";
 import SelectForm, { ISelectOptions } from "../../../common/Select";
 import { useEffect, useState } from "react";
-import Button from "../../../common/Button";
-import Table, { Columns } from "../../../common/Table";
-import ButtonTable from "../../../common/ButtonTable";
-import { FaTrash } from "react-icons/fa6";
-import { randomString } from "../../../../utils/functions";
-import Toast from "../../../common/Toast";
 import { getStates } from "../../../../utils/services/countries";
 import { relationshipTypesList } from "../../../../utils/services/relationshipTypes";
 
@@ -23,37 +17,9 @@ const TravelInfo = ({
     generalInfo,
     handleChange
 }:Props)=>{
-    const networks = [
-        {value:'Facebook', label:'Facebook'},
-        {value:'Instagram', label:'Instagram'},
-        {value:'X (Twitter)', label:'X (Twitter)'},
-        {value:'Linkedin', label:'Linkedin'},
-        {value:'Tiktok', label:'Tiktok'},
-        {value:'Youtube', label:'Youtube'},
-        {value:'Otra', label:'Otra'},
-    ]
-    const [socialForm, setSocialForm] = useState<any>({
-        socialNetwork:'',
-        username:'',
-        email:''
-    });
     const [usaStates, setUsaStates] = useState<ISelectOptions[]>([]);
     const [relationships, setRelationships] = useState<ISelectOptions[]>([]);
     const [showOtherRelationship, setShowOtherRelationship] = useState(false);
-
-    const networkColumns:Columns[] = [
-        {key:'network', title:'Red Social', grow:3, render:(row:any) => row.socialNetwork},
-        {key:'username', title:'Nombre de usuario / Página', grow:3, render:(row:any) => row.username},
-        {key:'email', title:'Correo', grow:3, render:(row:any) => row.email},
-        {key:'actions', title:'', grow:1, render:(row:any) => <>
-            <ButtonTable
-                controlId="delete"
-                title="Eliminar"
-                icon={<FaTrash />}
-                onClick={()=>handleDeleteSocial(row.id)}
-            />
-        </>}
-    ]
 
     useEffect(()=>{
         getStates(USA_COUNTRY_ID).then((response)=>{
@@ -87,15 +53,6 @@ const TravelInfo = ({
         }
     }
 
-    const handleChangeSocialForm = (e:any)=>{
-        const {name, value} = e.currentTarget;
-
-        setSocialForm({
-            ...socialForm,
-            [name]: value
-        });
-    }
-
     const onChangeData = (e:any, field:string)=>{
         const {name, value} = e.currentTarget;
 
@@ -120,58 +77,6 @@ const TravelInfo = ({
                         ...generalInfo.details.addressEEUU,
                         [name]: typeof value === 'number' ? value : String(value).toUpperCase()
                     }
-                }
-            }
-        });
-    }
-
-    const handleAddSocial = ()=>{
-        let list = [...generalInfo.details.socialNetworks];
-
-        var valid = true;
-
-        Object.keys(socialForm).map((key)=>{
-            if(socialForm[key] === ''){
-                valid = false;
-            }
-        });
-
-        if(valid){
-            list.push({
-                ...socialForm,
-                id: randomString(4)
-            });
-            
-            
-            handleChange({
-                currentTarget:{
-                    name:'details',
-                    value:{
-                        ...generalInfo.details,
-                        socialNetworks: list
-                    }
-                }
-            });
-
-            setSocialForm({
-                socialNetwork:'',
-                username:'',
-                email:''
-            });
-        }else{
-            Toast.fire('Alerta', 'Los campos red social, nombre de usuario y correo no deben estar vacios', 'error');
-        }
-    }
-
-    const handleDeleteSocial = (id:any) => {
-        let list = generalInfo.details.socialNetworks.filter((obj:any) => obj.id !== id);
-
-        handleChange({
-            currentTarget:{
-                name:'details',
-                value:{
-                    ...generalInfo.details,
-                    socialNetworks: list
                 }
             }
         });
@@ -509,50 +414,6 @@ const TravelInfo = ({
                 )}
                 
             </fieldset>
-             <Divider />
-                <fieldset>
-                    <legend className="font-semibold">Redes Sociales</legend>
-                    <Row className="flex items-end">
-                        <Col xs={24} md={5}>
-                            <label>Red Social</label>
-                            <SelectForm 
-                                id="social_network"
-                                options={networks}
-                                value={socialForm.socialNetwork}
-                                handleChange={(value)=>handleChangeSocialForm({currentTarget:{name:'socialNetwork', value: value}})}
-                            />
-                        </Col>
-                        <Col xs={24} md={8}>
-                            <label>Nombre de usuario / Página</label>
-                            <Input 
-                                id="username"
-                                value={socialForm.username}
-                                onChange={handleChangeSocialForm}
-                            />
-                        </Col>
-                        <Col xs={24} md={8}>
-                            <label>Correo del cliente con el que utiliza la red</label>
-                            <Input
-                                type="email"
-                                id="email"
-                                value={socialForm.email}
-                                onChange={handleChangeSocialForm}
-                            />
-                        </Col>
-                        <Col xs={24} md={3}>
-                            <Button onClick={handleAddSocial}>Agregar</Button>
-                        </Col>                    
-                    </Row>
-                    <Row>
-                        <Col xs={24}>
-                            <Table 
-                                columns={networkColumns}
-                                data={generalInfo.details.socialNetworks}
-                                height={220}
-                            />
-                        </Col>
-                    </Row>
-                </fieldset>
         </Grid>
     )
 }
