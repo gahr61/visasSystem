@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
-import { Tabs } from "rsuite";
+import { Message, Tabs } from "rsuite";
 
 import Content from "../../../components/common/Content";
 import DetailsForm from "../../../components/ui/procedures/visa/DetailsForm";
@@ -9,7 +9,7 @@ import { IApp } from "../../../utils/interfaces/function";
 import { visasInfoDetails } from "../../../utils/services/sales/procedures";
 import { useIdleTimer } from "react-idle-timer";
 import moment from "moment";
-import { decript, encript, isValidForm, removeFromStorage, verifyRequiredFields } from "../../../utils/functions";
+import { decript, encript, removeFromStorage, verifyRequiredFields } from "../../../utils/functions";
 import Toast from "../../../components/common/Toast";
 import Button from "../../../components/common/Button";
 import { Client } from "../../../utils/interfaces/client";
@@ -106,8 +106,8 @@ const VisaDetails = ({loader}:IApp)=>{
     };
 
     const validationRules:any = {
-        personalInformation:{            
-            names:'required', lastname1:'required', lastname2:'required', birthdate:'required', sex:'', curp:'required', civilStatus:'',
+        personalInformation:{
+            names:'required', lastname1:'required', lastname2:'', birthdate:'required', sex:'', curp:'required', civilStatus:'',
             birthplace:{
                 country:'required', state:'required', city:'required', nationality:''
             },
@@ -117,31 +117,104 @@ const VisaDetails = ({loader}:IApp)=>{
         },
         contactInformation:{
             address:{
-                street:'required', noInt:'', noExt:'required', postCode:'required', colony:'required', country:'required', state:'required', city:'required'                
+                street:'required', noInt:'', noExt:'required', postCode:'required', colony:'required', country:'required', state:'required', city:'required'
             }
         },
         jobsSchools:{
-            occupation:'required', otherOcupation:'', salary:'required', antiquity:'required', ocupationName:'required', ocupationAddress:'required',
-            schools:[]
+            occupation:'required', salary:'required', antiquity:'required', hireDate:'required', occupationName:'required', activitiesDescription:'required',
+            address:{
+                street:'required', noInt:'', noExt:'required', postCode:'required', colony:'required', country:'required', state:'required', city:'required'
+            }
         },
         generalInformation:{
             residence:{
-                fullName:'required', personalPhone:'required', workPhone:'', celPhone:''
+                fullName:'required', relationship:'required', citizen_status:'required', personalPhone:'required', workPhone:'', celPhone:''
             },
             history:{ tryProcedureVisa:'required', procedureDate:'' },
-            visa:{ lastVisa:'',expeditionDate:'', expirationDate:'' },
             details:{
-                addressEEUU:'required', travelDateEEUU:'required', has_visit_eeuu:'required', travel_date:'required',
-                timeEEUU:'', travelReason:'required', coverExpenses:'required', lastVisit:'required', dateLastVisit:'required', timeLastVisit:'required',
-                observations:''
+                addressEEUU:{
+                    street:'required', number:'required', city:'required', state:'required', zip:'required'
+                },
+                travelDateEEUU:'required', timeEEUU:'required', travelReason:'required', coverExpenses:'required',
+                has_visit_eeuu:'required', other_countries:'required'
             }
         }
     };
+
+    const SECTION_LABELS:any = {
+        personal: 'Datos personales',
+        contact: 'Información de contacto',
+        familiar: 'Familia directa',
+        job: 'Información laboral y académica',
+        general: 'Información de estancia'
+    };
+
+    const isRuleComplete = (obj:any, rules:any):boolean => {
+        return Object.keys(rules).every((key)=>{
+            const rule = rules[key];
+
+            if(typeof rule === 'object'){
+                return isRuleComplete(obj?.[key], rule);
+            }
+
+            if(rule === 'required'){
+                return obj?.[key] !== '' && obj?.[key] !== null && obj?.[key] !== undefined;
+            }
+
+            return true;
+        });
+    }
+
+    const isPersonalComplete = (client:any) => {
+        if(!isRuleComplete(client.personalInformation, validationRules.personalInformation)) return false;
+
+        const isMarried = client.personalInformation.civilStatus === 'Casado' || client.personalInformation.civilStatus === 'Union libre';
+
+        if(isMarried){
+            const spouse = client.personalInformation.spouse;
+            if(!spouse.names || !spouse.lastname1 || !spouse.birthdate || !spouse.state || spouse.hasVisa === '') return false;
+        }
+
+        return true;
+    }
+
+    const isContactComplete = (client:any) => isRuleComplete(client.contactInformation, validationRules.contactInformation);
+
+    const isFamiliarComplete = (client:any) => {
+        const relationships = client.familiarInformation.relationships;
+        const hasFather = relationships.some((r:any) => r.relationship === 'PADRE');
+        const hasMother = relationships.some((r:any) => r.relationship === 'MADRE');
+
+        return hasFather && hasMother;
+    }
+
+    const isJobComplete = (client:any) => isRuleComplete(client.jobsSchools, validationRules.jobsSchools);
+
+    const isGeneralComplete = (client:any) => {
+        if(!isRuleComplete(client.generalInformation, validationRules.generalInformation)) return false;
+
+        const details = client.generalInformation.details;
+        if(details.has_visit_eeuu === '1' && (!details.lastVisit || !details.dateLastVisit)) return false;
+        if(details.other_countries === '1' && !details.travelCountries) return false;
+
+        const history = client.generalInformation.history;
+        if(history.tryProcedureVisa === '1'){
+            if(!history.procedureDate || history.visaApproved === '') return false;
+
+            if(history.visaApproved === '1'){
+                const visa = client.generalInformation.visa;
+                if(!visa.lastVisa || !visa.expirationDate || !visa.expeditionDate) return false;
+            }
+        }
+
+        return true;
+    }
 
     const [currentKey, setCurrentKey] = useState<string | number | undefined>('0');
     const [saleStatus, setSaleStatus] = useState('');
     const [saleType, setSaleType] = useState('');
     const [showPrint, setShowPrint] = useState(false);
+    const [missingData, setMissingData] = useState<Record<number, string[]>>({});
 
     const onLoad = async ()=>{
         const fromStorage = decript('clients', 'local');
@@ -421,8 +494,6 @@ const VisaDetails = ({loader}:IApp)=>{
     }
 
     const onIdle = ()=>{
-        console.log('save data')
-
         handleSubmit();
     }
 
@@ -438,46 +509,6 @@ const VisaDetails = ({loader}:IApp)=>{
         encript('clients', JSON.stringify(dataClients), 'local');
 
         setClients(dataClients);
-    }
-
-    const validateAllData = () => {
-        let errors:any = [];
-
-        clients.forEach((client, index)=>{
-            Object.keys(validationRules).forEach((section)=>{                
-                Object.keys(validationRules[section]).forEach((element)=>{
-                    
-                    const formElement = validationRules[section][element];
-                    
-                    if(typeof formElement === 'object'){
-                        Object.keys(formElement).forEach((item)=>{
-                            const valueItem = formElement[item];
-                            const value = client[section][element][item];
-
-                            if(valueItem === 'required' && value === ''){
-                                let error:any = errors.find((obj:any) => obj.form === index);
-
-                                if(!error){
-                                    errors.push({
-                                        form:index,
-                                        fields:[{field:item}]
-                                    })
-                                }else{
-                                    error = {
-                                        ...error,
-                                        fields:[...error.fields, {field: item}]
-                                    }
-
-                                    errors[index] = error;
-                                }
-                            }                            
-                        })
-                    }
-                })
-            })
-        })
-        
-        return errors.length === 0;
     }
 
     const updatePersonalInfo = async (client:any)=>{
@@ -610,15 +641,6 @@ const VisaDetails = ({loader}:IApp)=>{
     }
 
     const saveUpdateRelationships = async (client:any)=>{
-        const hasFather = client.familiarInformation.relationships.some((r:any) => r.relationship === 'PADRE');
-        const hasMother = client.familiarInformation.relationships.some((r:any) => r.relationship === 'MADRE');
-
-        if(!hasFather || !hasMother){
-            const missing = [!hasFather && 'padre', !hasMother && 'madre'].filter(Boolean).join(' y ');
-            Toast.fire('Error', `Debe agregar a su ${missing} en Familia directa`, 'error');
-            return false;
-        }
-
         const relationships = client.familiarInformation.relationships.map((relation:any)=>{
             const item = {
                 relationship: relation.relationship,
@@ -760,11 +782,12 @@ const VisaDetails = ({loader}:IApp)=>{
         
     }
 
-    const saveGeneralInfo = async (client:any)=>{
+    const saveGeneralInfo = async (client:any, markComplete:boolean = false)=>{
         let valid = false;
 
         let obj:any = {
             clients_id: client.personalInformation.id,
+            mark_complete: markComplete,
             residence:{
                 process_id: client.process_id,
                 full_name: client.generalInformation.residence.fullName,
@@ -828,30 +851,52 @@ const VisaDetails = ({loader}:IApp)=>{
     }
 
     const handleSubmit = async ()=>{
-        if(!validateAllData() && !isValidForm('div.forms')){
-            Toast.fire('Error', 'Existen campos vacios en los clientes, que son requeridos', 'error');
-            return;
-        }
-    
         loader.current?.handleShow('Guardando...');
 
-        const requested = await Promise.all(clients.map(async (client:any)=>{
-            const resPersonal = await updatePersonalInfo(client);
-            const resContact = await updateContactInfo(client);
-            const resRelation = await saveUpdateRelationships(client);
-            const resJob = await updateJobsSchools(client);
-            const resGeneral = await saveGeneralInfo(client);
+        const missingByClient:Record<number, string[]> = {};
 
-            if(resPersonal && resContact && resRelation && resJob && resGeneral){
-                return true;
+        await Promise.all(clients.map(async (client:any, index:number)=>{
+            const missing:string[] = [];
+
+            if(isPersonalComplete(client)){
+                await updatePersonalInfo(client);
+            }else{
+                missing.push(SECTION_LABELS.personal);
+            }
+
+            if(isContactComplete(client)){
+                await updateContactInfo(client);
+            }else{
+                missing.push(SECTION_LABELS.contact);
+            }
+
+            if(isFamiliarComplete(client)){
+                await saveUpdateRelationships(client);
+            }else{
+                missing.push(SECTION_LABELS.familiar);
+            }
+
+            if(isJobComplete(client)){
+                await updateJobsSchools(client);
+            }else{
+                missing.push(SECTION_LABELS.job);
+            }
+
+            if(isGeneralComplete(client)){
+                await saveGeneralInfo(client, missing.length === 0);
+            }else{
+                missing.push(SECTION_LABELS.general);
+            }
+
+            if(missing.length > 0){
+                missingByClient[index] = missing;
             }
         }));
 
-        const filtered = requested.filter(obj => obj !== undefined);
-
+        setMissingData(missingByClient);
         loader.current?.handleClose();
-        
-        if(filtered.length === clients.length){
+
+        if(Object.keys(missingByClient).length === 0){
             Toast.fire('Correcto', 'Se guardaron los datos correctamente', 'success');
 
             if(userData.role === 'cliente'){
@@ -861,11 +906,11 @@ const VisaDetails = ({loader}:IApp)=>{
             }
 
             removeFromStorage('clients', 'local');
-            
+
             return;
         }
-        
-        Toast.fire('Error', 'Existe un error en el guardado de datos', 'error');
+
+        Toast.fire('Alerta', 'Se guardó tu avance. Aún hay datos pendientes por completar.', 'warning');
     }
 
     const handleCancel = ()=>{
@@ -904,14 +949,24 @@ const VisaDetails = ({loader}:IApp)=>{
                     saleType={saleType}
                 />
                 <div style={{minHeight:height}}>
+                    {Object.keys(missingData).length > 0 && (
+                        <Message type="warning" showIcon className="mb-2">
+                            <strong>Guardado parcial:</strong> se guardó lo que ya estaba completo, pero faltan datos por capturar.
+                            <ul className="m-0 mt-1">
+                                {Object.entries(missingData).map(([index, sections])=>
+                                    <li key={index}>Cliente {parseInt(index)+1}: {sections.join(', ')}</li>
+                                )}
+                            </ul>
+                        </Message>
+                    )}
                     <Tabs activeKey={currentKey} onSelect={setCurrentKey}>
                         {clients.map((client, index)=>
                             <Tabs.Tab key={index} eventKey={index.toString()} title={'Cliente '+index + 1}>
-                                <DetailsForm 
-                                    loader={loader} 
-                                    client={client} 
-                                    index={index} 
-                                    updateClient={updateClient} 
+                                <DetailsForm
+                                    loader={loader}
+                                    client={client}
+                                    index={index}
+                                    updateClient={updateClient}
                                 />
                             </Tabs.Tab>
                         )}
