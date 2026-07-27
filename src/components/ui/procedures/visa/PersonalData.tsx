@@ -300,45 +300,7 @@ const PersonalData = ({
                     </fieldset>
                 </>
             )}
-            <hr className="my-2" />
-            <fieldset>
-                <legend className="font-semibold">Idiomas</legend>
-                <Row className="flex items-end mb-2">
-                    <Col xs={24} lg={10}>
-                        <label>Idioma</label>
-                        <SelectForm
-                            id="language_select"
-                            options={LANGUAGES}
-                            value={languageForm.language}
-                            handleChange={(val) => setLanguageForm(prev => ({ ...prev, language: val as string }))}
-                        />
-                    </Col>
-                    <Col xs={24} lg={4}>
-                        <label>Porcentaje (%)</label>
-                        <Input
-                            type="number"
-                            id="language_percentage"
-                            value={languageForm.percentage}
-                            onChange={(e: any) => {
-                                const val = Math.min(100, Math.max(0, parseInt(e.currentTarget.value) || 0));
-                                setLanguageForm(prev => ({ ...prev, percentage: val.toString() }));
-                            }}
-                        />
-                    </Col>
-                    <Col xs={24} lg={3}>
-                        <Button onClick={handleAddLanguage}>Agregar</Button>
-                    </Col>
-                </Row>
-                <Row>
-                    <Col xs={24}>
-                        <Table
-                            columns={languageColumns}
-                            data={personalInfo.languages || []}
-                            height={150}
-                        />
-                    </Col>
-                </Row>
-            </fieldset>
+            
             <hr className="my-2" />
             <fieldset>
                 <legend className="font-semibold">Lugar de nacimiento</legend>
@@ -439,6 +401,45 @@ const PersonalData = ({
                             id="expedition_city"
                             value={personalInfo.passport.expedition_city}
                             onChange={(e:any)=>onChangeField('expedition_city', e.target.value.toUpperCase(), 'passport')}
+                        />
+                    </Col>
+                </Row>
+            </fieldset>
+            <hr className="my-2" />
+            <fieldset>
+                <legend className="font-semibold">Idiomas</legend>
+                <Row className="flex items-end mb-2">
+                    <Col xs={24} lg={10}>
+                        <label>Idioma</label>
+                        <SelectForm
+                            id="language_select"
+                            options={LANGUAGES}
+                            value={languageForm.language}
+                            handleChange={(val) => setLanguageForm(prev => ({ ...prev, language: val as string }))}
+                        />
+                    </Col>
+                    <Col xs={24} lg={4}>
+                        <label>Porcentaje (%)</label>
+                        <Input
+                            type="number"
+                            id="language_percentage"
+                            value={languageForm.percentage}
+                            onChange={(e: any) => {
+                                const val = Math.min(100, Math.max(0, parseInt(e.currentTarget.value) || 0));
+                                setLanguageForm(prev => ({ ...prev, percentage: val.toString() }));
+                            }}
+                        />
+                    </Col>
+                    <Col xs={24} lg={3}>
+                        <Button onClick={handleAddLanguage}>Agregar</Button>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col xs={24}>
+                        <Table
+                            columns={languageColumns}
+                            data={personalInfo.languages || []}
+                            height={150}
                         />
                     </Col>
                 </Row>
