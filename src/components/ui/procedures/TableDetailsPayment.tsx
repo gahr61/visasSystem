@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Input from "../../common/Input";
 import SelectForm from "../../common/Select";
 import { formatPrice } from "../../../utils/functions";
-import { conceptsPassportMinimumPayment, conceptsVisaPrices } from "../../../utils/services/concepts";
+import { conceptsPassportMinimumPayment, conceptsVisaMinimumPayment, conceptsVisaPrices } from "../../../utils/services/concepts";
 
 const TableDetailsPayment = ({
     dataPayment,
@@ -13,21 +13,26 @@ const TableDetailsPayment = ({
 })=>{
     const columns = ['Trámite', 'Concepto', 'Cantidad', 'Precio', 'Total'];
     const [showDetails, setShowDetails] = useState(false);
-    const [concepts, setConcepts]                   = useState<any[]>([]);
+    const [concepts, setConcepts]                     = useState<any[]>([]);
     const [passportMinPayment, setPassportMinPayment] = useState<any>(null);
+    const [visaMinPayment, setVisaMinPayment]         = useState<any>(null);
 
     const isPassportFlow = dataPayment.procedures.some((item:any)=>item.procedure === 'Pasaporte');
 
     const onLoad = async ()=>{
-        const [responsePrices, responsePassportMin] = await Promise.all([
+        const [responsePrices, responsePassportMin, responseVisaMin] = await Promise.all([
             conceptsVisaPrices(),
-            conceptsPassportMinimumPayment()
+            conceptsPassportMinimumPayment(),
+            conceptsVisaMinimumPayment()
         ]);
         if(responsePrices && responsePrices.success){
             setConcepts(responsePrices.data);
         }
         if(responsePassportMin && responsePassportMin.success){
             setPassportMinPayment(responsePassportMin.data);
+        }
+        if(responseVisaMin && responseVisaMin.success){
+            setVisaMinPayment(responseVisaMin.data);
         }
     }
 
@@ -75,7 +80,8 @@ const TableDetailsPayment = ({
         let findPrice;
         let total = 0;
         let amount = 0;
-        
+        const minPayment = parseFloat(visaMinPayment?.price ?? 0);
+
         const procedures = dataPayment.procedures.map((item:any, i: number) =>{
             if(i === index){
                 amount = item.amount;
@@ -101,12 +107,12 @@ const TableDetailsPayment = ({
                 ...dataPayment.options,
                 minPayment: true,
                 otherPayment: false,
-                minPrice: amount * 500,
-                otherPrice: amount * 500,
+                minPrice: amount * minPayment,
+                otherPrice: amount * minPayment,
                 totalProcedure: total,
-                totalPay:  dataPayment.options.minPayment ? total - (amount * 500): 
+                totalPay:  dataPayment.options.minPayment ? total - (amount * minPayment):
                 dataPayment.options.otherPayment ? total - dataPayment.options.otherPrice : 0,
-                totalPerPay: dataPayment.options.minPayment ? (amount * 500): 
+                totalPerPay: dataPayment.options.minPayment ? (amount * minPayment):
                     dataPayment.options.otherPayment ? dataPayment.options.otherPrice : 0
             }
         }
@@ -114,7 +120,7 @@ const TableDetailsPayment = ({
         setDataPayment(data);
 
         setShowDetails(value !== '');
-        
+
     }
 
     const onCheckOption = (e: React.FormEvent<HTMLInputElement>)=>{
@@ -147,6 +153,20 @@ const TableDetailsPayment = ({
         }
         setDataPayment(data);
     }
+
+    const onChangeObservation = (e: React.FormEvent<HTMLTextAreaElement>) => {
+        setDataPayment({
+            ...dataPayment,
+            options:{
+                ...dataPayment.options,
+                paymentObservation: e.currentTarget.value
+            }
+        });
+    }
+
+    const belowMinPayment = dataPayment.options.otherPayment
+        && dataPayment.options.otherPrice !== ''
+        && parseFloat(dataPayment.options.otherPrice) < dataPayment.options.minPrice;
 
     useEffect(()=>{ onLoad(); }, []);
 
@@ -257,6 +277,24 @@ const TableDetailsPayment = ({
                                 <Input type="number" name="otherPrice" value={dataPayment.options.otherPrice} onChange={onChangePrice} customClass="w-20 text-end" disabled={!dataPayment.options.otherPayment}  />
                             </td>
                         </tr>
+                        {belowMinPayment && (
+                            <tr className="border-b">
+                                <td colSpan={5} className="px-6 py-2">
+                                    <label htmlFor="paymentObservation" className="block text-sm font-medium text-gray-700 mb-1">
+                                        Observación (obligatoria: el pago es menor al pago por inicio de trámite)
+                                    </label>
+                                    <textarea
+                                        id="paymentObservation"
+                                        name="paymentObservation"
+                                        value={dataPayment.options.paymentObservation || ''}
+                                        onChange={onChangeObservation}
+                                        required
+                                        rows={2}
+                                        className="w-full border border-gray-300 rounded-lg text-sm p-2 outline-0 focus:border-blue-500 focus:ring-blue-500"
+                                    />
+                                </td>
+                            </tr>
+                        )}
                         <tr>
                             <td colSpan={4} className="px-6 py-2 whitespace-nowrap text-end text-sm font-medium text-gray-80">
                                 Total de trámite

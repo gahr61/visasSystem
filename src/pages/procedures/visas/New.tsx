@@ -218,7 +218,8 @@ const VisasNew = ({loader}:IApp)=>{
                 status:'Pagado',
                 platform:'Sistema',
                 receipt:dataPayment.payment.receipt,
-                reference: dataPayment.payment.reference
+                reference: dataPayment.payment.reference,
+                observations: dataPayment.options.paymentObservation || null
             },
             clients: formData.map((data:any)=>{
                 //obtener fecha de nacimiento para determinar si es menor o mayor de edad                    

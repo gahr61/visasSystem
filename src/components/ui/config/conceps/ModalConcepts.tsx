@@ -52,6 +52,13 @@ const ModalConcepts = forwardRef(({loader, getList}:Props, ref)=>{
         });
     }
 
+    const handleChangeProtected = (e: React.ChangeEvent<HTMLInputElement>)=>{
+        setDataForm({
+            ...dataForm,
+            is_protected: e.currentTarget.checked
+        });
+    }
+
     const handleSubmit = async ()=>{
         if(!isValidForm('div.catalog-form')){
             Toast.fire('Error', 'Campos requeridos', 'error');
@@ -103,6 +110,17 @@ const ModalConcepts = forwardRef(({loader, getList}:Props, ref)=>{
                                 <label>Precio</label>
                                 <Input type="number" id="price" value={dataForm.price} onChange={handleChange} required />
                             </Col>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col xs={24} className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                id="is_protected"
+                                checked={dataForm.is_protected}
+                                onChange={handleChangeProtected}
+                            />
+                            <label htmlFor="is_protected">No permitir cambiar nombre</label>
                         </Col>
                     </Row>
                  </Grid>
