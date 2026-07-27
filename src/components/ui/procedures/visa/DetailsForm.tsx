@@ -62,6 +62,14 @@ const DetailsForm = ({client, updateClient, index}: Props)=>{
             }
         }
 
+        if(currentStep === 3){
+            valid = await updateFamiliarInfo();
+
+            if(!valid){
+                return;
+            }
+        }
+
         if(currentStep < steps.length - 1){
             setCurrentStep(currentStep+1);
         }
@@ -97,6 +105,21 @@ const DetailsForm = ({client, updateClient, index}: Props)=>{
     const updateJobsSchools = async ()=>{
         if(!isValidForm('div.job-form')){
             Toast.fire('Error', 'Campos incompletos', 'error');
+            return false;
+        }
+
+        return true;
+    }
+
+    const updateFamiliarInfo = async ()=>{
+        const relationships = client.familiarInformation.relationships as any[];
+
+        const hasFather = relationships.some(r => r.relationship === 'PADRE');
+        const hasMother = relationships.some(r => r.relationship === 'MADRE');
+
+        if(!hasFather || !hasMother){
+            const missing = [!hasFather && 'padre', !hasMother && 'madre'].filter(Boolean).join(' y ');
+            Toast.fire('Error', `Debe agregar a su ${missing} en Familia directa`, 'error');
             return false;
         }
 

@@ -16,6 +16,7 @@ type EducationForm = {
     id: number,
     name: string,
     degree_level: string,
+    is_last_degree: boolean,
     period: string,
     address: any
 }
@@ -32,10 +33,11 @@ const JobInfo = ({
     const columns: Columns[] = [
         {key:'school', title:'Escuela', grow:3, render:(row:EducationForm) => row.name},
         {key:'degree_level', title:'Grado', grow:2, render:(row:EducationForm) => row.degree_level},
+        {key:'is_last_degree', title:'Último grado', grow:1, render:(row:EducationForm) => row.is_last_degree ? 'Sí' : 'No'},
         {key:'address', title:'Dirección', grow:3, render:(row:EducationForm) =>
             [row.address?.street, row.address?.colony, row.address?.city].filter(Boolean).join(', ')
         },
-        {key:'period', title:'Periodo', grow:1, render:(row:EducationForm) => row.period},
+        {key:'period', title:'Generación', grow:1, render:(row:EducationForm) => row.period},
         {key:'actions', title:'', grow:1, render:(row:EducationForm) =>
             <>
                 <ButtonTable

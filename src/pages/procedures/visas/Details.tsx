@@ -91,7 +91,7 @@ const VisaDetails = ({loader}:IApp)=>{
         },
         generalInformation:{
             residence:{
-                fullName:'', relationship:'', personalPhone:'', workPhone:'', celPhone:''
+                fullName:'', relationship:'', citizen_status:'', personalPhone:'', workPhone:'', celPhone:''
             },
             history:{ tryProcedureVisa:'', procedureDate:'', visaApproved:'' },
             visa:{ lastVisa:'',expeditionDate:'', expirationDate:'' },
@@ -307,6 +307,7 @@ const VisaDetails = ({loader}:IApp)=>{
                             schools: (item.studies || []).map((school:any)=>({
                                 name: school.name,
                                 degree_level: school.degree_level || '',
+                                is_last_degree: !!school.is_last_degree,
                                 period: school.period,
                                 address:{
                                     street: school.street || '',
@@ -334,6 +335,7 @@ const VisaDetails = ({loader}:IApp)=>{
                                 id: item.residence.id,
                                 fullName: item.residence.full_name  || '',
                                 relationship: item.residence.relationship || '',
+                                citizen_status: item.residence.citizen_status || '',
                                 personalPhone: item.residence.personal_phone  || '',
                                 workPhone: item.residence.work_phone  || '',
                                 celPhone: item.residence.cel_phone  || ''
@@ -608,6 +610,15 @@ const VisaDetails = ({loader}:IApp)=>{
     }
 
     const saveUpdateRelationships = async (client:any)=>{
+        const hasFather = client.familiarInformation.relationships.some((r:any) => r.relationship === 'PADRE');
+        const hasMother = client.familiarInformation.relationships.some((r:any) => r.relationship === 'MADRE');
+
+        if(!hasFather || !hasMother){
+            const missing = [!hasFather && 'padre', !hasMother && 'madre'].filter(Boolean).join(' y ');
+            Toast.fire('Error', `Debe agregar a su ${missing} en Familia directa`, 'error');
+            return false;
+        }
+
         const relationships = client.familiarInformation.relationships.map((relation:any)=>{
             const item = {
                 relationship: relation.relationship,
@@ -682,6 +693,7 @@ const VisaDetails = ({loader}:IApp)=>{
             const item = {
                 name: school.name,
                 degree_level: school.degree_level,
+                is_last_degree: school.is_last_degree,
                 period: school.period,
                 address:{
                     street: schoolAddress.street,
@@ -757,6 +769,7 @@ const VisaDetails = ({loader}:IApp)=>{
                 process_id: client.process_id,
                 full_name: client.generalInformation.residence.fullName,
                 relationship: client.generalInformation.residence.relationship,
+                citizen_status: client.generalInformation.residence.citizen_status,
                 cel_phone: client.generalInformation.residence.celPhone,
                 work_phone: client.generalInformation.residence.workPhone,
                 personal_phone: client.generalInformation.residence.personalPhone

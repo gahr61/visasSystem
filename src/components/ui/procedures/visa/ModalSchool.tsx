@@ -1,5 +1,5 @@
 import { forwardRef, useImperativeHandle, useState } from "react";
-import { Col, Grid, Modal, Row } from "rsuite";
+import { Checkbox, Col, Grid, Modal, Row } from "rsuite";
 import Input from "../../../common/Input";
 import SelectForm, { ISelectOptions } from "../../../common/Select";
 import Button from "../../../common/Button";
@@ -19,6 +19,7 @@ const DEGREE_LEVELS: ISelectOptions[] = [
 const emptyForm = {
     name: '',
     degree_level: '',
+    is_last_degree: false,
     period: '',
     address: {
         street: '', noInt: '', noExt: '', postCode: '', colony: '', country: 42, state: '', city: ''
@@ -85,8 +86,18 @@ const ModalSchool = forwardRef(({ onAdd }: Props, ref) => {
                             />
                         </Col>
                         <Col xs={24} lg={6}>
-                            <label>Periodo</label>
+                            <label>Generación</label>
                             <Input id="period" value={form.period} onChange={handleChange} required />
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col xs={24}>
+                            <Checkbox
+                                checked={form.is_last_degree}
+                                onChange={(_v, checked)=>setForm({...form, is_last_degree: checked})}
+                            >
+                                Es tu último grado de estudios
+                            </Checkbox>
                         </Col>
                     </Row>
                     <hr className="my-2" />

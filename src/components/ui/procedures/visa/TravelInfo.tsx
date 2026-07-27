@@ -87,7 +87,7 @@ const TravelInfo = ({
             <fieldset>
                 <legend className="font-semibold">Hospedaje</legend>
                 <Row>
-                    <Col xs={24} lg={16}>
+                    <Col xs={24} lg={12}>
                         <label>Nombre completo de persona de referencia en Estados Unidos</label>
                         <Input
                             id="fullName"
@@ -96,7 +96,7 @@ const TravelInfo = ({
                             required
                         />
                     </Col>
-                    <Col xs={24} lg={showOtherRelationship ? 4 : 8}>
+                    <Col xs={24} lg={showOtherRelationship ? 4 : 6}>
                         <label>Parentesco</label>
                         <SelectForm
                             id="relationship"
@@ -118,6 +118,19 @@ const TravelInfo = ({
                             />
                         </Col>
                     )}
+                    <Col xs={24} lg={6}>
+                        <label>¿Es ciudadano o residente?</label>
+                        <SelectForm
+                            id="citizen_status"
+                            options={[
+                                {value:'Ciudadano', label:'Ciudadano'},
+                                {value:'Residente', label:'Residente'}
+                            ]}
+                            value={generalInfo.residence.citizen_status}
+                            handleChange={(value)=>onChangeData({currentTarget:{name:'citizen_status', value}}, 'residence')}
+                            required
+                        />
+                    </Col>
                 </Row>
                 <Row>
                     <Col xs={24} lg={5}>
