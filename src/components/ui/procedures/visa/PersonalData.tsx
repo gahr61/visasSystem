@@ -303,7 +303,7 @@ const PersonalData = ({
             
             <hr className="my-2" />
             <fieldset>
-                <legend className="font-semibold">Lugar de nacimiento</legend>
+                <legend className="font-semibold">Lugar de nacimiento (como se muestra en el pasaporte)</legend>
                 <Row>
                     <Col xs={24} lg={6}>
                         <label>País</label>

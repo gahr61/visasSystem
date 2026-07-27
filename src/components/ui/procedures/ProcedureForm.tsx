@@ -95,6 +95,8 @@ const ProcedureForm = ({
             passport_expedition_date:'',
             passport_expiration_date:'',
             passport_country_expedition:42,
+            passport_state_expedition:'',
+            passport_city_expedition:'',
             expirations:{
                 time: '',
                 complete:'',

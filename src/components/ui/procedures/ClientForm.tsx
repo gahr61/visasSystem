@@ -155,7 +155,7 @@ const ClientForm = ({
 
     return(
         <fieldset>
-            <legend className="text-lg">Datos del cliente</legend>
+            <legend className="text-lg">Datos del cliente (como se muestra en el pasaporte)</legend>
             {/* <Row>
                 <Col xs={24}>
                     <label>Buscar solicitante</label>

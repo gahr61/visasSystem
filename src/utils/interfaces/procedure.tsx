@@ -48,6 +48,8 @@ export interface Passport {
     passport_expedition_date: string;
     passport_expiration_date: string;
     passport_country_expedition: string | number;
+    passport_state_expedition?: string | number;
+    passport_city_expedition?: string;
     expirations: PassportExpirations;
 }
 

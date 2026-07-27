@@ -257,7 +257,9 @@ const VisasNew = ({loader}:IApp)=>{
                         number: data.passport.passport_number,
                         expedition_date: data.passport.passport_expedition_date,
                         expiration_date: data.passport.passport_expiration_date,
-                        country_expedition: data.passport.passport_country_expedition
+                        country_expedition: data.passport.passport_country_expedition,
+                        state_expedition: data.passport.passport_state_expedition,
+                        city_expedition: data.passport.passport_city_expedition
                     }
                 }
 
