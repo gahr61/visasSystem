@@ -101,6 +101,44 @@ const ModalSchedule = forwardRef(({ loader, id, onLoad }: Props, ref) => {
                             <p className="font-semibold text-sm mb-3 text-gray-800">{item.client}</p>
 
                             <div className="mb-3">
+                                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">CAS</p>
+                                <Row>
+                                    <Col xs={24} md={10}>
+                                        <label className="text-xs text-gray-500 mb-1 block">Ciudad</label>
+                                        <select
+                                            name="cas_city"
+                                            value={item.cas_city}
+                                            onChange={(e) => handleChange(e, item.client_id)}
+                                            className={selectClass}
+                                        >
+                                            <option value="">Seleccione...</option>
+                                            {MEXICO_CITIES.map(city => (
+                                                <option key={city} value={city}>{city}</option>
+                                            ))}
+                                        </select>
+                                    </Col>
+                                    <Col xs={24} md={8}>
+                                        <label className="text-xs text-gray-500 mb-1 block">Fecha</label>
+                                        <Input
+                                            type="date"
+                                            name="cas"
+                                            value={item.cas}
+                                            onChange={(e: any) => handleChange(e, item.client_id)}
+                                        />
+                                    </Col>
+                                    <Col xs={24} md={6}>
+                                        <label className="text-xs text-gray-500 mb-1 block">Hora</label>
+                                        <Input
+                                            type="time"
+                                            name="cas_time"
+                                            value={item.cas_time}
+                                            onChange={(e: any) => handleChange(e, item.client_id)}
+                                        />
+                                    </Col>
+                                </Row>
+                            </div>
+
+                            <div>
                                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Consulado</p>
                                 <Row>
                                     <Col xs={24} md={10}>
@@ -138,43 +176,7 @@ const ModalSchedule = forwardRef(({ loader, id, onLoad }: Props, ref) => {
                                 </Row>
                             </div>
 
-                            <div>
-                                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">CAS</p>
-                                <Row>
-                                    <Col xs={24} md={10}>
-                                        <label className="text-xs text-gray-500 mb-1 block">Ciudad</label>
-                                        <select
-                                            name="cas_city"
-                                            value={item.cas_city}
-                                            onChange={(e) => handleChange(e, item.client_id)}
-                                            className={selectClass}
-                                        >
-                                            <option value="">Seleccione...</option>
-                                            {MEXICO_CITIES.map(city => (
-                                                <option key={city} value={city}>{city}</option>
-                                            ))}
-                                        </select>
-                                    </Col>
-                                    <Col xs={24} md={8}>
-                                        <label className="text-xs text-gray-500 mb-1 block">Fecha</label>
-                                        <Input
-                                            type="date"
-                                            name="cas"
-                                            value={item.cas}
-                                            onChange={(e: any) => handleChange(e, item.client_id)}
-                                        />
-                                    </Col>
-                                    <Col xs={24} md={6}>
-                                        <label className="text-xs text-gray-500 mb-1 block">Hora</label>
-                                        <Input
-                                            type="time"
-                                            name="cas_time"
-                                            value={item.cas_time}
-                                            onChange={(e: any) => handleChange(e, item.client_id)}
-                                        />
-                                    </Col>
-                                </Row>
-                            </div>
+                            
                         </div>
                     ))}
                 </Grid>
