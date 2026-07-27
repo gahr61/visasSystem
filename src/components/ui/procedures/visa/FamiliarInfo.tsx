@@ -1,15 +1,16 @@
 import { Col, Grid, Row, Tooltip, Whisper } from "rsuite"
 import Input from "../../../common/Input";
-import SelectForm from "../../../common/Select";
+import SelectForm, { ISelectOptions } from "../../../common/Select";
 import Button from "../../../common/Button";
 import Table, { Columns } from "../../../common/Table";
 import ButtonTable from "../../../common/ButtonTable";
 import { FaTrashAlt } from "react-icons/fa";
 import { FaCircleInfo } from "react-icons/fa6";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { isValidForm } from "../../../../utils/functions";
 import Toast from "../../../common/Toast";
 import moment from "moment";
+import { relationshipTypesList } from "../../../../utils/services/relationshipTypes";
 
 type FamiliarForm = {
     id:number,
@@ -24,40 +25,6 @@ type Props = {
     familiarInfo: any,
     handleChange:(e:any) => void
 }
-
-const relationships = [
-    { value: 'padre', label: 'Padre' },
-    { value: 'madre', label: 'Madre' },
-    { value: 'hermano', label: 'Hermano' },
-    { value: 'hermana', label: 'Hermana' },
-    { value: 'hijo', label: 'Hijo' },
-    { value: 'hija', label: 'Hija' },
-    { value: 'abuelo', label: 'Abuelo' },
-    { value: 'abuela', label: 'Abuela' },
-    { value: 'nieto', label: 'Nieto' },
-    { value: 'nieta', label: 'Nieta' },
-    { value: 'tio', label: 'Tío' },
-    { value: 'tia', label: 'Tía' },
-    { value: 'sobrino', label: 'Sobrino' },
-    { value: 'sobrina', label: 'Sobrina' },
-    { value: 'primo', label: 'Primo' },
-    { value: 'prima', label: 'Prima' },
-    { value: 'cuñado', label: 'Cuñado' },
-    { value: 'cuñada', label: 'Cuñada' },
-    { value: 'yerno', label: 'Yerno' },
-    { value: 'nuera', label: 'Nuera' },
-    { value: 'suegro', label: 'Suegro' },
-    { value: 'suegra', label: 'Suegra' },
-    { value: 'padrastra', label: 'Padrastro' },
-    { value: 'madrastra', label: 'Madrastra' },
-    { value: 'hermanastro', label: 'Hermanastro' },
-    { value: 'hermanastra', label: 'Hermanastra' },
-    { value: 'primohermano', label: 'Primo hermano' },
-    { value: 'primossegundos', label: 'Primos segundos' },
-    { value: 'bautizo', label: 'Padrino/Madrina' },
-    { value: 'ahijado', label: 'Ahijado' },
-    { value: 'ahijada', label: 'Ahijada' }
-];
 
 const FamiliarInfo = ({
     familiarInfo,
@@ -82,13 +49,29 @@ const FamiliarInfo = ({
     ]
 
     const [requiredFamiliar, setRequiredFamiliar] = useState(false);
+    const [relationships, setRelationships] = useState<ISelectOptions[]>([]);
     const [familiarForm, setFamiliarForm] = useState({
         full_name:'',
         relationship:'',
+        otherRelationship:'',
         birthdate:'',
         has_visa:0,
         lives_in_usa:0
     })
+
+    const loadRelationships = async ()=>{
+        const response = await relationshipTypesList();
+
+        if(response && response.success){
+            const list = response.data.map((item)=>({value: item.name, label: item.name}));
+
+            setRelationships([...list, {value:'Otro', label:'Otro'}]);
+        }
+    }
+
+    useEffect(()=>{
+        loadRelationships();
+    }, []);
 
     const onChangeForm = (e:React.FormEvent<HTMLInputElement | HTMLSelectElement>)=>{
         const {name, value} = e.currentTarget;
@@ -117,9 +100,13 @@ const FamiliarInfo = ({
 
             let list = [...familiarInfo.relationships];
 
+            const relationship = familiarForm.relationship === 'Otro'
+                ? familiarForm.otherRelationship.toUpperCase()
+                : familiarForm.relationship.toUpperCase();
+
             list.push({
                 full_name: familiarForm.full_name,
-                relationship: familiarForm.relationship.toUpperCase(),
+                relationship: relationship,
                 birthdate: moment(familiarInfo.birthdate).local().format('DD/MM/YYYY'),
                 hasVisa: familiarForm.has_visa === 1 ? 'Si' : 'No',
                 livesInUsa: familiarForm.lives_in_usa === 1 ? 'Si' : 'No'
@@ -135,6 +122,7 @@ const FamiliarInfo = ({
             setFamiliarForm({
                 full_name:'',
                 relationship:'',
+                otherRelationship:'',
                 birthdate:'',
                 has_visa:0,
                 lives_in_usa:0
@@ -191,6 +179,17 @@ const FamiliarInfo = ({
                             required={requiredFamiliar}
                         />
                     </Col>
+                    {familiarForm.relationship === 'Otro' && (
+                        <Col xs={24} lg={4}>
+                            <label>¿Cuál?</label>
+                            <Input
+                                id="otherRelationship"
+                                value={familiarForm.otherRelationship}
+                                onChange={onChangeForm}
+                                required={requiredFamiliar}
+                            />
+                        </Col>
+                    )}
                     <Col xs={24} lg={4}>
                         <label>F. Nacimiento</label>
                         <Input

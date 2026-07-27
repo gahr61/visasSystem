@@ -91,12 +91,13 @@ const VisaDetails = ({loader}:IApp)=>{
         },
         generalInformation:{
             residence:{
-                fullName:'', personalPhone:'', workPhone:'', celPhone:''
+                fullName:'', relationship:'', personalPhone:'', workPhone:'', celPhone:''
             },
             history:{ tryProcedureVisa:'', procedureDate:'', visaApproved:'' },
             visa:{ lastVisa:'',expeditionDate:'', expirationDate:'' },
             details:{
-                addressEEUU:'', travelDateEEUU:'', has_visit_eeuu:'', travel_date:'',
+                addressEEUU:{ street:'', number:'', city:'', state:'', zip:'' },
+                travelDateEEUU:'', has_visit_eeuu:'', travel_date:'',
                 timeEEUU:'', travelReason:'', coverExpenses:'', lastVisit:'', dateLastVisit:'', timeLastVisit:'',
                 other_countries:'', travelCountries:'',
                 observations:'', socialNetworks:[]
@@ -158,6 +159,15 @@ const VisaDetails = ({loader}:IApp)=>{
                     ...dataForm.jobsSchools,
                     ...client.jobsSchools,
                     address:{ ...dataForm.jobsSchools.address, ...client.jobsSchools?.address }
+                },
+                generalInformation:{
+                    ...dataForm.generalInformation,
+                    ...client.generalInformation,
+                    details:{
+                        ...dataForm.generalInformation.details,
+                        ...client.generalInformation?.details,
+                        addressEEUU:{ ...dataForm.generalInformation.details.addressEEUU, ...client.generalInformation?.details?.addressEEUU }
+                    }
                 }
             }));
 
@@ -321,10 +331,11 @@ const VisaDetails = ({loader}:IApp)=>{
                             ...data.generalInformation,
                             residence:{
                                 ...data.generalInformation.residence,
-                                id: item.residence.id,                                
-                                fullName: item.residence.full_name  || '', 
-                                personalPhone: item.residence.personal_phone  || '', 
-                                workPhone: item.residence.work_phone  || '', 
+                                id: item.residence.id,
+                                fullName: item.residence.full_name  || '',
+                                relationship: item.residence.relationship || '',
+                                personalPhone: item.residence.personal_phone  || '',
+                                workPhone: item.residence.work_phone  || '',
                                 celPhone: item.residence.cel_phone  || ''
                             },
                         }
@@ -371,7 +382,13 @@ const VisaDetails = ({loader}:IApp)=>{
                                 id: item.process_details.id,
                                 travel_date: item.process_details.travel_date || '',
                                 has_visit_eeuu:  has_visit,
-                                addressEEUU: item.process_details.address_eeuu || '', 
+                                addressEEUU:{
+                                    street: item.process_details.street_eeuu || '',
+                                    number: item.process_details.number_eeuu || '',
+                                    city: item.process_details.city_eeuu || '',
+                                    state: item.process_details.state_eeuu || '',
+                                    zip: item.process_details.zip_eeuu || ''
+                                },
                                 travelDateEEUU: item.process_details.travel_date_eeuu || '',
                                 timeEEUU: item.process_details.time_stay_eeuu || '', 
                                 travelReason: item.process_details.travel_reason || '', 
@@ -636,7 +653,7 @@ const VisaDetails = ({loader}:IApp)=>{
 
     const updateJobsSchools = async (client:any)=>{
 
-        const jobAddress = client.jobsSchools.address;
+        const jobAddress = client.jobsSchools.address || {};
 
         const objJobs = {
             clients_id: client.personalInformation.id,
@@ -660,19 +677,21 @@ const VisaDetails = ({loader}:IApp)=>{
         };
 
         const schools = client.jobsSchools.schools.map((school:any)=>{
+            const schoolAddress = school.address || {};
+
             const item = {
                 name: school.name,
                 degree_level: school.degree_level,
                 period: school.period,
                 address:{
-                    street: school.address.street,
-                    int_number: school.address.noInt || null,
-                    ext_number: school.address.noExt,
-                    postal_code: school.address.postCode,
-                    colony: school.address.colony,
-                    city: school.address.city,
-                    countries_id: school.address.country,
-                    states_id: school.address.state
+                    street: schoolAddress.street,
+                    int_number: schoolAddress.noInt || null,
+                    ext_number: schoolAddress.noExt,
+                    postal_code: schoolAddress.postCode,
+                    colony: schoolAddress.colony,
+                    city: schoolAddress.city,
+                    countries_id: schoolAddress.country,
+                    states_id: schoolAddress.state
                 }
             };
 
@@ -737,6 +756,7 @@ const VisaDetails = ({loader}:IApp)=>{
             residence:{
                 process_id: client.process_id,
                 full_name: client.generalInformation.residence.fullName,
+                relationship: client.generalInformation.residence.relationship,
                 cel_phone: client.generalInformation.residence.celPhone,
                 work_phone: client.generalInformation.residence.workPhone,
                 personal_phone: client.generalInformation.residence.personalPhone

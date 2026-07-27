@@ -93,6 +93,7 @@ const MOCK_CLIENT = {
     generalInformation: {
         residence: {
             fullName:      'Michael Johnson',
+            relationship:  'Amigo',
             personalPhone: '+1 213 555 0101',
             workPhone:     '+1 213 555 0202',
             celPhone:      '+1 310 555 0303',
@@ -109,7 +110,7 @@ const MOCK_CLIENT = {
         },
         details: {
             travel_date:      '2025-07-15',
-            addressEEUU:      '123 Main Street, Los Angeles, CA 90001',
+            addressEEUU:      { street: '123 Main Street', number: '4B', city: 'Los Angeles', state: 'CA', zip: '90001' },
             travelDateEEUU:   '2025-07-15',
             timeEEUU:         '15 días',
             travelReason:     'Turismo y negocios',
@@ -122,8 +123,8 @@ const MOCK_CLIENT = {
             observations:     'Viaje de placer con familia, regreso confirmado',
             clave_ds_160:     'AA001XB2025MX',
             socialNetworks: [
-                { socialNetwork: 'Facebook',  username: 'juancarlos.gonzalez',  url: 'facebook.com/juancarlos.gonzalez' },
-                { socialNetwork: 'Instagram', username: '@jc_gonzalez',         url: 'instagram.com/jc_gonzalez'        },
+                { socialNetwork: 'Facebook',  username: 'juancarlos.gonzalez',  email: 'juan.gonzalez@email.com' },
+                { socialNetwork: 'Instagram', username: '@jc_gonzalez',         email: 'juan.gonzalez@email.com' },
             ],
         },
     },
@@ -335,7 +336,7 @@ const buildClientHTML = (client: any, saleStatus: string, saleType: string, idx:
     );
 
     const fmtAddress = (a: any) =>
-        [a?.street, a?.noExt, a?.colony, a?.city].filter(Boolean).join(', ');
+        esc([a?.street, a?.noExt || a?.number, a?.colony, a?.city, a?.zip].filter(Boolean).join(', '));
 
     const occupationBox = box('Ocupación / Trabajo',
         row(
@@ -343,13 +344,13 @@ const buildClientHTML = (client: any, saleStatus: string, saleType: string, idx:
             cell('Lugar',      esc(js.occupationName),               '50%'),
             cell('Salario',    js.salary ? `$${esc(js.salary)}` : '—', '50%'),
             cell('Antigüedad', esc(js.antiquity),                    '50%'),
-            cellFull('Dirección', esc(fmtAddress(js.address))),
+            cellFull('Dirección', fmtAddress(js.address)),
         )
     );
 
     const studiesBox = box('Estudios',
         tbl(['Nombre', 'Grado', 'Dirección', 'Período'],
-            (js.schools || []).map((s: any) => [esc(s.name), esc(s.degree_level), esc(fmtAddress(s.address)), esc(s.period)])
+            (js.schools || []).map((s: any) => [esc(s.name), esc(s.degree_level), fmtAddress(s.address), esc(s.period)])
         )
     );
 
@@ -379,7 +380,7 @@ const buildClientHTML = (client: any, saleStatus: string, saleType: string, idx:
 
     const travelBox = box('Información de Viaje',
         row(
-            cellFull('Dirección en EE.UU.', esc(det.addressEEUU)),
+            cellFull('Dirección en EE.UU.', fmtAddress(det.addressEEUU)),
             cell('F. viaje EE.UU.',  fmtDate(det.travelDateEEUU), '25%'),
             cell('Tiempo estancia',  esc(det.timeEEUU),           '25%'),
             cell('Motivo',           esc(det.travelReason),       '25%'),
@@ -397,8 +398,8 @@ const buildClientHTML = (client: any, saleStatus: string, saleType: string, idx:
 
     const socialBox = box('Redes Sociales',
         tbl(
-            ['Red Social', 'Usuario / Página', 'URL'],
-            (det.socialNetworks || []).map((s: any) => [esc(s.socialNetwork), esc(s.username), esc(s.url)])
+            ['Red Social', 'Usuario / Página', 'Correo'],
+            (det.socialNetworks || []).map((s: any) => [esc(s.socialNetwork), esc(s.username), esc(s.email)])
         )
     );
 
