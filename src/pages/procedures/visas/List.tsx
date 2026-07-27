@@ -210,8 +210,8 @@ const VisasList = ({loader}:IApp)=>{
     ];
 
     const [printState, setPrintState] = useState<{
-        show: boolean; clients: any[]; saleStatus: string; saleType: string;
-    }>({ show: false, clients: [], saleStatus: '', saleType: '' });
+        show: boolean; clients: any[]; saleStatus: string; saleType: string; saleFolio: string;
+    }>({ show: false, clients: [], saleStatus: '', saleType: '', saleFolio: '' });
 
     const [data, setData] = useState<Procedure[]>([]);
     const [filters, setFilters] = useState<Filters>({
@@ -295,7 +295,13 @@ const VisasList = ({loader}:IApp)=>{
 
         if (!response?.success) return;
 
-        const mapped = response.data.clients.map((item: any) => ({
+        const spouseRelationships = ['esposo', 'esposa', 'conyuge'];
+
+        const mapped = response.data.clients.map((item: any) => {
+            const spouseEntry = (item.parents || []).find((p:any) => spouseRelationships.includes((p.relationship || '').toLowerCase()));
+            const otherRelationships = (item.parents || []).filter((p:any) => !spouseRelationships.includes((p.relationship || '').toLowerCase()));
+
+            return {
             personalInformation: {
                 id: item.id,
                 names: item.names || '',
@@ -321,6 +327,13 @@ const VisasList = ({loader}:IApp)=>{
                     state_expedition: item.passport?.expedition_states_id || '',
                     city_expedition: item.passport?.expedition_city || '',
                 },
+                spouse: {
+                    names: spouseEntry?.full_name || '',
+                    birthdate: spouseEntry?.birthdate || '',
+                    country: spouseEntry?.country_birth_id || '',
+                    state: spouseEntry?.state_birth_id || '',
+                    hasVisa: spouseEntry?.has_visa ? '1' : '0',
+                },
             },
             contactInformation: {
                 address: item.address ? {
@@ -336,9 +349,11 @@ const VisasList = ({loader}:IApp)=>{
                 phones: item.phones || [],
             },
             familiarInformation: {
-                relationships: (item.parents || []).map((p: any) => ({
+                relationships: otherRelationships.map((p: any) => ({
                     ...p,
                     birthdate: p.birthdate ? moment(p.birthdate).format('DD/MM/YYYY') : '',
+                    hasVisa: p.has_visa ? 'Si' : 'No',
+                    livesInUsa: p.lives_in_usa ? 'Si' : 'No',
                 })),
             },
             jobsSchools: {
@@ -346,6 +361,7 @@ const VisasList = ({loader}:IApp)=>{
                 occupationName: item.occupation?.name || '',
                 salary: item.occupation?.salary || '',
                 antiquity: item.occupation?.antiquity || '',
+                activitiesDescription: item.occupation?.activities_description || '',
                 address: item.occupation ? {
                     street: item.occupation.street || '',
                     noExt: item.occupation.ext_number || '',
@@ -355,6 +371,7 @@ const VisasList = ({loader}:IApp)=>{
                 schools: (item.studies || []).map((school:any) => ({
                     name: school.name,
                     degree_level: school.degree_level || '',
+                    is_last_degree: !!school.is_last_degree,
                     period: school.period,
                     address: {
                         street: school.street || '',
@@ -366,6 +383,8 @@ const VisasList = ({loader}:IApp)=>{
             generalInformation: {
                 residence: {
                     fullName: item.residence?.full_name || '',
+                    relationship: item.residence?.relationship || '',
+                    citizen_status: item.residence?.citizen_status || '',
                     personalPhone: item.residence?.personal_phone || '',
                     workPhone: item.residence?.work_phone || '',
                     celPhone: item.residence?.cel_phone || '',
@@ -382,7 +401,13 @@ const VisasList = ({loader}:IApp)=>{
                 },
                 details: {
                     travel_date: item.process_details?.travel_date || '',
-                    addressEEUU: item.process_details?.address_eeuu || '',
+                    addressEEUU: {
+                        street: item.process_details?.street_eeuu || '',
+                        number: item.process_details?.number_eeuu || '',
+                        city: item.process_details?.city_eeuu || '',
+                        state: item.process_details?.state_eeuu || '',
+                        zip: item.process_details?.zip_eeuu || '',
+                    },
                     travelDateEEUU: item.process_details?.travel_date_eeuu || '',
                     timeEEUU: item.process_details?.time_stay_eeuu || '',
                     travelReason: item.process_details?.travel_reason || '',
@@ -396,17 +421,22 @@ const VisasList = ({loader}:IApp)=>{
                     clave_ds_160: item.process_details?.clave_ds_160 || '',
                     socialNetworks: item.social || [],
                 },
+                appointments: {
+                    cas: item.cas ? { date: item.cas.appointment_date, time: item.cas.schedule, city: item.cas.city } : null,
+                    consulado: item.consulado ? { date: item.consulado.appointment_date, time: item.consulado.schedule, city: item.consulado.city } : null,
+                },
             },
             process_id: item.process?.id || null,
             account_email: item.account?.email || '',
-            account_password: item.account?.password || '',
-        }));
+            };
+        });
 
         setPrintState({
             show: true,
             clients: mapped,
             saleStatus: response.data.sale_status || '',
             saleType: response.data.sale_type || '',
+            saleFolio: response.data.sale_folio || '',
         });
     };
 
@@ -502,6 +532,7 @@ const VisasList = ({loader}:IApp)=>{
                     clients={printState.clients}
                     saleStatus={printState.saleStatus}
                     saleType={printState.saleType}
+                    saleFolio={printState.saleFolio}
                 />
             </>
         </Content>

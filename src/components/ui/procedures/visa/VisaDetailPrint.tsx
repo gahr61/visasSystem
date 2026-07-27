@@ -11,10 +11,16 @@ type Props = {
     clients: any[];
     saleStatus: string;
     saleType: string;
+    saleFolio?: string;
 };
 
 const esc = (v: any) => String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-const fmtDate = (d: any) => (!d ? '—' : String(d).split('T')[0]);
+const fmtDate = (d: any) => {
+    if (!d) return '—';
+    const s = String(d).split('T')[0];
+    const m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    return m ? `${m[3]}/${m[2]}/${m[1]}` : s;
+};
 const yesNo = (v: any) => (v==='1'||v===true||v===1 ? 'Sí' : v==='0'||v===false||v===0 ? 'No' : esc(v)||'—');
 
 type Stamp = { text: string; color: string } | null;
@@ -56,6 +62,13 @@ const MOCK_CLIENT = {
             state_expedition:   9,
             expedition_city:   'CIUDAD DE MÉXICO',
         },
+        spouse: {
+            names:     'Ana Sofía Ramírez Torres',
+            birthdate: '1992-02-14',
+            country:   42,
+            state:     9,
+            hasVisa:   '1',
+        },
     },
     contactInformation: {
         address: {
@@ -75,9 +88,9 @@ const MOCK_CLIENT = {
     },
     familiarInformation: {
         relationships: [
-            { relationship: 'Padre',    full_name: 'Roberto González López',        birthdate: '1960-08-20', has_visa: '0' },
-            { relationship: 'Madre',    full_name: 'María Martínez de González',    birthdate: '1963-11-05', has_visa: '1' },
-            { relationship: 'Cónyuge',  full_name: 'Ana Sofía Ramírez Torres',      birthdate: '1992-02-14', has_visa: '1' },
+            { relationship: 'Padre',    full_name: 'Roberto González López',        birthdate: '1960-08-20', has_visa: '0', lives_in_usa: '0' },
+            { relationship: 'Madre',    full_name: 'María Martínez de González',    birthdate: '1963-11-05', has_visa: '1', lives_in_usa: '0' },
+            { relationship: 'Hermano',  full_name: 'Luis González Martínez',        birthdate: '1993-09-01', has_visa: '1', lives_in_usa: '1' },
         ],
     },
     jobsSchools: {
@@ -85,15 +98,17 @@ const MOCK_CLIENT = {
         occupationName:    'Empresa Tecnológica S.A. de C.V.',
         salary:            '35000',
         antiquity:         '5 años',
+        activitiesDescription: 'Desarrollo y mantenimiento de sistemas internos',
         address: { street: 'Av. Reforma', noExt: '222', colony: 'Juárez', city: 'CDMX' },
         schools: [
-            { name: 'Universidad Nacional Autónoma de México', degree_level: 'Licenciatura', period: '2008-2013', address: { street: 'Ciudad Universitaria', colony: '', city: 'CDMX' } },
+            { name: 'Universidad Nacional Autónoma de México', degree_level: 'Licenciatura', is_last_degree: true, period: '2008-2013', address: { street: 'Ciudad Universitaria', colony: '', city: 'CDMX' } },
         ],
     },
     generalInformation: {
         residence: {
             fullName:      'Michael Johnson',
             relationship:  'Amigo',
+            citizen_status:'Ciudadano',
             personalPhone: '+1 213 555 0101',
             workPhone:     '+1 213 555 0202',
             celPhone:      '+1 310 555 0303',
@@ -127,9 +142,12 @@ const MOCK_CLIENT = {
                 { socialNetwork: 'Instagram', username: '@jc_gonzalez',         email: 'juan.gonzalez@email.com' },
             ],
         },
+        appointments: {
+            cas:       { date: '2025-06-20', time: '09:30', city: 'Ciudad de México' },
+            consulado: { date: '2025-06-27', time: '11:00', city: 'Ciudad de México' },
+        },
     },
-    account_email:    'juan.gonzalez@email.com',
-    account_password: 'Visa2025#Mx',
+    account_email: 'juan.gonzalez@email.com',
     _labels: {
         birthCountry:    'México',
         birthState:      'Ciudad de México',
@@ -137,28 +155,33 @@ const MOCK_CLIENT = {
         passportState:   'Ciudad de México',
         addressCountry:  'México',
         addressState:    'Ciudad de México',
+        spouseCountry:   'México',
+        spouseState:     'Ciudad de México',
         occupation:      'Empleado',
     },
 };
 
 const MOCK_STATUS = 'Pagado';
 const MOCK_TYPE   = 'Visa B1/B2 Turista';
+const MOCK_FOLIO  = 'PV20250615120000';
 
 // ── HTML builder ───────────────────────────────────────────────────────────
 
-const buildClientHTML = (client: any, saleStatus: string, saleType: string, idx: number): string => {
+const buildClientHTML = (client: any, saleStatus: string, saleType: string, idx: number, saleFolio = '', total = 1): string => {
     const pi   = client.personalInformation || {};
     const bp   = pi.birthplace              || {};
     const pp   = pi.passport                || {};
     const ci   = client.contactInformation  || {};
     const addr = ci.address                 || {};
     const fi   = client.familiarInformation || {};
+    const spouse = pi.spouse                || {};
     const js   = client.jobsSchools         || {};
     const gi   = client.generalInformation  || {};
     const res  = gi.residence               || {};
     const hist = gi.history                 || {};
     const vsa  = gi.visa                    || {};
     const det  = gi.details                 || {};
+    const appt = gi.appointments             || {};
     const lbl  = client._labels             || {};
 
     const stamp    = getStamp(saleStatus);
@@ -173,18 +196,22 @@ const buildClientHTML = (client: any, saleStatus: string, saleType: string, idx:
 
     // Sectioned box: dark title bar + content
     const box = (title: string, content: string) =>
-        `<div style="border:1px solid #cbd5e1;border-radius:2px;overflow:hidden;margin-bottom:4px;">
+        `<div style="border:1px solid #cbd5e1;border-radius:2px;overflow:hidden;margin-bottom:4px;page-break-inside:avoid;">
             <div style="background:#1e293b;color:#e2e8f0;font-size:9px;font-weight:700;
                 padding:2px 7px;text-transform:uppercase;letter-spacing:0.7px;">${title}</div>
             <div>${content}</div>
         </div>`;
 
+    const groupLabel = (l: string) =>
+        `<div style="width:100%;padding:2px 6px;font-size:${F}px;font-weight:700;color:#1d4ed8;
+            background:#f8fafc;border-bottom:1px solid #e2e8f0;box-sizing:border-box;">${l}</div>`;
+
     // Field cell with label + value
     const cell = (l: string, v: string, w = '50%') =>
         `<div style="width:${w};padding:${P}px 6px;border-bottom:1px solid #f1f5f9;
-            border-right:1px solid #f1f5f9;font-size:${F}px;box-sizing:border-box;overflow:hidden;
-            white-space:nowrap;text-overflow:ellipsis;">
-            <span style="color:#64748b;">${l}:</span>
+            border-right:1px solid #f1f5f9;font-size:${F}px;box-sizing:border-box;
+            word-break:break-word;">
+            <span style="color:#64748b;white-space:nowrap;">${l}:</span>
             <span style="color:#0f172a;font-weight:600;margin-left:2px;">${v || '—'}</span>
         </div>`;
 
@@ -223,8 +250,9 @@ const buildClientHTML = (client: any, saleStatus: string, saleType: string, idx:
         : '';
 
     const header = `
-        <div style="position:relative;background:#1e293b;padding:10px 16px 8px;margin-bottom:5px;border-radius:3px;">
+        <div style="position:relative;background:#1e293b;padding:10px 16px 8px;margin-bottom:5px;border-radius:3px;page-break-inside:avoid;">
             ${stampOverlay}
+            <p style="text-align:left;font-size:8px;color:#64748b;margin:0;">Folio:&nbsp;${esc(saleFolio) || '—'}</p>
             <p style="text-align:center;font-size:10px;font-weight:700;color:#94a3b8;
                 text-transform:uppercase;letter-spacing:1px;margin:0 0 2px;">Detalle de Trámite de Visa</p>
             <p style="text-align:center;font-size:16px;font-weight:700;color:#f8fafc;margin:0 0 6px;">${fullName || '—'}</p>
@@ -235,9 +263,6 @@ const buildClientHTML = (client: any, saleStatus: string, saleType: string, idx:
                 <span style="background:${stBg};border:1px solid ${stColor}55;padding:2px 12px;
                     border-radius:20px;font-size:10px;color:${stColor};">
                     Estado:&nbsp;<strong>${esc(saleStatus) || '—'}</strong>
-                </span>
-                <span style="background:#334155;padding:2px 12px;border-radius:20px;font-size:10px;color:#94a3b8;">
-                    F.&nbsp;Viaje:&nbsp;<strong style="color:#f1f5f9;">${fmtDate(det.travel_date)}</strong>
                 </span>
             </div>
         </div>`;
@@ -255,17 +280,29 @@ const buildClientHTML = (client: any, saleStatus: string, saleType: string, idx:
                 <span style="color:#6b7280;">Email:</span>
                 <strong style="color:#1e293b;">&nbsp;${esc(client.account_email) || '—'}</strong>
             </span>
-            <span style="font-size:${F}px;padding:0 12px;border-right:1px solid #bfdbfe;
-                flex:1;min-width:120px;white-space:nowrap;overflow:hidden;">
-                <span style="color:#6b7280;">Contraseña:</span>
-                <strong style="color:#1e293b;">&nbsp;${esc(client.account_password) || '—'}</strong>
-            </span>
             <span style="font-size:${F}px;padding:0 12px;flex:1;min-width:120px;
                 white-space:nowrap;overflow:hidden;">
                 <span style="color:#6b7280;">Clave DS-160:</span>
                 <strong style="color:#1e293b;">&nbsp;${esc(det.clave_ds_160) || '—'}</strong>
             </span>
         </div>`;
+
+    // ── Citas (CAS / Consulado) ──────────────────────────────────────────────
+
+    const appointmentsBox = box('Citas',
+        groupLabel('CAS') +
+        row(
+            cell('Fecha', fmtDate(appt.cas?.date),    '33.33%'),
+            cell('Hora',  esc(appt.cas?.time) || '—', '33.33%'),
+            cell('Sede',  esc(appt.cas?.city) || '—', '33.33%'),
+        ) +
+        groupLabel('Consulado') +
+        row(
+            cell('Fecha', fmtDate(appt.consulado?.date),    '33.33%'),
+            cell('Hora',  esc(appt.consulado?.time) || '—', '33.33%'),
+            cell('Sede',  esc(appt.consulado?.city) || '—', '33.33%'),
+        )
+    );
 
     // ── Sections ───────────────────────────────────────────────────────────
 
@@ -294,16 +331,26 @@ const buildClientHTML = (client: any, saleStatus: string, saleType: string, idx:
         tbl(['Idioma', '%'], (pi.languages || []).map((l: any) => [esc(l.language), `${l.percentage}%`]))
     );
 
+    const spouseBox = spouse.names ? box('Cónyuge',
+        row(
+            cell('Nombre completo', esc(spouse.names),                          '40%'),
+            cell('F. Nacimiento',   fmtDate(spouse.birthdate),                  '30%'),
+            cell('¿Tiene visa?',    yesNo(spouse.hasVisa),                      '30%'),
+            cell('País nacimiento', esc(lbl.spouseCountry) || '—',              '50%'),
+            cell('Estado nacimiento', esc(lbl.spouseState) || '—',              '50%'),
+        )
+    ) : '';
+
     // ── Passport (full width, 2 rows of 3) ────────────────────────────────
 
     const passportBox = box('Pasaporte',
         row(
-            cell('No. Pasaporte',   esc(pp.number),                               '33%'),
-            cell('F. Expedición',   fmtDate(pp.expedition_date),                  '33%'),
-            cell('F. Caducidad',    fmtDate(pp.expiration_date),                  '34%'),
-            cell('País expedición', esc(lbl.passportCountry),                     '33%'),
-            cell('Estado expd.',    esc(lbl.passportState),                       '33%'),
-            cell('Ciudad expd.',    esc(pp.expedition_city || pp.city_expedition), '34%'),
+            cell('No. Pasaporte',   esc(pp.number),                               '33.33%'),
+            cell('F. Expedición',   fmtDate(pp.expedition_date),                  '33.33%'),
+            cell('F. Caducidad',    fmtDate(pp.expiration_date),                  '33.33%'),
+            cell('País expedición', esc(lbl.passportCountry),                     '25%'),
+            cell('Estado expd.',    esc(lbl.passportState),                       '25%'),
+            cell('Ciudad expd.',    esc(pp.expedition_city || pp.city_expedition), '50%'),
         )
     );
 
@@ -311,14 +358,14 @@ const buildClientHTML = (client: any, saleStatus: string, saleType: string, idx:
 
     const addressBox = box('Domicilio',
         row(
-            cell('Calle',    esc(addr.street),          '36%'),
-            cell('No. Int.', esc(addr.noInt)   || '—', '14%'),
-            cell('No. Ext.', esc(addr.noExt),           '14%'),
-            cell('C.P.',     esc(addr.postCode),        '14%'),
-            cell('Colonia',  esc(addr.colony),          '22%'),
-            cell('Ciudad',   esc(addr.city),            '40%'),
-            cell('País',     esc(lbl.addressCountry),   '30%'),
-            cell('Estado',   esc(lbl.addressState),     '30%'),
+            cell('Calle',    esc(addr.street),          '25%'),
+            cell('No. Int.', esc(addr.noInt)   || '—', '12.5%'),
+            cell('No. Ext.', esc(addr.noExt),           '12.5%'),
+            cell('C.P.',     esc(addr.postCode),        '15%'),
+            cell('Colonia',  esc(addr.colony),          '35%'),
+            cell('Ciudad',   esc(addr.city),            '34%'),
+            cell('País',     esc(lbl.addressCountry),   '33%'),
+            cell('Estado',   esc(lbl.addressState),     '33%'),
         )
     );
 
@@ -328,9 +375,9 @@ const buildClientHTML = (client: any, saleStatus: string, saleType: string, idx:
 
     const familyBox = box('Familia Directa',
         tbl(
-            ['Parentesco', 'Nombre completo', 'F. Nac.', '¿Visa?'],
+            ['Parentesco', 'Nombre completo', 'F. Nac.', '¿Visa?', '¿Vive en EEUU?'],
             (fi.relationships || []).map((r: any) => [
-                esc(r.relationship), esc(r.full_name), esc(r.birthdate), yesNo(r.has_visa ?? r.hasVisa)
+                esc(r.relationship), esc(r.full_name), esc(r.birthdate), yesNo(r.has_visa ?? r.hasVisa), yesNo(r.lives_in_usa ?? r.livesInUsa)
             ])
         )
     );
@@ -344,35 +391,25 @@ const buildClientHTML = (client: any, saleStatus: string, saleType: string, idx:
             cell('Lugar',      esc(js.occupationName),               '50%'),
             cell('Salario',    js.salary ? `$${esc(js.salary)}` : '—', '50%'),
             cell('Antigüedad', esc(js.antiquity),                    '50%'),
+            cellFull('Descripción de actividades', esc(js.activitiesDescription)),
             cellFull('Dirección', fmtAddress(js.address)),
         )
     );
 
     const studiesBox = box('Estudios',
-        tbl(['Nombre', 'Grado', 'Dirección', 'Período'],
-            (js.schools || []).map((s: any) => [esc(s.name), esc(s.degree_level), fmtAddress(s.address), esc(s.period)])
+        tbl(['Nombre', 'Grado', '¿Último grado?', 'Dirección', 'Generación'],
+            (js.schools || []).map((s: any) => [esc(s.name), esc(s.degree_level), yesNo(s.is_last_degree), fmtAddress(s.address), esc(s.period)])
         )
     );
 
     const lodgingBox = box('Hospedaje EE.UU.',
         row(
-            cell('Nombre ref.',   esc(res.fullName),         '100%'),
+            cell('Nombre ref.',           esc(res.fullName),               '40%'),
+            cell('Parentesco',            esc(res.relationship) || '—',    '30%'),
+            cell('¿Ciudadano o residente?', esc(res.citizen_status) || '—', '30%'),
             cell('Tel. Personal', esc(res.personalPhone),    '33.33%'),
             cell('Tel. Trabajo',  esc(res.workPhone) || '—', '33.33%'),
             cell('Tel. Celular',  esc(res.celPhone)  || '—', '33.33%'),
-        )
-    );
-
-    // ── Visa History (full width) ──────────────────────────────────────────
-
-    const visaHistBox = box('Historial de Visa',
-        row(
-            cell('¿Intentó tramitar?', yesNo(hist.tryProcedureVisa), '25%'),
-            cell('Fecha trámite',      fmtDate(hist.procedureDate),  '25%'),
-            cell('¿Aprobada?',         yesNo(hist.visaApproved),     '25%'),
-            cell('No. visa anterior',  esc(vsa.lastVisa) || '—',    '25%'),
-            cell('F. Exp. visa ant.',  fmtDate(vsa.expeditionDate),  '50%'),
-            cell('F. Vcto. visa ant.', fmtDate(vsa.expirationDate),  '50%'),
         )
     );
 
@@ -381,16 +418,29 @@ const buildClientHTML = (client: any, saleStatus: string, saleType: string, idx:
     const travelBox = box('Información de Viaje',
         row(
             cellFull('Dirección en EE.UU.', fmtAddress(det.addressEEUU)),
-            cell('F. viaje EE.UU.',  fmtDate(det.travelDateEEUU), '25%'),
-            cell('Tiempo estancia',  esc(det.timeEEUU),           '25%'),
-            cell('Motivo',           esc(det.travelReason),       '25%'),
-            cell('Cubre gastos',     esc(det.coverExpenses),      '25%'),
-            cell('¿Visitó EE.UU.?',  yesNo(det.has_visit_eeuu),  '25%'),
-            cell('Última visita',    fmtDate(det.lastVisit),      '25%'),
-            cell('Duración visita',  esc(det.dateLastVisit),      '25%'),
-            cell('¿Otros países?',   yesNo(det.other_countries),  '25%'),
+            cell('F. viaje EE.UU.',  fmtDate(det.travelDateEEUU), '33.33%'),
+            cell('Tiempo estancia',  esc(det.timeEEUU),           '33.33%'),
+            cell('Motivo',           esc(det.travelReason),       '33.33%'),
+            cell('Cubre gastos',     esc(det.coverExpenses),      '50%'),
+            cell('¿Visitó EE.UU.?',  yesNo(det.has_visit_eeuu),  '50%'),
+            cell('Última visita',    fmtDate(det.lastVisit),      '50%'),
+            cell('Duración visita',  esc(det.dateLastVisit),      '50%'),
+            cell('¿Otros países?',   yesNo(det.other_countries),  '100%'),
             cellFull('Países visitados', det.travelCountries ? esc(det.travelCountries) : '—'),
             cellFull('Observaciones', esc(det.observations)),
+        )
+    );
+
+    // ── Visa History (full width) ──────────────────────────────────────────
+
+    const visaHistBox = box('Historial de Visa',
+        row(
+            cell('¿Intentó tramitar?', yesNo(hist.tryProcedureVisa), '33.33%'),
+            cell('Fecha trámite',      fmtDate(hist.procedureDate),  '33.33%'),
+            cell('¿Aprobada?',         yesNo(hist.visaApproved),     '33.33%'),
+            cell('No. visa anterior',  esc(vsa.lastVisa) || '—',    '33.33%'),
+            cell('F. Exp. visa ant.',  fmtDate(vsa.expeditionDate),  '33.33%'),
+            cell('F. Vcto. visa ant.', fmtDate(vsa.expirationDate),  '33.33%'),
         )
     );
 
@@ -411,28 +461,41 @@ const buildClientHTML = (client: any, saleStatus: string, saleType: string, idx:
             <div style="width:${splitB};min-width:0;">${b}</div>
         </div>`;
 
-    const pageBreak = idx > 0 ? 'page-break-before:always;' : '';
-    return `<div style="${pageBreak}padding:0;">
-        ${header}
-        ${ds160bar}
-        ${personalBox}
-        ${birthBox}
-        ${row2col(langBox, phonesBox)}
-        ${passportBox}
-        ${addressBox}
-        ${familyBox}
-        ${occupationBox}
-        ${studiesBox}
-        ${lodgingBox}
-        ${visaHistBox}
-        ${travelBox}
-        ${socialBox}
+    // A <thead> repeats on every printed page (unlike a plain <div>), so the
+    // header stays visible when a client's content spans multiple pages.
+    // The footer info instead feeds a CSS running element (see print stylesheet
+    // in handlePrint) so it stays pinned to the bottom margin of every page,
+    // rather than trailing right after the content like a <tfoot> row does.
+    const footerMarker = `<div class="vp-footer-marker" style="display:none;">
+        Folio: ${esc(saleFolio) || '—'} — ${fullName || '—'}${total > 1 ? ` — Solicitante ${idx + 1} de ${total}` : ''}
     </div>`;
+
+    const pageBreak = idx > 0 ? 'page-break-before:always;' : '';
+    return `${footerMarker}<table style="${pageBreak}width:100%;border-collapse:collapse;">
+        <thead><tr><td style="padding:0;border:none;">${header}</td></tr></thead>
+        <tbody><tr><td style="padding:0;border:none;">
+            ${ds160bar}
+            ${appointmentsBox}
+            ${personalBox}
+            ${birthBox}
+            ${spouseBox}
+            ${row2col(langBox, phonesBox)}
+            ${passportBox}
+            ${addressBox}
+            ${familyBox}
+            ${occupationBox}
+            ${studiesBox}
+            ${lodgingBox}
+            ${travelBox}
+            ${visaHistBox}
+            ${socialBox}
+        </td></tr></tbody>
+    </table>`;
 };
 
 // ── Component ──────────────────────────────────────────────────────────────
 
-const VisaDetailPrint = ({ open, onClose, clients, saleStatus, saleType }: Props) => {
+const VisaDetailPrint = ({ open, onClose, clients, saleStatus, saleType, saleFolio = '' }: Props) => {
     const countries = useAddressStore(state => state.countries);
     const [selectedTab, setSelectedTab]         = useState(0);
     const [resolvedClients, setResolvedClients] = useState<any[]>([]);
@@ -454,6 +517,7 @@ const VisaDetailPrint = ({ open, onClose, clients, saleStatus, saleType }: Props
                         birth:    client.personalInformation?.birthplace?.country as number,
                         passport: client.personalInformation?.passport?.country_expedition as number,
                         address:  client.contactInformation?.address?.country as number,
+                        spouse:   client.personalInformation?.spouse?.country as number,
                     };
                     const uniqueIds = [...new Set(Object.values(ids).filter(Boolean))];
                     const stateMap: Record<string, any[]> = {};
@@ -477,6 +541,8 @@ const VisaDetailPrint = ({ open, onClose, clients, saleStatus, saleType }: Props
                             passportState:   lbl(stateMap[String(ids.passport)] || [], client.personalInformation?.passport?.state_expedition),
                             addressCountry:  lbl(countries, ids.address),
                             addressState:    lbl(stateMap[String(ids.address)]  || [], client.contactInformation?.address?.state),
+                            spouseCountry:   lbl(countries, ids.spouse),
+                            spouseState:     lbl(stateMap[String(ids.spouse)]    || [], client.personalInformation?.spouse?.state),
                             occupation:      occList.find((o: any) => String(o.id) === String(client.jobsSchools?.occupation))?.name || '',
                         },
                     };
@@ -496,18 +562,21 @@ const VisaDetailPrint = ({ open, onClose, clients, saleStatus, saleType }: Props
         let data: any[];
         let status: string;
         let type: string;
+        let folio: string;
 
         if (isMockMode) {
             data   = [MOCK_CLIENT];
             status = MOCK_STATUS;
             type   = MOCK_TYPE;
+            folio  = MOCK_FOLIO;
         } else {
             data   = resolvedClients.length ? resolvedClients : clients;
             status = saleStatus;
             type   = saleType;
+            folio  = saleFolio;
         }
 
-        const body = data.map((c, i) => buildClientHTML(c, status, type, i)).join('');
+        const body = data.map((c, i) => buildClientHTML(c, status, type, i, folio, data.length)).join('');
         const win  = window.open('', '_blank', 'width=960,height=800');
         if (!win) return;
         win.document.write(`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
@@ -517,7 +586,20 @@ const VisaDetailPrint = ({ open, onClose, clients, saleStatus, saleType }: Props
                 body{font-family:Arial,sans-serif;font-size:12px;padding:10px;}
                 @media print{
                     body{padding:0;}
-                    @page{margin:8mm;}
+                    .vp-footer-marker{display:block;position:running(pageFooter);}
+                    @page{
+                        margin:8mm;
+                        @bottom-left{
+                            content: element(pageFooter);
+                            font-size: 8px;
+                            color: #94a3b8;
+                        }
+                        @bottom-center{
+                            content: "Página " counter(page) " de " counter(pages);
+                            font-size: 8px;
+                            color: #94a3b8;
+                        }
+                    }
                 }
             </style>
             </head><body>${body}</body></html>`);
@@ -529,8 +611,9 @@ const VisaDetailPrint = ({ open, onClose, clients, saleStatus, saleType }: Props
     const displayClients  = isMockMode ? [MOCK_CLIENT]  : (resolvedClients.length ? resolvedClients : clients);
     const displayStatus   = isMockMode ? MOCK_STATUS    : saleStatus;
     const displayType     = isMockMode ? MOCK_TYPE      : saleType;
+    const displayFolio    = isMockMode ? MOCK_FOLIO     : saleFolio;
     const currentClient   = displayClients[selectedTab];
-    const previewHtml     = currentClient ? buildClientHTML(currentClient, displayStatus, displayType, 0) : '';
+    const previewHtml     = currentClient ? buildClientHTML(currentClient, displayStatus, displayType, 0, displayFolio, displayClients.length) : '';
 
     return (
         <Modal full open={open} onClose={onClose}>
