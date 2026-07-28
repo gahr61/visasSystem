@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import { Col, Grid, Panel, Row } from "rsuite"
 
 import Button from "../../components/common/Button";
@@ -138,8 +137,6 @@ const Login = ({loader}: IApp)=>{
                                                 required
                                             />
                                         </Col>
-
-                                        <Link to="" className="text-sm text-blue-500">Recuperar Contraseña</Link>
 
                                         <Col xs={24} className="py-3 flex justify-end">
                                             <Button onClick={(e)=>onSubmit(e)}>Ingresar</Button>
