@@ -18,10 +18,11 @@ import VisaDetailPrint from "../../../components/ui/procedures/visa/VisaDetailPr
 import { Column } from "../../../utils/interfaces/system";
 import { IApp } from "../../../utils/interfaces/function";
 import { Procedure, VisaAccount } from "../../../utils/interfaces/procedure";
-import { visasSalesList, visaAccountPassword, VisaListParams } from "../../../utils/services/sales/visa";
+import { visasSalesList, visaAccountPassword, visasSalesDelete, VisaListParams } from "../../../utils/services/sales/visa";
 import { visasInfoDetails } from "../../../utils/services/sales/procedures";
 import { usePermissionsStore } from "../../../utils/stores/usePermissionsStore";
 import { useUserStore } from "../../../utils/stores/useUserStore";
+import { swalConfirm } from "../../../utils/functions";
 import moment from "moment";
 
 const AccountCell = ({ row, canViewPassword }: { row: Procedure, canViewPassword: boolean }) => {
@@ -197,11 +198,11 @@ const VisasList = ({loader}:IApp)=>{
                 )}
                 
                 {hasPermission('procedure_visa_delete') && (
-                    <ButtonTable 
+                    <ButtonTable
                         title="Eliminar"
                         controlId="delete"
                         icon={<FaTrashAlt />}
-                        onClick={()=>{}}
+                        onClick={()=>onDelete(row.id)}
                     />
                 )}
                 
@@ -286,6 +287,23 @@ const VisasList = ({loader}:IApp)=>{
     
     const onConfirmTicket = (id: number)=>{
         confirmModal.current?.handleShow(id);
+    }
+
+    const onDelete = (id: number) => {
+        swalConfirm({
+            title: 'Eliminar registro',
+            text: '¿Estás seguro de eliminar este registro de visa? Esta acción no se puede deshacer.',
+            confirmText: 'Sí, eliminar',
+            value: id,
+            confirmFunction: async (value: number) => {
+                loader.current?.handleShow('Eliminando...');
+                const response = await visasSalesDelete(value);
+                loader.current?.handleClose();
+                if (response?.success) {
+                    getList(filters, page, perPage);
+                }
+            }
+        });
     }
 
     const onOpenPrint = async (id: number) => {

@@ -35,6 +35,10 @@ export const visasSalesClientList = ():Promise<IResponse<Procedure[]>> => {
     return fetchRequest({url:'sales/visa/client/list'});
 }
 
+export const visasSalesDelete = (id: number): Promise<IResponse<undefined>> => {
+    return fetchRequest({ url: 'sales/visa/' + id + '/delete', method: 'DELETE' });
+}
+
 export const visaAccountPassword = (id: number):Promise<IResponse<VisaAccount[]>> => {
     return fetchRequest({url:'sales/visa/'+id+'/account/password'});
 }
