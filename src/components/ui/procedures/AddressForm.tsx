@@ -69,11 +69,11 @@ const AddressForm = ({ address, onChange, size = 'default' }: Props) => {
             </Col>
             <Col xs={24} lg={w.noInt}>
                 <label>No. Int</label>
-                <Input type="number" id={idPrefix+'noInt'} value={value.noInt} onChange={(e:any)=>handleChange('noInt', e.currentTarget.value)} />
+                <Input id={idPrefix+'noInt'} value={value.noInt} onChange={(e:any)=>handleChange('noInt', e.currentTarget.value)} />
             </Col>
             <Col xs={24} lg={w.noExt}>
                 <label>No. Ext.</label>
-                <Input type="number" id={idPrefix+'noExt'} value={value.noExt} onChange={(e:any)=>handleChange('noExt', e.currentTarget.value)} required />
+                <Input id={idPrefix+'noExt'} value={value.noExt} onChange={(e:any)=>handleChange('noExt', e.currentTarget.value)} required />
             </Col>
             <Col xs={24} lg={w.postCode}>
                 <label>Código postal</label>
