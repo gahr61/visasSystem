@@ -197,7 +197,6 @@ const FamiliarInfo = ({
                             type="date"
                             value={familiarForm.birthdate}
                             onChange={onChangeForm}
-                            required={requiredFamiliar}
                         />
                     </Col>
                     <Col xs={24} lg={3}>
