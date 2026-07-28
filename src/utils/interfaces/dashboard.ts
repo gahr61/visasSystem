@@ -21,13 +21,35 @@ export interface ISalesType {
     amount: number;
 }
 
+export interface IProcedureType {
+    type: string;
+    count: number;
+}
+
+export interface IEmployeeByRole {
+    role: string;
+    count: number;
+}
+
 export interface IDashboardData {
     my_sales: { count: number; amount: number };
-    my_procedures: { active: number; by_status: IProcedureStatus[] };
+    my_procedures: { active: number; by_status: IProcedureStatus[]; by_type: IProcedureType[] };
     my_upcoming_appointments: number;
-    my_new_clients: number;
     my_commissions: { count: number; amount: number };
-    my_sales_by_branch?: IBranchSales[];
+
+    // Solo Ventas
+    my_rank?: { position: number | null; total: number };
+
+    // Solo Volanteo
+    my_flyer_sales?: { count: number; amount: number };
+    my_flyer_commissions?: { count: number; amount: number };
+    my_flyer_clients?: number;
+
+    // Solo Administrador de sistema
+    roles_count?: number;
+    permissions_count?: number;
+    employees_by_role?: IEmployeeByRole[];
+    pending_email_verifications?: number;
 
     // Solo admin / gerencia
     total_sales?: { count: number; amount: number };

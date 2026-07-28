@@ -12,11 +12,11 @@ import {
     HiOutlineCalendarDays, HiOutlineUsers, HiOutlineBanknotes,
     HiOutlineUserGroup, HiOutlineEnvelope, HiOutlineKey,
     HiOutlineClock, HiOutlineChartBar, HiOutlineShoppingCart,
-    HiOutlineGlobeAlt, HiOutlineIdentification,
+    HiOutlineGlobeAlt, HiOutlineIdentification, HiOutlineShieldCheck,
 } from "react-icons/hi2";
 import { useUserStore } from "../utils/stores/useUserStore";
 import { ILoader } from "../utils/interfaces/function";
-import { IBranchSales, IDashboardData, IEmployeeRanking, IProcedureStatus, ISalesType } from "../utils/interfaces/dashboard";
+import { IBranchSales, IDashboardData, IEmployeeByRole, IEmployeeRanking, IProcedureStatus, ISalesType } from "../utils/interfaces/dashboard";
 import { getDashboardIndicators } from "../utils/services/dashboard";
 import { formatPrice } from "../utils/functions";
 import Loader from "../components/common/Loader";
@@ -231,6 +231,31 @@ const RankingChart = ({ rows }: { rows: IEmployeeRanking[] }) => (
     </Panel>
 );
 
+// ── Lista — Empleados por rol ─────────────────────────────────────────────────
+
+const RoleBreakdown = ({ rows }: { rows: IEmployeeByRole[] }) => {
+    const total = rows.reduce((s, r) => s + r.count, 0);
+
+    return (
+        <Panel bordered header={<span style={{ fontWeight: 600, fontSize: 14, color: '#374151' }}>Empleados por rol</span>}>
+            {rows.length === 0 ? EMPTY_CHART('Sin empleados registrados') : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '4px 0' }}>
+                    {rows.map((row, i) => (
+                        <div key={row.role} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <span style={{ width: 10, height: 10, borderRadius: '50%', flexShrink: 0, background: BRANCH_PALETTE[i % BRANCH_PALETTE.length] }} />
+                            <span style={{ flex: 1, fontSize: 13, color: '#374151' }}>{row.role}</span>
+                            <span style={{ fontSize: 13, fontWeight: 700, color: '#111827' }}>{row.count}</span>
+                            <span style={{ fontSize: 11, color: '#9ca3af', width: 40, textAlign: 'right' }}>
+                                {total > 0 ? Math.round(row.count / total * 100) : 0}%
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </Panel>
+    );
+};
+
 // ── Fechas por defecto ────────────────────────────────────────────────────────
 
 const defaultStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
@@ -244,7 +269,10 @@ const Home = () => {
     const [data, setData]           = useState<IDashboardData | null>(null);
     const [dateRange, setDateRange] = useState<[Date, Date]>([defaultStart, defaultEnd]);
 
-    const isVendedor = userData.role === 'vendedor';
+    const isVentas      = userData.role === 'ventas';
+    const isVolanteo    = userData.role === 'volanteo';
+    const isSystemAdmin = userData.role === 'administrador_de_sistema';
+    const isFullView    = !isVentas && !isVolanteo;
 
     const fetchData = useCallback((range: [Date, Date]) => {
         loader.current?.handleShow('Cargando indicadores...');
@@ -277,7 +305,7 @@ const Home = () => {
             <Row style={{ marginBottom: 24 }}>
                 <Col xs={24} sm={14} style={{ marginBottom: 8 }}>
                     <h1 style={{ fontSize: 22, fontWeight: 800, color: '#111827', margin: 0 }}>
-                        {isVendedor ? 'Mi desempeño' : 'Panel de control'}
+                        {isFullView ? 'Panel de control' : 'Inicio'}
                     </h1>
                     <p style={{ fontSize: 13, color: '#9ca3af', marginTop: 3 }}>{periodLabel}</p>
                 </Col>
@@ -296,49 +324,22 @@ const Home = () => {
             {data && (
                 <>
                     {/* ════════════════════════════════════════
-                        VISTA VENDEDOR
+                        VISTA VENTAS / VOLANTEO — sin indicadores por
+                        ahora, pendiente de definir con el administrador
                     ════════════════════════════════════════ */}
-                    {isVendedor && (
-                        <>
-                            <Row style={{ marginBottom: 12 }}>
-                                {([
-                                    { title: 'Mis ventas',           value: data.my_sales.count,                   subtitle: `${data.my_sales.count} trámite${data.my_sales.count !== 1 ? 's' : ''}`, color: '#3b82f6', icon: <HiOutlineShoppingCart /> },
-                                    { title: 'Monto de mis ventas',  value: formatPrice(data.my_sales.amount),     subtitle: undefined,                                                                   color: '#22c55e', icon: <HiOutlineCurrencyDollar /> },
-                                    { title: 'Mis trámites activos', value: data.my_procedures.active,             subtitle: undefined,                                                                   color: '#f97316', icon: <HiOutlineDocumentText /> },
-                                ] as StatCardProps[]).map(card => (
-                                    <Col key={card.title} xs={24} sm={12} md={8} style={{ marginBottom: 12, paddingLeft: 6, paddingRight: 6 }}>
-                                        <StatCard {...card} />
-                                    </Col>
-                                ))}
-                            </Row>
-
-                            <Row style={{ marginBottom: 24 }}>
-                                {([
-                                    { title: 'Citas próximas',  value: data.my_upcoming_appointments,           subtitle: 'próximos 7 días',                                              color: '#a855f7', icon: <HiOutlineCalendarDays /> },
-                                    { title: 'Mis comisiones',  value: formatPrice(data.my_commissions.amount), subtitle: `${data.my_commissions.count} comisiones`,                      color: '#eab308', icon: <HiOutlineBanknotes /> },
-                                    { title: 'Clientes nuevos', value: data.my_new_clients,                     subtitle: undefined,                                                     color: '#14b8a6', icon: <HiOutlineUsers /> },
-                                ] as StatCardProps[]).map(card => (
-                                    <Col key={card.title} xs={24} sm={12} md={8} style={{ marginBottom: 12, paddingLeft: 6, paddingRight: 6 }}>
-                                        <StatCard {...card} />
-                                    </Col>
-                                ))}
-                            </Row>
-
-                            <Row>
-                                <Col xs={24} md={12} style={{ marginBottom: 16, paddingLeft: 6, paddingRight: 6 }}>
-                                    <DonutChart items={data.my_procedures.by_status} title="Mis trámites por estado" />
-                                </Col>
-                                <Col xs={24} md={12} style={{ marginBottom: 16, paddingLeft: 6, paddingRight: 6 }}>
-                                    <BranchChart rows={data.my_sales_by_branch ?? []} title="Mis ventas por sucursal" />
-                                </Col>
-                            </Row>
-                        </>
+                    {(isVentas || isVolanteo) && (
+                        <div style={{
+                            padding: '40px 20px', textAlign: 'center',
+                            border: '1px dashed #e5e7eb', borderRadius: 10, color: '#9ca3af',
+                        }}>
+                            Aún no hay indicadores definidos para este panel.
+                        </div>
                     )}
 
                     {/* ════════════════════════════════════════
                         VISTA ADMIN / GERENCIA
                     ════════════════════════════════════════ */}
-                    {!isVendedor && (
+                    {isFullView && (
                         <>
                             {/* ── Ventas ──────────────────────────────── */}
                             <SectionLabel label="Ventas" />
@@ -418,6 +419,29 @@ const Home = () => {
                                     </Col>
                                 ))}
                             </Row>
+
+                            {/* ── Sistema (solo Administrador de sistema) ── */}
+                            {isSystemAdmin && (
+                                <>
+                                    <SectionLabel label="Sistema" />
+                                    <Row style={{ marginBottom: 16 }}>
+                                        {([
+                                            { title: 'Roles definidos',                    value: data.roles_count ?? 0,                  subtitle: undefined,       color: '#3b82f6', icon: <HiOutlineUserGroup /> },
+                                            { title: 'Permisos definidos',                 value: data.permissions_count ?? 0,            subtitle: undefined,       color: '#6366f1', icon: <HiOutlineShieldCheck /> },
+                                            { title: 'Verificaciones de correo pendientes', value: data.pending_email_verifications ?? 0, subtitle: undefined,       color: '#f59e0b', icon: <HiOutlineEnvelope /> },
+                                        ] as StatCardProps[]).map(card => (
+                                            <Col key={card.title} xs={24} sm={8} style={{ marginBottom: 12, paddingLeft: 6, paddingRight: 6 }}>
+                                                <StatCard {...card} />
+                                            </Col>
+                                        ))}
+                                    </Row>
+                                    <Row>
+                                        <Col xs={24} md={12} style={{ marginBottom: 16, paddingLeft: 6, paddingRight: 6 }}>
+                                            <RoleBreakdown rows={data.employees_by_role ?? []} />
+                                        </Col>
+                                    </Row>
+                                </>
+                            )}
                         </>
                     )}
                 </>
