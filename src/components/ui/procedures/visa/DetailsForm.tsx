@@ -103,8 +103,10 @@ const DetailsForm = ({client, updateClient, index}: Props)=>{
     }
 
     const updateJobsSchools = async ()=>{
-        if(!isValidForm('div.job-form')){
-            Toast.fire('Error', 'Campos incompletos', 'error');
+        const occupations = client.jobsSchools.occupations as any[];
+
+        if(!occupations || occupations.length === 0){
+            Toast.fire('Error', 'Debe agregar al menos una ocupación', 'error');
             return false;
         }
 

@@ -96,12 +96,17 @@ const MOCK_CLIENT = {
         ],
     },
     jobsSchools: {
-        occupation:        '1',
-        occupationName:    'Empresa Tecnológica S.A. de C.V.',
-        salary:            '35000',
-        antiquity:         '5 años',
-        activitiesDescription: 'Desarrollo y mantenimiento de sistemas internos',
-        address: { street: 'Av. Reforma', noExt: '222', colony: 'Juárez', city: 'CDMX' },
+        occupations: [
+            {
+                occupations_id: '1',
+                name: 'Empresa Tecnológica S.A. de C.V.',
+                salary: '35000',
+                antiquity: '5 años',
+                activities_description: 'Desarrollo y mantenimiento de sistemas internos',
+                is_primary: true,
+                address: { street: 'Av. Reforma', noExt: '222', colony: 'Juárez', city: 'CDMX' },
+            },
+        ],
         schools: [
             { name: 'Universidad Nacional Autónoma de México', degree_level: 'Licenciatura', is_last_degree: true, period: '2008-2013', address: { street: 'Ciudad Universitaria', colony: '', city: 'CDMX' } },
         ],
@@ -159,7 +164,7 @@ const MOCK_CLIENT = {
         addressState:    'Ciudad de México',
         spouseCountry:   'México',
         spouseState:     'Ciudad de México',
-        occupation:      'Empleado',
+        occupationNames: { '1': 'Empleado' },
     },
 };
 
@@ -388,14 +393,18 @@ const buildClientHTML = (client: any, saleStatus: string, saleType: string, idx:
         esc([a?.street, a?.noExt || a?.number, a?.colony, a?.city, a?.zip].filter(Boolean).join(', '));
 
     const occupationBox = box('Ocupación / Trabajo',
-        row(
-            cell('Ocupación',  esc(lbl.occupation || js.occupation), '50%'),
-            cell('Lugar',      esc(js.occupationName),               '50%'),
-            cell('Salario',    js.salary ? `$${esc(js.salary)}` : '—', '50%'),
-            cell('Antigüedad', esc(js.antiquity),                    '50%'),
-            cellFull('Descripción de actividades', esc(js.activitiesDescription)),
-            cellFull('Dirección', fmtAddress(js.address)),
-        )
+        (js.occupations && js.occupations.length > 0)
+            ? js.occupations.map((o: any) =>
+                groupLabel(esc(o.name) + (o.is_primary ? ' · Principal' : '')) +
+                row(
+                    cell('Ocupación',  esc(lbl.occupationNames?.[String(o.occupations_id)] || ''), '33.33%'),
+                    cell('Salario',    o.salary ? `$${esc(o.salary)}` : '—',                        '33.33%'),
+                    cell('Antigüedad', esc(o.antiquity),                                            '33.33%'),
+                    cellFull('Descripción de actividades', esc(o.activities_description)),
+                    cellFull('Dirección', fmtAddress(o.address)),
+                )
+            ).join('')
+            : `<p style="font-size:${F}px;padding:3px 6px;color:#94a3b8;font-style:italic;">Sin datos</p>`
     );
 
     const studiesBox = box('Estudios',
@@ -545,7 +554,12 @@ const VisaDetailPrint = ({ open, onClose, clients, saleStatus, saleType, saleFol
                             addressState:    lbl(stateMap[String(ids.address)]  || [], client.contactInformation?.address?.state),
                             spouseCountry:   lbl(countries, ids.spouse),
                             spouseState:     lbl(stateMap[String(ids.spouse)]    || [], client.personalInformation?.spouse?.state),
-                            occupation:      occList.find((o: any) => String(o.id) === String(client.jobsSchools?.occupation))?.name || '',
+                            occupationNames: Object.fromEntries(
+                                (client.jobsSchools?.occupations || []).map((occ: any) => [
+                                    String(occ.occupations_id),
+                                    occList.find((o: any) => String(o.id) === String(occ.occupations_id))?.name || '',
+                                ])
+                            ),
                         },
                     };
                 })

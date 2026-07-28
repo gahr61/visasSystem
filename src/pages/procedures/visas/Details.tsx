@@ -83,10 +83,7 @@ const VisaDetails = ({loader}:IApp)=>{
             relationships:[]
         },
         jobsSchools:{
-            occupation:'', otherOcupation:'', salary:'', antiquity:'', hireDate:'', occupationName:'', activitiesDescription:'',
-            address:{
-                street:'', noInt:'', noExt:'', postCode:'', colony:'', country:42, state:'', city:''
-            },
+            occupations:[],
             schools:[]
         },
         generalInformation:{
@@ -116,12 +113,6 @@ const VisaDetails = ({loader}:IApp)=>{
             }
         },
         contactInformation:{
-            address:{
-                street:'required', noInt:'', noExt:'required', postCode:'required', colony:'required', country:'required', state:'required', city:'required'
-            }
-        },
-        jobsSchools:{
-            occupation:'required', salary:'required', antiquity:'required', hireDate:'required', occupationName:'required', activitiesDescription:'required',
             address:{
                 street:'required', noInt:'', noExt:'required', postCode:'required', colony:'required', country:'required', state:'required', city:'required'
             }
@@ -188,7 +179,7 @@ const VisaDetails = ({loader}:IApp)=>{
         return hasFather && hasMother;
     }
 
-    const isJobComplete = (client:any) => isRuleComplete(client.jobsSchools, validationRules.jobsSchools);
+    const isJobComplete = (client:any) => (client.jobsSchools.occupations || []).length > 0;
 
     const isGeneralComplete = (client:any) => {
         const formIsValid = isValidForm('div.general-form');
@@ -240,8 +231,7 @@ const VisaDetails = ({loader}:IApp)=>{
                 },
                 jobsSchools:{
                     ...dataForm.jobsSchools,
-                    ...client.jobsSchools,
-                    address:{ ...dataForm.jobsSchools.address, ...client.jobsSchools?.address }
+                    ...client.jobsSchools
                 },
                 generalInformation:{
                     ...dataForm.generalInformation,
@@ -328,9 +318,42 @@ const VisaDetails = ({loader}:IApp)=>{
                         }))
                     },
                     jobsSchools:{
-                        ...dataForm.jobsSchool,
-                        ...data.jobsSchool,
-                        schools: item.studies
+                        occupations: (item.occupations || []).map((occupation:any)=>({
+                            id: occupation.id,
+                            occupations_id: occupation.occupations_id,
+                            name: occupation.name,
+                            salary: occupation.salary,
+                            antiquity: occupation.antiquity,
+                            hireDate: occupation.hire_date || '',
+                            activities_description: occupation.activities_description || '',
+                            is_primary: !!occupation.is_primary,
+                            address:{
+                                street: occupation.street || '',
+                                noInt: occupation.int_number || '',
+                                noExt: occupation.ext_number || '',
+                                postCode: occupation.postal_code || '',
+                                colony: occupation.colony || '',
+                                country: occupation.countries_id || 42,
+                                state: occupation.states_id || '',
+                                city: occupation.city || ''
+                            }
+                        })),
+                        schools: (item.studies || []).map((school:any)=>({
+                            name: school.name,
+                            degree_level: school.degree_level || '',
+                            is_last_degree: !!school.is_last_degree,
+                            period: school.period,
+                            address:{
+                                street: school.street || '',
+                                noInt: school.int_number || '',
+                                noExt: school.ext_number || '',
+                                postCode: school.postal_code || '',
+                                colony: school.colony || '',
+                                country: school.countries_id || 42,
+                                state: school.states_id || '',
+                                city: school.city || ''
+                            }
+                        }))
                     },
                     generalInformation:{
                         ...data.generalInformation,                        
@@ -362,49 +385,6 @@ const VisaDetails = ({loader}:IApp)=>{
                             }
                             
                         }
-                    }
-                }
-
-                if(item.occupation !== null){
-                    data = {
-                        ...data,
-                        jobsSchools:{
-                            ...data.jobSchools,
-                            id: item.occupation.id,
-                            occupation: item.occupation.occupations_id,
-                            salary: item.occupation.salary,
-                            antiquity: item.occupation.antiquity,
-                            hireDate: item.occupation.hire_date || '',
-                            occupationName: item.occupation.name,
-                            activitiesDescription: item.occupation.activities_description || '',
-                            address:{
-                                street: item.occupation.street || '',
-                                noInt: item.occupation.int_number || '',
-                                noExt: item.occupation.ext_number || '',
-                                postCode: item.occupation.postal_code || '',
-                                colony: item.occupation.colony || '',
-                                country: item.occupation.countries_id || 42,
-                                state: item.occupation.states_id || '',
-                                city: item.occupation.city || ''
-                            },
-                            schools: (item.studies || []).map((school:any)=>({
-                                name: school.name,
-                                degree_level: school.degree_level || '',
-                                is_last_degree: !!school.is_last_degree,
-                                period: school.period,
-                                address:{
-                                    street: school.street || '',
-                                    noInt: school.int_number || '',
-                                    noExt: school.ext_number || '',
-                                    postCode: school.postal_code || '',
-                                    colony: school.colony || '',
-                                    country: school.countries_id || 42,
-                                    state: school.states_id || '',
-                                    city: school.city || ''
-                                }
-                            }))
-                        }
-
                     }
                 }
 
@@ -696,27 +676,34 @@ const VisaDetails = ({loader}:IApp)=>{
 
     const updateJobsSchools = async (client:any)=>{
 
-        const jobAddress = client.jobsSchools.address || {};
+        const occupations = (client.jobsSchools.occupations || []).map((occupation:any)=>{
+            const occupationAddress = occupation.address || {};
+
+            return {
+                occupations_id: occupation.occupations_id,
+                name: occupation.name,
+                otherOccupation: occupation.otherOccupation,
+                salary: occupation.salary,
+                antiquity: occupation.antiquity,
+                hire_date: occupation.hireDate,
+                activities_description: occupation.activities_description,
+                is_primary: occupation.is_primary,
+                address:{
+                    street: occupationAddress.street,
+                    int_number: occupationAddress.noInt || null,
+                    ext_number: occupationAddress.noExt,
+                    postal_code: occupationAddress.postCode,
+                    colony: occupationAddress.colony,
+                    city: occupationAddress.city,
+                    countries_id: occupationAddress.country,
+                    states_id: occupationAddress.state
+                }
+            };
+        });
 
         const objJobs = {
             clients_id: client.personalInformation.id,
-            occupations_id: client.jobsSchools.occupation,
-            name: client.jobsSchools.occupationName,
-            otherOccupation: client.jobsSchools.otherOcupation,
-            salary: client.jobsSchools.salary,
-            antiquity: client.jobsSchools.antiquity,
-            hire_date: client.jobsSchools.hireDate,
-            activities_description: client.jobsSchools.activitiesDescription,
-            address:{
-                street: jobAddress.street,
-                int_number: jobAddress.noInt || null,
-                ext_number: jobAddress.noExt,
-                postal_code: jobAddress.postCode,
-                colony: jobAddress.colony,
-                city: jobAddress.city,
-                countries_id: jobAddress.country,
-                states_id: jobAddress.state
-            }
+            occupations: occupations
         };
 
         const schools = client.jobsSchools.schools.map((school:any)=>{
@@ -747,49 +734,41 @@ const VisaDetails = ({loader}:IApp)=>{
             schools: schools
         };
 
+        const jobRequest = salesClientsOcuppations(objJobs);
 
-        const validForm = verifyRequiredFields(objJobs, detailsForm.job) && verifyRequiredFields(objJobs.address, detailsForm.address);
+        let responses:any = [jobRequest];
 
-        if(validForm){
-            const jobRequest = salesClientsOcuppations(objJobs);
+        if(schools.length > 0){
+            const schoolRequest = salesClientsStudies(objSchool);
 
-            let responses:any = [jobRequest];
+            responses.push(schoolRequest);
+        }
 
-            if(schools.length > 0){
-                const schoolRequest = salesClientsStudies(objSchool);
+        const [
+            jobResponse,
+            schoolResponse
+        ]:any = await Promise.allSettled(responses);
 
-                responses.push(schoolRequest);
-            }
+        let error = jobResponse.value.success ? '' : jobResponse.value.message;
 
-            const [
-                jobResponse,
-                schoolResponse
-            ]:any = await Promise.allSettled(responses);
-
-            let error = jobResponse.value.success ? '' : jobResponse.value.message;
-
-            if(responses.length === 1){
-                if(jobResponse.value.success){
-                    return true;
-                }
-
-                Toast.fire('Error', jobResponse.value.message, 'error');
-                return;
-            }
-
-            if(jobResponse.value.success && schoolResponse.value.success){
+        if(responses.length === 1){
+            if(jobResponse.value.success){
                 return true;
             }
 
-            error += jobResponse.value.success ? '' : ' - '+jobResponse.value.message
-
-            Toast.fire('Error', error, 'error');
-
+            Toast.fire('Error', jobResponse.value.message, 'error');
             return;
         }
 
-        return true;
-        
+        if(jobResponse.value.success && schoolResponse.value.success){
+            return true;
+        }
+
+        error += jobResponse.value.success ? '' : ' - '+jobResponse.value.message
+
+        Toast.fire('Error', error, 'error');
+
+        return;
     }
 
     const saveGeneralInfo = async (client:any, markComplete:boolean = false)=>{
@@ -867,7 +846,7 @@ const VisaDetails = ({loader}:IApp)=>{
         return valid;
     }
 
-    const VISIBLE_STEP_FORMS = ['div.personal-form', 'div.address-form', 'div.job-form', 'div.general-form'];
+    const VISIBLE_STEP_FORMS = ['div.personal-form', 'div.address-form', 'div.general-form'];
 
     const handleSubmit = async ()=>{
         const visibleFormIsValid = VISIBLE_STEP_FORMS.every((selector)=> isValidForm(selector));

@@ -1,16 +1,15 @@
 import { Col, Grid, Row } from "rsuite"
-import SelectForm, { ISelectOptions } from "../../../common/Select";
-import Input from "../../../common/Input";
+import { ISelectOptions } from "../../../common/Select";
 import Button from "../../../common/Button";
 import Table, { Columns } from "../../../common/Table";
 import ButtonTable from "../../../common/ButtonTable";
-import { FaTrashAlt } from "react-icons/fa";
+import { FaCheck, FaPen, FaTrashAlt } from "react-icons/fa";
 import { useEffect, useRef, useState } from "react";
 import { occupationsList } from "../../../../utils/services/occupations";
+import { formatPrice } from "../../../../utils/functions";
 import Toast from "../../../common/Toast";
-import moment from "moment";
 import ModalSchool from "./ModalSchool";
-import AddressForm from "../AddressForm";
+import ModalOccupation from "./ModalOccupation";
 
 type EducationForm = {
     id: number,
@@ -18,6 +17,18 @@ type EducationForm = {
     degree_level: string,
     is_last_degree: boolean,
     period: string,
+    address: any
+}
+
+type OccupationForm = {
+    occupations_id: number | string,
+    otherOccupation?: string,
+    name: string,
+    salary: string | number,
+    hireDate: string,
+    antiquity: string,
+    activities_description: string,
+    is_primary: boolean,
     address: any
 }
 
@@ -30,7 +41,7 @@ const JobInfo = ({
     jobsSchools,
     handleChange
 }:Props)=>{
-    const columns: Columns[] = [
+    const educationColumns: Columns[] = [
         {key:'school', title:'Escuela', grow:3, render:(row:EducationForm) => row.name},
         {key:'degree_level', title:'Grado', grow:2, render:(row:EducationForm) => row.degree_level},
         {key:'is_last_degree', title:'Último grado', grow:1, render:(row:EducationForm) => row.is_last_degree ? 'Sí' : 'No'},
@@ -51,27 +62,12 @@ const JobInfo = ({
     ]
 
     const schoolModalRef = useRef<any>(null);
+    const occupationModalRef = useRef<any>(null);
 
     const [occupations, setOccupations] = useState<ISelectOptions[]>([]);
-    const [showOtherOccupation, setShowOtherOccupation] = useState(false);
 
-    const calculateAntiquity = (hireDate: string)=>{
-        if(!hireDate) return '';
-
-        const years = moment().diff(hireDate, 'years');
-        const months = moment().diff(moment(hireDate).add(years, 'years'), 'months');
-
-        const parts = [];
-
-        if(years > 0) parts.push(years+(years === 1 ? ' año' : ' años'));
-        if(months > 0) parts.push(months+(months === 1 ? ' mes' : ' meses'));
-
-        return parts.length > 0 ? parts.join(', ') : 'Menos de 1 mes';
-    }
-
-    const onChangeAddress = (address:any)=>{
-        handleChange({currentTarget:{name:'address', value:address}});
-    }
+    const occupationName = (occupations_id: number | string)=>
+        occupations.find(obj => obj.value === occupations_id)?.label || '';
 
     const getOccupations = async ()=>{
         const response = await occupationsList();
@@ -88,6 +84,65 @@ const JobInfo = ({
 
             setOccupations(list);
         }
+    }
+
+    const handleSaveOccupation = (occupation:any, index?:number)=>{
+        const list = [...(jobsSchools.occupations || [])];
+
+        const exist = list.find((obj:any, i:number)=> obj.name === occupation.name && i !== index);
+
+        if(exist){
+            Toast.fire('Error', 'El nombre que intenga agregar ya se encuentra en el listado', 'error');
+            return false;
+        }
+
+        if(occupation.is_primary){
+            list.forEach((obj:any, i:number)=> { if(i !== index) obj.is_primary = false; });
+        }
+
+        if(index !== undefined){
+            list[index] = occupation;
+        }else{
+            list.push(occupation);
+        }
+
+        handleChange({
+            currentTarget:{
+                name:'occupations',
+                value: list
+            }
+        });
+
+        return true;
+    }
+
+    const handleDeleteOccupation = (name:string)=>{
+        const list = (jobsSchools.occupations || []).filter((obj:any) => obj.name !== name);
+
+        if(list.length > 0 && !list.some((obj:any)=>obj.is_primary)){
+            list[0].is_primary = true;
+        }
+
+        handleChange({
+            currentTarget:{
+                name:'occupations',
+                value: list
+            }
+        });
+    }
+
+    const handleSetPrimaryOccupation = (name:string)=>{
+        const list = (jobsSchools.occupations || []).map((obj:any)=>({
+            ...obj,
+            is_primary: obj.name === name
+        }));
+
+        handleChange({
+            currentTarget:{
+                name:'occupations',
+                value: list
+            }
+        });
     }
 
     const handleAddSchool = (school:any)=>{
@@ -127,108 +182,70 @@ const JobInfo = ({
         getOccupations();
     },[]);
 
-    useEffect(()=>{
-        const item = occupations.find(obj => obj.value === jobsSchools.occupation);
-
-        if(item){
-            if(item.label === 'Otro'){
-                setShowOtherOccupation(true);
-            }else{
-                setShowOtherOccupation(false);
-            }
-        }
-    },[jobsSchools])
-
-    useEffect(()=>{
-        if(jobsSchools.hireDate){
-            const antiquity = calculateAntiquity(jobsSchools.hireDate);
-
-            if(antiquity !== jobsSchools.antiquity){
-                handleChange({currentTarget:{name:'antiquity', value: antiquity}});
-            }
-        }
-    },[jobsSchools.hireDate])
+    const hasPrimaryOccupation = (jobsSchools.occupations || []).some((obj:any)=>obj.is_primary);
 
     return(
         <Grid fluid>
             <fieldset>
-                <legend className="font-semibold">Ocupación</legend>
-                <div className="job-form">
-                <Row>
-                    <Col xs={24} lg={8}>
-                        <label>Ocupación actual</label>
-                        <SelectForm 
-                            id="occupation" 
-                            options={occupations} 
-                            value={jobsSchools.occupation} 
-                            handleChange={(e)=>handleChange({currentTarget:{name:'occupation', value: e}})} 
-                            required
-                        />
-                    </Col>
-                    {showOtherOccupation && (
-                        <Col xs={24} lg={6}>
-                            <label>Nombre Ocupación</label>
-                            <Input 
-                                id="otherOcupation"
-                                value={jobsSchools.otherOcupation}
-                                onChange={handleChange}
-                                required
-                            />
-                        </Col>
-                    )}
-                    
-                    <Col xs={24} lg={4}>
-                        <label>Ingreso mensual</label>
-                        <Input
-                            type="number"
-                            id="salary"
-                            value={jobsSchools.salary}
-                            onChange={handleChange}
-                            required
-                        />
-                    </Col>
-                    <Col xs={24} lg={4}>
-                        <label>Fecha de ingreso</label>
-                        <Input
-                            type="date"
-                            id="hireDate"
-                            value={jobsSchools.hireDate}
-                            onChange={handleChange}
-                            required
-                        />
-                    </Col>
-                    <Col xs={24} lg={4}>
-                        <label>Antiguedad</label>
-                        <Input
-                            id="antiquity"
-                            value={jobsSchools.antiquity}
-                            onChange={handleChange}
-                            disabled
-                        />
-                    </Col>
-                </Row>
-                <Row>
-                    <Col xs={24} lg={22}>
-                        <label>Nombre de empleo o escuela</label>
-                        <Input
-                            id="occupationName"
-                            value={jobsSchools.occupationName}
-                            onChange={handleChange}
-                            required
-                        />
-                    </Col>
-                    <Col xs={24} lg={22}>
-                        <label>Descripción de actividades</label>
-                        <Input
-                            id="activitiesDescription"
-                            value={jobsSchools.activitiesDescription}
-                            onChange={handleChange}
-                            required
-                        />
+                <legend className="w-full">
+                    <span className="font-semibold">Ocupación</span>
+                    <div className="float-right">
+                        <Button size="sm" onClick={()=>occupationModalRef.current?.handleShow()}>Agregar</Button>
+                    </div>
+                </legend>
+                <Row className="mt-3">
+                    <Col xs={24}>
+                        {(jobsSchools.occupations || []).length === 0 ? (
+                            <div className="flex justify-center items-center h-24 border rounded-lg text-gray-500">
+                                No se encontraron resultados
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+                                {(jobsSchools.occupations || []).map((occupation:OccupationForm, index:number)=>
+                                    <div
+                                        key={index}
+                                        className={`border rounded-lg p-3 flex flex-col gap-1 ${occupation.is_primary ? 'border-blue-400 bg-blue-50' : ''}`}
+                                    >
+                                        <div className="flex justify-between items-start gap-2">
+                                            <span className="font-semibold break-words">{occupation.name}</span>
+                                            {occupation.is_primary && (
+                                                <span className="shrink-0 text-xs bg-blue-600 text-white rounded-full px-2 py-0.5">Principal</span>
+                                            )}
+                                        </div>
+                                        <span className="text-sm text-gray-600">{occupationName(occupation.occupations_id)}</span>
+                                        <span className="text-sm">Ingreso mensual: {formatPrice(occupation.salary || 0)}</span>
+                                        <span className="text-sm">Antigüedad: {occupation.antiquity}</span>
+                                        <span className="text-xs text-gray-500 break-words">
+                                            {[occupation.address?.street, occupation.address?.colony, occupation.address?.city].filter(Boolean).join(', ') || '—'}
+                                        </span>
+                                        <div className="flex gap-2 mt-2 justify-end">
+                                            {!occupation.is_primary && (
+                                                <ButtonTable
+                                                    controlId="set-primary"
+                                                    title="Marcar como principal"
+                                                    icon={<FaCheck />}
+                                                    onClick={()=>handleSetPrimaryOccupation(occupation.name)}
+                                                />
+                                            )}
+                                            <ButtonTable
+                                                controlId="edit"
+                                                title="Editar"
+                                                icon={<FaPen />}
+                                                onClick={()=>occupationModalRef.current?.handleShow(occupation, index)}
+                                            />
+                                            <ButtonTable
+                                                controlId="delete"
+                                                title="Eliminar"
+                                                icon={<FaTrashAlt />}
+                                                onClick={()=>handleDeleteOccupation(occupation.name)}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </Col>
                 </Row>
-                <AddressForm address={jobsSchools.address} onChange={onChangeAddress} />
-                </div>
             </fieldset>
             <hr className="my-2" />
             <fieldset>
@@ -241,7 +258,7 @@ const JobInfo = ({
                 <Row className="mt-3">
                     <Col xs={24}>
                         <Table
-                            columns={columns}
+                            columns={educationColumns}
                             data={jobsSchools.schools}
                             height={200}
                         />
@@ -249,6 +266,7 @@ const JobInfo = ({
                 </Row>
             </fieldset>
             <ModalSchool ref={schoolModalRef} onAdd={handleAddSchool} />
+            <ModalOccupation ref={occupationModalRef} onSave={handleSaveOccupation} hasPrimary={hasPrimaryOccupation} />
         </Grid>
     )
 }

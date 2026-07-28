@@ -375,17 +375,20 @@ const VisasList = ({loader}:IApp)=>{
                 })),
             },
             jobsSchools: {
-                occupation: item.occupation?.occupations_id || '',
-                occupationName: item.occupation?.name || '',
-                salary: item.occupation?.salary || '',
-                antiquity: item.occupation?.antiquity || '',
-                activitiesDescription: item.occupation?.activities_description || '',
-                address: item.occupation ? {
-                    street: item.occupation.street || '',
-                    noExt: item.occupation.ext_number || '',
-                    colony: item.occupation.colony || '',
-                    city: item.occupation.city || '',
-                } : {},
+                occupations: (item.occupations || []).map((occupation:any) => ({
+                    occupations_id: occupation.occupations_id,
+                    name: occupation.name,
+                    salary: occupation.salary,
+                    antiquity: occupation.antiquity,
+                    activities_description: occupation.activities_description || '',
+                    is_primary: !!occupation.is_primary,
+                    address: {
+                        street: occupation.street || '',
+                        noExt: occupation.ext_number || '',
+                        colony: occupation.colony || '',
+                        city: occupation.city || '',
+                    }
+                })),
                 schools: (item.studies || []).map((school:any) => ({
                     name: school.name,
                     degree_level: school.degree_level || '',
