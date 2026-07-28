@@ -59,6 +59,13 @@ const ModalConcepts = forwardRef(({loader, getList}:Props, ref)=>{
         });
     }
 
+    const handleChangeProcess = (e: React.ChangeEvent<HTMLInputElement>)=>{
+        setDataForm({
+            ...dataForm,
+            is_process: e.currentTarget.checked
+        });
+    }
+
     const handleSubmit = async ()=>{
         if(!isValidForm('div.catalog-form')){
             Toast.fire('Error', 'Campos requeridos', 'error');
@@ -121,6 +128,17 @@ const ModalConcepts = forwardRef(({loader, getList}:Props, ref)=>{
                                 onChange={handleChangeProtected}
                             />
                             <label htmlFor="is_protected">No permitir cambiar nombre</label>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col xs={24} className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                id="is_process"
+                                checked={dataForm.is_process}
+                                onChange={handleChangeProcess}
+                            />
+                            <label htmlFor="is_process">Mostrar en pago de trámite (Visa/Pasaporte)</label>
                         </Col>
                     </Row>
                  </Grid>

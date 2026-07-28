@@ -159,18 +159,21 @@ const VisaConfirm = ({loader}:IApp)=>{
     } 
 
     const onSubmit = async ()=>{
-        const token = captchaRef.current?.getValue();
+        const captchaToken = captchaRef.current?.getValue();
 
-        if(token === ''){
-           // Toast.fire('Error', 'Debe realizar la verificación', 'error');
-            //return;
+        if(captchaToken === ''){
+            Toast.fire('Error', 'Debe realizar la verificación', 'error');
+            return;
         }
+
+        if(!token) return;
 
         let error = '';
         let countConfirm = 0;
 
         let obj = new FormData();
-        
+        obj.append('token', token);
+
         data.forEach((item, index)=>{
             obj.append('salesPayment['+index+'][id]', item.id.toString());
             obj.append('salesPayment['+index+'][is_confirmed]', '0');
@@ -209,7 +212,7 @@ const VisaConfirm = ({loader}:IApp)=>{
         if(response && response.success){
             Swal.fire('Correcto', response.message, 'success').then((result)=>{
                 if(result.isConfirmed){
-                    window.location.href = 'http://www.visas-premier.com';
+                    window.location.href = 'https://www.visas-premier.com';
                 }
             });   
             return;
