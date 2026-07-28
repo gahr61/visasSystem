@@ -464,7 +464,7 @@ const VisaDetails = ({loader}:IApp)=>{
                                     state: item.process_details.state_eeuu || '',
                                     zip: item.process_details.zip_eeuu || ''
                                 },
-                                travelDateEEUU: item.process_details.travel_date_eeuu || '',
+                                travelDateEEUU: (item.process_details.travel_date_eeuu || '').slice(0, 7),
                                 timeEEUU: item.process_details.time_stay_eeuu || '', 
                                 travelReason: item.process_details.travel_reason || '', 
                                 coverExpenses: item.process_details.cover_expenses || '', 
@@ -801,7 +801,9 @@ const VisaDetails = ({loader}:IApp)=>{
                 id: client.generalInformation.details.id,
                 travel_date: client.generalInformation.details.travelDate,
                 address_eeuu: client.generalInformation.details.addressEEUU,
-                travel_date_eeuu: client.generalInformation.details.travelDateEEUU,
+                travel_date_eeuu: client.generalInformation.details.travelDateEEUU
+                    ? `${client.generalInformation.details.travelDateEEUU}-01`
+                    : null,
                 time_stay_eeuu: client.generalInformation.details.timeEEUU,
                 travel_reason: client.generalInformation.details.travelReason,
                 cover_expenses: client.generalInformation.details.coverExpenses,

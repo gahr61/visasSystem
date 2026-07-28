@@ -221,7 +221,7 @@ const TravelInfo = ({
                 <Row>
                     <Col xs={24} lg={5}>
                         <label>¿Cuándo planea viajar a los EEUU?</label>
-                        <Input type="date"
+                        <Input type="month"
                             id="travelDateEEUU"
                             value={generalInfo.details.travelDateEEUU}
                             onChange={(e)=>onChangeData(e, 'details')}

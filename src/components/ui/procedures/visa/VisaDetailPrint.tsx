@@ -19,7 +19,9 @@ const fmtDate = (d: any) => {
     if (!d) return '—';
     const s = String(d).split('T')[0];
     const m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    return m ? `${m[3]}/${m[2]}/${m[1]}` : s;
+    if (m) return `${m[3]}/${m[2]}/${m[1]}`;
+    const ym = s.match(/^(\d{4})-(\d{2})$/);
+    return ym ? `${ym[2]}/${ym[1]}` : s;
 };
 const yesNo = (v: any) => (v==='1'||v===true||v===1 ? 'Sí' : v==='0'||v===false||v===0 ? 'No' : esc(v)||'—');
 
