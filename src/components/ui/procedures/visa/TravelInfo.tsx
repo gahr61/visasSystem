@@ -103,7 +103,6 @@ const TravelInfo = ({
                             options={relationships}
                             value={showOtherRelationship ? 'Otro' : generalInfo.residence.relationship}
                             handleChange={onChangeRelationship}
-                            required
                         />
                     </Col>
                     {showOtherRelationship && (
@@ -128,24 +127,22 @@ const TravelInfo = ({
                             ]}
                             value={generalInfo.residence.citizen_status}
                             handleChange={(value)=>onChangeData({currentTarget:{name:'citizen_status', value}}, 'residence')}
-                            required
                         />
                     </Col>
                 </Row>
                 <Row>
                     <Col xs={24} lg={5}>
                         <label>Teléfono personal</label>
-                        <Input 
-                            type="tel" 
+                        <Input
+                            type="tel"
                             id="personalPhone"
                             value={generalInfo.residence.personalPhone}
                             onChange={(e)=>onChangeData(e, 'residence')}
-                            required
                         />
                     </Col>
                     <Col xs={24} lg={4}>
                         <label>Teléfono trabajo</label>
-                        <Input type="tel" 
+                        <Input type="tel"
                             id="workPhone"
                             value={generalInfo.residence.workPhone}
                             onChange={(e)=>onChangeData(e, 'residence')}
@@ -153,10 +150,11 @@ const TravelInfo = ({
                     </Col>
                     <Col xs={24} lg={4}>
                         <label>Teléfono celular</label>
-                        <Input type="tel" 
+                        <Input type="tel"
                             id="celPhone"
                             value={generalInfo.residence.celPhone}
                             onChange={(e)=>onChangeData(e, 'residence')}
+                            required
                         />
                     </Col>
                 </Row>
@@ -172,7 +170,6 @@ const TravelInfo = ({
                             id="addressStreet"
                             value={generalInfo.details.addressEEUU.street}
                             onChange={(e:any)=>onChangeAddressEEUU('street', e.currentTarget.value)}
-                            required
                         />
                     </Col>
                     <Col xs={24} lg={4}>
@@ -181,7 +178,6 @@ const TravelInfo = ({
                             id="addressNumber"
                             value={generalInfo.details.addressEEUU.number}
                             onChange={(e:any)=>onChangeAddressEEUU('number', e.currentTarget.value)}
-                            required
                         />
                     </Col>
                     <Col xs={24} lg={6}>
@@ -190,7 +186,6 @@ const TravelInfo = ({
                             id="addressCity"
                             value={generalInfo.details.addressEEUU.city}
                             onChange={(e:any)=>onChangeAddressEEUU('city', e.currentTarget.value)}
-                            required
                         />
                     </Col>
                     <Col xs={24} lg={6}>
@@ -200,7 +195,6 @@ const TravelInfo = ({
                             options={usaStates}
                             value={generalInfo.details.addressEEUU.state}
                             handleChange={(value)=>onChangeAddressEEUU('state', value)}
-                            required
                         />
                     </Col>
                     <Col xs={24} lg={4}>
@@ -209,7 +203,6 @@ const TravelInfo = ({
                             id="addressZip"
                             value={generalInfo.details.addressEEUU.zip}
                             onChange={(e:any)=>onChangeAddressEEUU('zip', e.currentTarget.value)}
-                            required
                             maxLength={10}
                         />
                     </Col>
@@ -225,7 +218,6 @@ const TravelInfo = ({
                             id="travelDateEEUU"
                             value={generalInfo.details.travelDateEEUU}
                             onChange={(e)=>onChangeData(e, 'details')}
-                            required
                         />
                     </Col>
                     <Col xs={24} lg={8}>
@@ -234,7 +226,6 @@ const TravelInfo = ({
                             id="timeEEUU"
                             value={generalInfo.details.timeEEUU}
                             onChange={(e)=>onChangeData(e, 'details')}
-                            required
                         />
                     </Col>
                 </Row>
@@ -245,7 +236,6 @@ const TravelInfo = ({
                             id="travelReason"
                             value={generalInfo.details.travelReason}
                             onChange={(e)=>onChangeData(e, 'details')}
-                            required
                         />
                     </Col>
                     <Col xs={24} lg={9}>
@@ -254,7 +244,6 @@ const TravelInfo = ({
                             id="coverExpenses"
                             value={generalInfo.details.coverExpenses}
                             onChange={(e)=>onChangeData(e, 'details')}
-                            required
                         />
                     </Col>
                 </Row>
@@ -271,7 +260,6 @@ const TravelInfo = ({
                             handleChange={(value)=>onChangeData({
                                 currentTarget:{name:'has_visit_eeuu', value: value}
                             }, 'details')}
-                            required
                         />
                     </Col>
                     {generalInfo.details.has_visit_eeuu === '1' && (
@@ -311,7 +299,6 @@ const TravelInfo = ({
                             handleChange={(value)=>onChangeData({
                                 currentTarget:{name:'other_countries', value: value}
                             }, 'details')}
-                            required
                         />
                     </Col>
                     {generalInfo.details.other_countries === '1' && (
@@ -352,11 +339,10 @@ const TravelInfo = ({
                                 {value:'0', label:'No'},
                                 {value:'1', label:'Si'}
                             ]} 
-                            value={generalInfo.history.tryProcedureVisa} 
+                            value={generalInfo.history.tryProcedureVisa}
                             handleChange={(value)=>onChangeData({
                                 currentTarget:{name:'tryProcedureVisa', value: value}
-                            }, 'history')} 
-                            required    
+                            }, 'history')}
                         />
                     </Col>
                     {generalInfo.history.tryProcedureVisa === '1' && (

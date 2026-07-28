@@ -9,7 +9,7 @@ import { IApp } from "../../../utils/interfaces/function";
 import { visasInfoDetails } from "../../../utils/services/sales/procedures";
 import { useIdleTimer } from "react-idle-timer";
 import moment from "moment";
-import { decript, encript, removeFromStorage, verifyRequiredFields } from "../../../utils/functions";
+import { decript, encript, isValidForm, removeFromStorage, verifyRequiredFields } from "../../../utils/functions";
 import Toast from "../../../components/common/Toast";
 import Button from "../../../components/common/Button";
 import { Client } from "../../../utils/interfaces/client";
@@ -128,15 +128,15 @@ const VisaDetails = ({loader}:IApp)=>{
         },
         generalInformation:{
             residence:{
-                fullName:'required', relationship:'required', citizen_status:'required', personalPhone:'required', workPhone:'', celPhone:''
+                fullName:'required', relationship:'', citizen_status:'', personalPhone:'', workPhone:'', celPhone:'required'
             },
-            history:{ tryProcedureVisa:'required', procedureDate:'' },
+            history:{ tryProcedureVisa:'', procedureDate:'' },
             details:{
                 addressEEUU:{
-                    street:'required', number:'required', city:'required', state:'required', zip:'required'
+                    street:'', number:'', city:'', state:'', zip:''
                 },
-                travelDateEEUU:'required', timeEEUU:'required', travelReason:'required', coverExpenses:'required',
-                has_visit_eeuu:'required', other_countries:'required'
+                travelDateEEUU:'', timeEEUU:'', travelReason:'', coverExpenses:'',
+                has_visit_eeuu:'', other_countries:''
             }
         }
     };
@@ -191,19 +191,29 @@ const VisaDetails = ({loader}:IApp)=>{
     const isJobComplete = (client:any) => isRuleComplete(client.jobsSchools, validationRules.jobsSchools);
 
     const isGeneralComplete = (client:any) => {
-        if(!isRuleComplete(client.generalInformation, validationRules.generalInformation)) return false;
+        const formIsValid = isValidForm('div.general-form');
+
+        if(!isRuleComplete(client.generalInformation, validationRules.generalInformation) || !formIsValid) return false;
 
         const details = client.generalInformation.details;
-        if(details.has_visit_eeuu === '1' && (!details.lastVisit || !details.dateLastVisit)) return false;
-        if(details.other_countries === '1' && !details.travelCountries) return false;
+        if(details.has_visit_eeuu === '1' && (!details.lastVisit || !details.dateLastVisit)){
+            return false;
+        }
+        if(details.other_countries === '1' && !details.travelCountries){
+            return false;
+        }
 
         const history = client.generalInformation.history;
         if(history.tryProcedureVisa === '1'){
-            if(!history.procedureDate || history.visaApproved === '') return false;
+            if(!history.procedureDate || history.visaApproved === ''){
+                return false;
+            }
 
             if(history.visaApproved === '1'){
                 const visa = client.generalInformation.visa;
-                if(!visa.lastVisa || !visa.expirationDate || !visa.expeditionDate) return false;
+                if(!visa.lastVisa || !visa.expirationDate || !visa.expeditionDate){
+                    return false;
+                }
             }
         }
 
@@ -789,6 +799,7 @@ const VisaDetails = ({loader}:IApp)=>{
             clients_id: client.personalInformation.id,
             mark_complete: markComplete,
             residence:{
+                id: client.generalInformation.residence.id,
                 process_id: client.process_id,
                 full_name: client.generalInformation.residence.fullName,
                 relationship: client.generalInformation.residence.relationship,
@@ -847,12 +858,25 @@ const VisaDetails = ({loader}:IApp)=>{
 
         if(response && response.success){
             valid = true;
+
+            return valid;
         }
+
+        Toast.fire('Error', response?.message, 'error');
 
         return valid;
     }
 
+    const VISIBLE_STEP_FORMS = ['div.personal-form', 'div.address-form', 'div.job-form', 'div.general-form'];
+
     const handleSubmit = async ()=>{
+        const visibleFormIsValid = VISIBLE_STEP_FORMS.every((selector)=> isValidForm(selector));
+
+        if(!visibleFormIsValid){
+            Toast.fire('Error', 'Completa los campos requeridos del formulario que estás visualizando', 'error');
+            return;
+        }
+
         loader.current?.handleShow('Guardando...');
 
         const missingByClient:Record<number, string[]> = {};
@@ -884,8 +908,14 @@ const VisaDetails = ({loader}:IApp)=>{
                 missing.push(SECTION_LABELS.job);
             }
 
+
+            console.log('isgeneral', isGeneralComplete(client))
             if(isGeneralComplete(client)){
-                await saveGeneralInfo(client, missing.length === 0);
+                const savedGeneral = await saveGeneralInfo(client, missing.length === 0);
+
+                if(!savedGeneral){
+                    missing.push(SECTION_LABELS.general);
+                }
             }else{
                 missing.push(SECTION_LABELS.general);
             }

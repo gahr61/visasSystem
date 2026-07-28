@@ -270,13 +270,15 @@ export const isPhone = (value: string)=>{
  * @returns 
  */
 export const isValidForm = (element: string): boolean =>{
-    
+
     let ctrls: NodeListOf<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement> = document.querySelectorAll('input');
 
-    const select = document.querySelector(element);
+    // when several matches exist (eg. one per hidden tab), validate the one actually visible on screen
+    const matches = Array.from(document.querySelectorAll(element)) as HTMLElement[];
+    const select = matches.find((el) => el.offsetParent !== null) || matches[0];
     let isFormValid =  true;
     if(select){
-        ctrls = select.querySelectorAll('input, select, textarea') as NodeListOf<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>;   
+        ctrls = select.querySelectorAll('input, select, textarea') as NodeListOf<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>;
 
         ctrls.forEach((ctrl) => {
             const ariaRequired = ctrl.getAttribute('aria-required');
