@@ -2,6 +2,7 @@ import { Col, Divider, Row } from "rsuite";
 import Button from "../../../common/Button";
 import Input from "../../../common/Input";
 import { PassportSalesClientsInfo } from "../../../../utils/interfaces/passportSales";
+import moment from "moment";
 
 const selectClass = "py-1 px-2 block w-full border border-gray-300 outline-0 rounded-lg text-sm h-[1.85rem] bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 cursor-pointer";
 
@@ -132,7 +133,7 @@ const PassportClientCard = ({ client, onChange, onOpenSchedule }: Props) => {
                                     <div className="grid grid-cols-2 gap-1">
                                         <div><span className="text-gray-500">Oficina: </span>{s.office}</div>
                                         <div><span className="text-gray-500">Ciudad: </span>{s.city || '—'}</div>
-                                        <div><span className="text-gray-500">Fecha: </span>{s.appointment_date}</div>
+                                        <div><span className="text-gray-500">Fecha: </span>{moment(s.appointment_date, 'YYYY-MM-DD').format('DD/MM/YYYY')}</div>
                                         <div><span className="text-gray-500">Horario: </span>{s.schedule}</div>
                                         {s.observations && (
                                             <div className="col-span-2"><span className="text-gray-500">Obs: </span>{s.observations}</div>

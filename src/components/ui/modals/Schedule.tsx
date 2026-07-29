@@ -6,17 +6,15 @@ import { IApp } from "../../../utils/interfaces/function";
 import Toast from "../../common/Toast";
 import { scheduleDetailsUpdate } from "../../../utils/services/schedule";
 
+// Las 32 capitales estatales + ciudades fronterizas con presencia consular importante
 const MEXICO_CITIES = [
-    'Ciudad de México',
-    'Guadalajara',
-    'Monterrey',
-    'Ciudad Juárez',
-    'Tijuana',
-    'Mérida',
-    'Hermosillo',
-    'Matamoros',
-    'Nogales',
-    'Nuevo Laredo',
+    'Aguascalientes', 'Campeche', 'Chetumal', 'Chihuahua', 'Chilpancingo',
+    'Ciudad de México', 'Ciudad Juárez', 'Ciudad Victoria', 'Colima', 'Culiacán',
+    'Cuernavaca', 'Durango', 'Guadalajara', 'Guanajuato', 'Hermosillo', 'La Paz',
+    'Matamoros', 'Mérida', 'Mexicali', 'Monterrey', 'Morelia', 'Nogales',
+    'Nuevo Laredo', 'Oaxaca de Juárez', 'Pachuca', 'Puebla', 'Querétaro',
+    'Saltillo', 'San Luis Potosí', 'Tepic', 'Tijuana', 'Tlaxcala', 'Toluca',
+    'Tuxtla Gutiérrez', 'Villahermosa', 'Xalapa', 'Zacatecas',
 ];
 
 const selectClass = "py-1 px-2 block w-full border border-gray-300 outline-0 rounded-lg text-sm h-[1.85rem] bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 cursor-pointer";

@@ -7,9 +7,15 @@ import { IApp } from "../../../utils/interfaces/function";
 import { PassportScheduleItem } from "../../../utils/interfaces/passportSales";
 import { passportScheduleUpdate } from "../../../utils/services/sales/passport";
 
+// Las 32 capitales estatales + ciudades fronterizas con presencia consular importante
 const MEXICO_CITIES = [
-    'Ciudad de México', 'Guadalajara', 'Monterrey', 'Ciudad Juárez', 'Tijuana',
-    'Mérida', 'Hermosillo', 'Matamoros', 'Nogales', 'Nuevo Laredo',
+    'Aguascalientes', 'Campeche', 'Chetumal', 'Chihuahua', 'Chilpancingo',
+    'Ciudad de México', 'Ciudad Juárez', 'Ciudad Victoria', 'Colima', 'Culiacán',
+    'Cuernavaca', 'Durango', 'Guadalajara', 'Guanajuato', 'Hermosillo', 'La Paz',
+    'Matamoros', 'Mérida', 'Mexicali', 'Monterrey', 'Morelia', 'Nogales',
+    'Nuevo Laredo', 'Oaxaca de Juárez', 'Pachuca', 'Puebla', 'Querétaro',
+    'Saltillo', 'San Luis Potosí', 'Tepic', 'Tijuana', 'Tlaxcala', 'Toluca',
+    'Tuxtla Gutiérrez', 'Villahermosa', 'Xalapa', 'Zacatecas',
 ];
 
 const selectClass = "py-1 px-2 block w-full border border-gray-300 outline-0 rounded-lg text-sm h-[1.85rem] bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 cursor-pointer";
@@ -78,42 +84,46 @@ const PassportScheduleModal = forwardRef(({ loader, salesId, onSaved }: Props, r
                             <p className="font-semibold text-sm mb-3 text-gray-800">{item.clientName}</p>
                             <Row>
                                 <Col xs={24} md={12}>
-                                    <label className="text-xs text-gray-500 mb-1 block">Oficina</label>
+                                    <label className="text-xs text-gray-500 mb-1 block">Oficina <span className="span-required text-red-600">*</span></label>
                                     <Input
                                         name="office"
                                         value={item.office}
                                         onChange={(e: any) => handleChange(e, item.clients_id)}
                                         placeholder="Nombre de la oficina"
+                                        required
                                     />
                                 </Col>
                                 <Col xs={24} md={12}>
-                                    <label className="text-xs text-gray-500 mb-1 block">Ciudad</label>
+                                    <label className="text-xs text-gray-500 mb-1 block">Ciudad <span className="span-required text-red-600">*</span></label>
                                     <select
                                         name="city"
                                         value={item.city}
                                         onChange={(e) => handleChange(e, item.clients_id)}
                                         className={selectClass}
+                                        required
                                     >
                                         <option value="">Seleccione...</option>
                                         {MEXICO_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
                                     </select>
                                 </Col>
                                 <Col xs={24} md={8} className="mt-2">
-                                    <label className="text-xs text-gray-500 mb-1 block">Fecha de cita</label>
+                                    <label className="text-xs text-gray-500 mb-1 block">Fecha de cita <span className="span-required text-red-600">*</span></label>
                                     <Input
                                         type="date"
                                         name="appointment_date"
                                         value={item.appointment_date}
                                         onChange={(e: any) => handleChange(e, item.clients_id)}
+                                        required
                                     />
                                 </Col>
                                 <Col xs={24} md={8} className="mt-2">
-                                    <label className="text-xs text-gray-500 mb-1 block">Horario</label>
+                                    <label className="text-xs text-gray-500 mb-1 block">Horario <span className="span-required text-red-600">*</span></label>
                                     <Input
                                         type="time"
                                         name="schedule"
                                         value={item.schedule}
                                         onChange={(e: any) => handleChange(e, item.clients_id)}
+                                        required
                                     />
                                 </Col>
                                 <Col xs={24} md={8} className="mt-2">
