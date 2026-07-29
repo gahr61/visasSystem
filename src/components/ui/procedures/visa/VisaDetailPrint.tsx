@@ -377,7 +377,10 @@ const buildClientHTML = (client: any, saleStatus: string, saleType: string, idx:
     );
 
     const phonesBox = box('Teléfonos',
-        tbl(['Tipo', 'Número'], (ci.phones || []).map((p: any) => [esc(p.type), esc(p.number)]))
+        tbl(
+            ['Tipo', 'Número', 'Descripción'],
+            (ci.phones || []).map((p: any) => [esc(p.type), esc(p.number), p.description ? esc(p.description) : '—'])
+        )
     );
 
     const familyBox = box('Familia Directa',

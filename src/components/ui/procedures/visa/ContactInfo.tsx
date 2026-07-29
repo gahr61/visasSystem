@@ -13,7 +13,8 @@ import AddressForm from "../AddressForm";
 type PhoneForm = {
     id: number,
     type: string,
-    number: string
+    number: string,
+    description?: string
 }
 
 type Props = {
@@ -30,12 +31,14 @@ const ContactInfo = ({
     const [requiredPhones, setRequiredPhones] = useState(false);
     const [phonesForm, setPhonesForm] = useState({
         number:'',
-        type:''
+        type:'',
+        description:''
     })
 
     const columns: Columns[] = [
         {key:'type', title:'Tipo', grow:1, render:(row: PhoneForm)=>row.type},
         {key:'number', title:'Número', grow:1, render:(row: PhoneForm)=>row.number},
+        {key:'description', title:'Descripción', grow:2, render:(row: PhoneForm)=>row.description || '—'},
         {key:'actions', title:'', grow:2, render:(row: PhoneForm) => {
             return(
                 <>
@@ -80,17 +83,18 @@ const ContactInfo = ({
             list.push({
                 id: Date.now(),
                 number: phonesForm.number,
-                type: phonesForm.type
+                type: phonesForm.type,
+                description: phonesForm.type === 'Otro' ? phonesForm.description : ''
             });
 
             handleChange({
                 currentTarget:{
-                    name:'phones', 
+                    name:'phones',
                     value:list
                 }
             });
-            
-            setPhonesForm({type:'', number:''});
+
+            setPhonesForm({type:'', number:'', description:''});
             setRequiredPhones(false);
         },  300)
         
@@ -129,11 +133,22 @@ const ContactInfo = ({
                                 {label:'Celular', value:'Celular'},
                                 {label:'Otro', value:'Otro'},
                             ]} 
-                            value={phonesForm.type}                             
-                            handleChange={(value)=>setPhonesForm({...phonesForm, type: value})} 
+                            value={phonesForm.type}
+                            handleChange={(value)=>setPhonesForm({...phonesForm, type: value})}
                             required={requiredPhones}
                         />
                     </Col>
+                    {phonesForm.type === 'Otro' && (
+                        <Col xs={24} lg={5}>
+                            <label>Nombre/Descripción</label>
+                            <Input
+                                id="description"
+                                value={phonesForm.description}
+                                onChange={(e:any)=>setPhonesForm({...phonesForm, description: e.currentTarget.value})}
+                                required={requiredPhones}
+                            />
+                        </Col>
+                    )}
                     <Col xs={24} lg={4}>
                         <label>Número</label>
                         <Input 

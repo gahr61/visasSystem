@@ -580,8 +580,9 @@ const VisaDetails = ({loader}:IApp)=>{
             clients_id: client.personalInformation.id,
             phones: client.contactInformation.phones.map((phone:any)=>{
                 const item = {
-                    type: phone.type, 
-                    number: phone.number
+                    type: phone.type,
+                    number: phone.number,
+                    description: phone.description || null
                 };
 
                 return item;
