@@ -130,7 +130,7 @@ const VisasList = ({loader}:IApp)=>{
             <AccountCell row={row} canViewPassword={hasPermission('procedure_visa_view_password')} />
         },
         {key:'status', title:'Estatus', grow:1, render:(row: Procedure)=> row.status },
-        {key:'', title:'Acciones', grow:1, render:(row: Procedure)=>
+        {key:'', title:'Acciones', grow:2, render:(row: Procedure)=>
             <div className="flex gap-2">
                 <ButtonTable
                     title="Detalles"

@@ -13,7 +13,8 @@ interface Props {
     errorEmail: string
     setErrorEmail: (value: string) => void,
     errorPhone: string,
-    setErrorPhone: (value: string) => void
+    setErrorPhone: (value: string) => void,
+    requireEmail?: boolean
 }
 const PaymentForm = ({
     dataPayment,
@@ -22,7 +23,8 @@ const PaymentForm = ({
     errorEmail,
     setErrorEmail,
     errorPhone,
-    setErrorPhone
+    setErrorPhone,
+    requireEmail = true
 }: Props)=>{
     const contacts:ISelectOptions[] = [
         {value:'Correo electrónico', label:'Correo electrónico'},
@@ -288,17 +290,17 @@ const PaymentForm = ({
                                 />
                             </Col>
                             <Col xs={24} lg={8}>
-                                <label>Correo electrónico del cliente</label>
-                                <span className="span-required text-red-600">                                    
+                                <label>Correo electrónico del cliente{!requireEmail && <span className="text-xs text-gray-400"> (opcional)</span>}</label>
+                                <span className="span-required text-red-600">
                                     {<span className="text-xs text-red-400 ms-2">{errorEmail}</span>}
                                 </span>
-                                <Input 
+                                <Input
                                     id="email"
                                     type="email"
                                     value={dataPayment.payment.client.email}
                                     onChange={(e:React.FormEvent<HTMLInputElement>)=>handleChange(e, 'payment', 'client')}
                                     setErrorEmail={setErrorEmail}
-                                    required
+                                    required={requireEmail}
                                 />
                             </Col>
                             <Col xs={24} lg={4}>

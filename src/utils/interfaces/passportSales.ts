@@ -28,7 +28,7 @@ export type PassportProcedure = {
     type: string;
     no_applicants: number;
     client: string;
-    email: string;
+    email: string | null;
     phone: string;
     status: string;
 }
@@ -90,7 +90,7 @@ export type PassportSalesInfo = {
     advance_payment: string;
     payable: string;
     contact: string;
-    email: string;
+    email: string | null;
     names: string;
     lastname1: string;
     lastname2: string | null;

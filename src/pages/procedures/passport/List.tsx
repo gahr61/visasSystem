@@ -25,7 +25,7 @@ const PassportList = ({ loader }: IApp) => {
         { key: 'type',       title: 'Tipo',            grow: 1, render: (row: PassportProcedure) => row.type },
         { key: 'applicants', title: 'No. Solicitantes',grow: 1, render: (row: PassportProcedure) => row.no_applicants.toString() },
         { key: 'client',     title: 'Cliente',         grow: 2, render: (row: PassportProcedure) => row.client },
-        { key: 'email',      title: 'Correo',          grow: 2, render: (row: PassportProcedure) => row.email },
+        { key: 'email',      title: 'Correo',          grow: 2, render: (row: PassportProcedure) => row.email || '—' },
         { key: 'status',     title: 'Estatus',         grow: 1, render: (row: PassportProcedure) => row.status },
         {
             key: 'actions', title: 'Acciones', grow: 1,

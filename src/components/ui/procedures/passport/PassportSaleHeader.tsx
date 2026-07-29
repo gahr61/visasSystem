@@ -35,7 +35,7 @@ const PassportSaleHeader = ({ info }: Props) => {
                 <Col xs={24} md={7}>
                     <p className={label}>Cliente (facturación)</p>
                     <p className={value}>{info.names} {info.lastname1}{info.lastname2 ? ' ' + info.lastname2 : ''}</p>
-                    <p className="text-xs text-gray-400">{info.email} · {info.phone}</p>
+                    <p className="text-xs text-gray-400">{info.email ? `${info.email} · ` : ''}{info.phone}</p>
                 </Col>
             </Row>
             <Row className="mt-3">

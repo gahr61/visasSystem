@@ -45,7 +45,7 @@ const PassportSaleEditModal = forwardRef(({ loader, salesId, onSaved }: Props, r
                 names:     info.names,
                 lastname1: info.lastname1,
                 lastname2: info.lastname2 || '',
-                email:     info.email,
+                email:     info.email || '',
                 phone:     info.phone
             },
             sale_process: {
@@ -117,7 +117,7 @@ const PassportSaleEditModal = forwardRef(({ loader, salesId, onSaved }: Props, r
                             </Col>
                             <Col xs={24} md={12} className="mt-2">
                                 <label className="text-xs text-gray-500 mb-1 block">Correo electrónico</label>
-                                <Input name="email" type="email" value={form.billing.email} onChange={onBillingChange} required />
+                                <Input name="email" type="email" value={form.billing.email} onChange={onBillingChange} />
                             </Col>
                             <Col xs={24} md={12} className="mt-2">
                                 <label className="text-xs text-gray-500 mb-1 block">Teléfono</label>

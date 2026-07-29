@@ -240,6 +240,7 @@ const PassportNew = ({ loader }: IApp) => {
                         setErrorEmail={setErrorEmail}
                         errorPhone={errorPhone}
                         setErrorPhone={setErrorPhone}
+                        requireEmail={false}
                     />
                 ) : (
                     <PassportProcedureForm
