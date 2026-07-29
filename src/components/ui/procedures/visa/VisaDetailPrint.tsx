@@ -198,8 +198,8 @@ const buildClientHTML = (client: any, saleStatus: string, saleType: string, idx:
     const stColor  = stamp ? stamp.color : '#475569';
     const stBg     = stamp ? `${stamp.color}1a` : '#f1f5f9';
 
-    const F = 10;
-    const P = 3;
+    const F = 12;
+    const P = 4;
 
     // Sectioned box: dark title bar + content
     const box = (title: string, content: string) =>
@@ -315,13 +315,15 @@ const buildClientHTML = (client: any, saleStatus: string, saleType: string, idx:
 
     const personalBox = box('Datos Personales',
         row(
-            cell('Nombre(s)',    esc(pi.names),             '38%'),
-            cell('Ap. Paterno',  esc(pi.lastname1),         '31%'),
-            cell('Ap. Materno',  esc(pi.lastname2) || '—', '31%'),
-            cell('F. Nacimiento',fmtDate(pi.birthdate),     '34%'),
-            cell('Género',       gender,                    '33%'),
-            cell('CURP',         esc(pi.curp),              '33%'),
-            cell('Estado Civil', esc(pi.civilStatus),       '100%'),
+            cell('Nombre(s)',    esc(pi.names),             '34%'),
+            cell('Ap. Paterno',  esc(pi.lastname1),         '33%'),
+            cell('Ap. Materno',  esc(pi.lastname2) || '—', '33%'),
+        ) +
+        row(
+            cell('F. Nacimiento',fmtDate(pi.birthdate),     '50%'),
+            cell('Género',       gender,                    '50%'),
+            cell('CURP',         esc(pi.curp),              '50%'),
+            cell('Estado Civil', esc(pi.civilStatus),       '50%'),
         )
     );
 
@@ -340,9 +342,11 @@ const buildClientHTML = (client: any, saleStatus: string, saleType: string, idx:
 
     const spouseBox = spouse.names ? box('Cónyuge',
         row(
-            cell('Nombre completo', esc(spouse.names),                          '40%'),
-            cell('F. Nacimiento',   fmtDate(spouse.birthdate),                  '30%'),
-            cell('¿Tiene visa?',    yesNo(spouse.hasVisa),                      '30%'),
+            cell('Nombre completo', esc(spouse.names),                          '100%'),
+            cell('F. Nacimiento',   fmtDate(spouse.birthdate),                  '50%'),
+            cell('¿Tiene visa?',    yesNo(spouse.hasVisa),                      '50%'),
+        ) +
+        row(
             cell('País nacimiento', esc(lbl.spouseCountry) || '—',              '50%'),
             cell('Estado nacimiento', esc(lbl.spouseState) || '—',              '50%'),
         )
@@ -354,9 +358,11 @@ const buildClientHTML = (client: any, saleStatus: string, saleType: string, idx:
         row(
             cell('No. Pasaporte',   esc(pp.number),                               '33.33%'),
             cell('F. Expedición',   fmtDate(pp.expedition_date),                  '33.33%'),
-            cell('F. Caducidad',    fmtDate(pp.expiration_date),                  '33.33%'),
-            cell('País expedición', esc(lbl.passportCountry),                     '25%'),
-            cell('Estado expd.',    esc(lbl.passportState),                       '25%'),
+            cell('F. Caducidad',    fmtDate(pp.expiration_date),                  '33.34%'),
+        ) +
+        row(
+            cell('País expedición', esc(lbl.passportCountry),                     '50%'),
+            cell('Estado expd.',    esc(lbl.passportState),                       '50%'),
             cell('Ciudad expd.',    esc(pp.expedition_city || pp.city_expedition), '50%'),
         )
     );
@@ -365,14 +371,17 @@ const buildClientHTML = (client: any, saleStatus: string, saleType: string, idx:
 
     const addressBox = box('Domicilio',
         row(
-            cell('Calle',    esc(addr.street),          '25%'),
-            cell('No. Int.', esc(addr.noInt)   || '—', '12.5%'),
-            cell('No. Ext.', esc(addr.noExt),           '12.5%'),
-            cell('C.P.',     esc(addr.postCode),        '15%'),
-            cell('Colonia',  esc(addr.colony),          '35%'),
-            cell('Ciudad',   esc(addr.city),            '34%'),
-            cell('País',     esc(lbl.addressCountry),   '33%'),
-            cell('Estado',   esc(lbl.addressState),     '33%'),
+            cell('Calle',    esc(addr.street),          '60%'),
+            cell('No. Int.', esc(addr.noInt)   || '—', '20%'),
+            cell('No. Ext.', esc(addr.noExt),           '20%'),
+           
+        ) +
+        row(
+             cell('C.P.',     esc(addr.postCode),       '20%'),
+            cell('Colonia',  esc(addr.colony),          '80%'),
+            cell('Ciudad',   esc(addr.city),            '50%'),
+            cell('País',     esc(lbl.addressCountry),   '50%'),
+            cell('Estado',   esc(lbl.addressState),     '50%'),
         )
     );
 
@@ -419,12 +428,12 @@ const buildClientHTML = (client: any, saleStatus: string, saleType: string, idx:
 
     const lodgingBox = box('Hospedaje EE.UU.',
         row(
-            cell('Nombre ref.',           esc(res.fullName),               '40%'),
-            cell('Parentesco',            esc(res.relationship) || '—',    '30%'),
-            cell('¿Ciudadano o residente?', esc(res.citizen_status) || '—', '30%'),
-            cell('Tel. Personal', esc(res.personalPhone),    '33.33%'),
-            cell('Tel. Trabajo',  esc(res.workPhone) || '—', '33.33%'),
-            cell('Tel. Celular',  esc(res.celPhone)  || '—', '33.33%'),
+            cell('Nombre ref.',           esc(res.fullName),               '50%'),
+            cell('Parentesco',            esc(res.relationship) || '—',    '50%'),
+            cell('¿Ciudadano o residente?', esc(res.citizen_status) || '—', '50%'),        
+            cell('Tel. Personal', esc(res.personalPhone),    '50%'),
+            cell('Tel. Trabajo',  esc(res.workPhone) || '—', '50%'),
+            cell('Tel. Celular',  esc(res.celPhone)  || '—', '50%'),
         )
     );
 
