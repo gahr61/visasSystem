@@ -372,6 +372,7 @@ const VisasList = ({loader}:IApp)=>{
                     birthdate: p.birthdate ? moment(p.birthdate).format('DD/MM/YYYY') : '',
                     hasVisa: p.has_visa ? 'Si' : 'No',
                     livesInUsa: p.lives_in_usa ? 'Si' : 'No',
+                    citizenStatus: p.citizen_status || '',
                 })),
             },
             jobsSchools: {

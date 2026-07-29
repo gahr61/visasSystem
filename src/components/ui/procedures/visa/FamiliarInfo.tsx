@@ -18,7 +18,8 @@ type FamiliarForm = {
     relationship_id:string,
     relationship:string,
     birthdate: string,
-    hasVisa: boolean
+    hasVisa: boolean,
+    citizenStatus: string
 }
 
 type Props = {
@@ -36,6 +37,7 @@ const FamiliarInfo = ({
         {key:'birtdate', title:'F. Nacimiento', grow:1, render:(row: FamiliarForm) => row.birthdate},
         {key:'hasVisa', title:'Tiene visa?', grow:1, render:(row: FamiliarForm) => row.hasVisa},
         {key:'livesInUsa', title:'Vive en EEUU?', grow:1, render:(row: any) => row.livesInUsa},
+        {key:'citizenStatus', title:'Residente/Ciudadano', grow:1, render:(row: FamiliarForm) => row.citizenStatus || '—'},
         {key:'actions', title:'', grow:1, render:(row: FamiliarForm) =>
             <>
                 <ButtonTable 
@@ -56,7 +58,8 @@ const FamiliarInfo = ({
         otherRelationship:'',
         birthdate:'',
         has_visa:0,
-        lives_in_usa:0
+        lives_in_usa:0,
+        citizen_status:''
     })
 
     const loadRelationships = async ()=>{
@@ -107,9 +110,10 @@ const FamiliarInfo = ({
             list.push({
                 full_name: familiarForm.full_name,
                 relationship: relationship,
-                birthdate: moment(familiarInfo.birthdate).local().format('DD/MM/YYYY'),
+                birthdate: moment(familiarForm.birthdate).local().format('DD/MM/YYYY'),
                 hasVisa: familiarForm.has_visa === 1 ? 'Si' : 'No',
-                livesInUsa: familiarForm.lives_in_usa === 1 ? 'Si' : 'No'
+                livesInUsa: familiarForm.lives_in_usa === 1 ? 'Si' : 'No',
+                citizenStatus: familiarForm.citizen_status
             });
 
             handleChange({
@@ -125,7 +129,8 @@ const FamiliarInfo = ({
                 otherRelationship:'',
                 birthdate:'',
                 has_visa:0,
-                lives_in_usa:0
+                lives_in_usa:0,
+                citizen_status:''
             });
             setRequiredFamiliar(false);
         }, 300);
@@ -223,6 +228,18 @@ const FamiliarInfo = ({
                             value={familiarForm.lives_in_usa}
                             handleChange={(value:any)=>setFamiliarForm({...familiarForm, lives_in_usa: value})}
                             required={requiredFamiliar}
+                        />
+                    </Col>
+                    <Col xs={24} lg={4}>
+                        <label>Residente/Ciudadano</label>
+                        <SelectForm
+                            id="citizen_status"
+                            options={[
+                                {value:'Residente', label:'Residente'},
+                                {value:'Ciudadano', label:'Ciudadano'}
+                            ]}
+                            value={familiarForm.citizen_status}
+                            handleChange={(value:any)=>setFamiliarForm({...familiarForm, citizen_status: value})}
                         />
                     </Col>
                     <Col xs={24} lg={2}>

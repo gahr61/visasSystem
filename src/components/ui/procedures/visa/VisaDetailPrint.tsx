@@ -382,9 +382,10 @@ const buildClientHTML = (client: any, saleStatus: string, saleType: string, idx:
 
     const familyBox = box('Familia Directa',
         tbl(
-            ['Parentesco', 'Nombre completo', 'F. Nac.', '¿Visa?', '¿Vive en EEUU?'],
+            ['Parentesco', 'Nombre completo', 'F. Nac.', '¿Visa?', '¿Vive en EEUU?', 'Residente/Ciudadano'],
             (fi.relationships || []).map((r: any) => [
-                esc(r.relationship), esc(r.full_name), esc(r.birthdate), yesNo(r.has_visa ?? r.hasVisa), yesNo(r.lives_in_usa ?? r.livesInUsa)
+                esc(r.relationship), esc(r.full_name), esc(r.birthdate), yesNo(r.has_visa ?? r.hasVisa), yesNo(r.lives_in_usa ?? r.livesInUsa),
+                esc(r.citizen_status ?? r.citizenStatus) || '—'
             ])
         )
     );
