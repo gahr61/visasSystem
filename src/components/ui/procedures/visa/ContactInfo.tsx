@@ -4,7 +4,7 @@ import SelectForm from "../../../common/Select";
 import Button from "../../../common/Button";
 import Table, { Columns } from "../../../common/Table";
 import ButtonTable from "../../../common/ButtonTable";
-import { FaTrashAlt } from "react-icons/fa";
+import { FaPen, FaTrashAlt } from "react-icons/fa";
 import { useState } from "react";
 import { isValidForm } from "../../../../utils/functions";
 import Toast from "../../../common/Toast";
@@ -29,6 +29,7 @@ const ContactInfo = ({
 }:Props)=>{
 
     const [requiredPhones, setRequiredPhones] = useState(false);
+    const [editingId, setEditingId] = useState<number | null>(null);
     const [phonesForm, setPhonesForm] = useState({
         number:'',
         type:'',
@@ -42,6 +43,15 @@ const ContactInfo = ({
         {key:'actions', title:'', grow:2, render:(row: PhoneForm) => {
             return(
                 <>
+                    {row.type === 'Otro' && (
+                        <ButtonTable
+                            controlId="edit"
+                            title="Editar"
+                            customClass="me-2"
+                            icon={<FaPen />}
+                            onClick={()=>handleEditPhone(row)}
+                        />
+                    )}
                     <ButtonTable
                         controlId="delete"
                         title="Eliminar"
@@ -73,19 +83,28 @@ const ContactInfo = ({
 
             let list = [...contactInfo.phones];
 
-            const exist = list.find((obj:any) => obj.number === phonesForm.number);
+            const exist = list.find((obj:any) => obj.number === phonesForm.number && obj.id !== editingId);
 
             if(exist){
                 Toast.fire('Error', 'El número de teléfono que intenga registrar ya se encuentra en el listado', 'error');
                 return;
             }
 
-            list.push({
-                id: Date.now(),
-                number: phonesForm.number,
-                type: phonesForm.type,
-                description: phonesForm.type === 'Otro' ? phonesForm.description : ''
-            });
+            if(editingId !== null){
+                list = list.map((obj:any) => obj.id === editingId ? {
+                    ...obj,
+                    number: phonesForm.number,
+                    type: phonesForm.type,
+                    description: phonesForm.type === 'Otro' ? phonesForm.description : ''
+                } : obj);
+            }else{
+                list.push({
+                    id: Date.now(),
+                    number: phonesForm.number,
+                    type: phonesForm.type,
+                    description: phonesForm.type === 'Otro' ? phonesForm.description : ''
+                });
+            }
 
             handleChange({
                 currentTarget:{
@@ -95,9 +114,25 @@ const ContactInfo = ({
             });
 
             setPhonesForm({type:'', number:'', description:''});
+            setEditingId(null);
             setRequiredPhones(false);
         },  300)
-        
+
+    }
+
+    const handleEditPhone = (row: PhoneForm)=>{
+        setPhonesForm({
+            type: row.type,
+            number: row.number,
+            description: row.description || ''
+        });
+        setEditingId(row.id);
+    }
+
+    const handleCancelEditPhone = ()=>{
+        setPhonesForm({type:'', number:'', description:''});
+        setEditingId(null);
+        setRequiredPhones(false);
     }
 
     const handleDeletePhone = (id:number) => {
@@ -160,12 +195,17 @@ const ContactInfo = ({
                         />
                     </Col>
                     <Col xs={24} lg={2}>
-                        <Button onClick={handleAddPhone}>Agregar</Button>
+                        <Button onClick={handleAddPhone}>{editingId !== null ? 'Guardar' : 'Agregar'}</Button>
                     </Col>
+                    {editingId !== null && (
+                        <Col xs={24} lg={2}>
+                            <Button appearance="ghost" onClick={handleCancelEditPhone}>Cancelar</Button>
+                        </Col>
+                    )}
                 </Row>
                 <Row>
                     <Col xs={24}>
-                        <Table 
+                        <Table
                             columns={columns}
                             data={contactInfo.phones}
                             height={150}
