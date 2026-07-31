@@ -14,7 +14,7 @@ import Toast from "../../../components/common/Toast";
 import Button from "../../../components/common/Button";
 import { Client } from "../../../utils/interfaces/client";
 import { Passport } from "../../../utils/interfaces/passport";
-import { salesClientsLanguages, salesClientsOcuppations, salesClientsRelationships, salesClientsStudies, salesClientsTravel, salesClientsUpdate, salesClientsUpdateAddress, salesClientsUpdatePhones } from "../../../utils/services/clients";
+import { salesClientsLanguages, salesClientsOcuppations, salesClientsRelationships, salesClientsSocialNetworks, salesClientsStudies, salesClientsTravel, salesClientsUpdate, salesClientsUpdateAddress, salesClientsUpdatePhones } from "../../../utils/services/clients";
 import { passportUpdate } from "../../../utils/services/passport";
 import { usePermissionsStore } from "../../../utils/stores/usePermissionsStore";
 import {  detailsForm } from "../../../utils/requiredFields";
@@ -814,15 +814,7 @@ const VisaDetails = ({loader}:IApp)=>{
                 process_id: client.process_id,
                 has_tried_visa: client.generalInformation.history.tryProcedureVisa,
                 date: client.generalInformation.history.procedureDate
-            },
-            social_networks: client.generalInformation.details.socialNetworks.map((social:any)=>{
-                let item = {
-                    ...social,
-                    clients_id: client.personalInformation.id
-                }
-
-                return item;
-            })
+            }
         }
 
         if(client.generalInformation.history.tryProcedureVisa === '1'){
@@ -847,6 +839,26 @@ const VisaDetails = ({loader}:IApp)=>{
         Toast.fire('Error', response?.message, 'error');
 
         return valid;
+    }
+
+    const saveSocialNetworks = async (client:any)=>{
+        const obj = {
+            clients_id: client.personalInformation.id,
+            social_networks: (client.generalInformation.details.socialNetworks || []).map((social:any)=>({
+                ...social,
+                clients_id: client.personalInformation.id
+            }))
+        };
+
+        const response = await salesClientsSocialNetworks(obj);
+
+        if(response && response.success){
+            return true;
+        }
+
+        Toast.fire('Error', response?.message, 'error');
+
+        return false;
     }
 
     const VISIBLE_STEP_FORMS = ['div.personal-form', 'div.address-form', 'div.general-form'];
@@ -891,7 +903,6 @@ const VisaDetails = ({loader}:IApp)=>{
             }
 
 
-            console.log('isgeneral', isGeneralComplete(client))
             if(isGeneralComplete(client)){
                 const savedGeneral = await saveGeneralInfo(client, missing.length === 0);
 
@@ -901,6 +912,8 @@ const VisaDetails = ({loader}:IApp)=>{
             }else{
                 missing.push(SECTION_LABELS.general);
             }
+
+            await saveSocialNetworks(client);
 
             if(missing.length > 0){
                 missingByClient[index] = missing;
