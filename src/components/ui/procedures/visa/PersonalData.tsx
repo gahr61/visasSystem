@@ -77,7 +77,7 @@ const PersonalData = ({
         });
 
         if(name === 'country' && field === 'birthplace' && value !== ''){
-            onLoadStates(parseInt(value), 'birtplace');
+            onLoadStates(parseInt(value), 'birthplace');
         }
 
         if(name === 'country' && field === 'passport' && value !== ''){
@@ -399,8 +399,8 @@ const PersonalData = ({
                         <label>Ciudad expedición</label>
                         <Input
                             id="expedition_city"
-                            value={personalInfo.passport.expedition_city}
-                            onChange={(e:any)=>onChangeField('expedition_city', e.target.value.toUpperCase(), 'passport')}
+                            value={personalInfo.passport.city_expedition}
+                            onChange={(e:any)=>onChangeField('city_expedition', e.target.value.toUpperCase(), 'passport')}
                         />
                     </Col>
                 </Row>

@@ -15,11 +15,13 @@ import { relationshipTypesList } from "../../../../utils/services/relationshipTy
 type FamiliarForm = {
     id:number,
     full_name: string,
-    relationship_id:string,
     relationship:string,
     birthdate: string,
-    hasVisa: boolean,
-    citizenStatus: string
+    hasVisa: string,
+    livesInUsa: string,
+    citizenStatus: string,
+    country_birth_id?: number | null,
+    state_birth_id?: number | null
 }
 
 type Props = {

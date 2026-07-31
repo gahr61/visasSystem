@@ -281,7 +281,7 @@ const VisaDetails = ({loader}:IApp)=>{
                             ...data.personalInformation.birthplace,
                             country: item.country_birth_id || 42,
                             state: item.state_birth_id,
-                            city: item.city,
+                            city: item.city_birth || '',
                             nationality: item.nationality || ''
                         },
                         passport:{
@@ -290,8 +290,8 @@ const VisaDetails = ({loader}:IApp)=>{
                             number: item.passport.number,
                             expedition_date: item.passport.expedition_date,
                             expiration_date: item.passport.expiration_date,
-                            country_expedition: item.passport.expedition_country_id || 42,
-                            state_expedition: item.passport.expedition_state_id || '',
+                            country_expedition: item.passport.expedition_countries_id || 42,
+                            state_expedition: item.passport.expedition_states_id || '',
                             city_expedition: item.passport.expedition_city || ''
                         },
                         spouse:{
@@ -459,12 +459,11 @@ const VisaDetails = ({loader}:IApp)=>{
                                 timeEEUU: item.process_details.time_stay_eeuu || '', 
                                 travelReason: item.process_details.travel_reason || '', 
                                 coverExpenses: item.process_details.cover_expenses || '', 
-                                lastVisit: item.process_details.date_visit_eeuu , 
-                                dateLastVisit: item.process_details.time_visit_eeuu || '', 
+                                lastVisit: item.process_details.date_visit_eeuu ,
+                                dateLastVisit: item.process_details.time_visit_eeuu || '',
                                 timeLastVisit: item.process_details.date_visit_eeuu || '',
-                                observations: item.process_details.observations || '',    
-                                travel_before: item.process_details.travel_before || '',
-                                other_countries: item.process_details.travel_before_countries || '',
+                                observations: item.process_details.observations || '',
+                                other_countries: item.process_details.travel_before ? '1' : '0',
                                 travelCountries: item.process_details.travel_countries || '',
                                 clave_ds_160: item.process_details.clave_ds_160 || '',
                                 socialNetworks: item.social
@@ -525,9 +524,9 @@ const VisaDetails = ({loader}:IApp)=>{
             number: client.personalInformation.passport.number,
             expedition_date: client.personalInformation.passport.expedition_date,
             expiration_date: client.personalInformation.passport.expiration_date,
-            expedition_country_id: client.personalInformation.passport.expedition_country_id || null,
-            expedition_state_id: client.personalInformation.passport.expedition_country_id || null,
-            expedition_city: client.personalInformation.passport.expedition_city || null
+            expedition_countries_id: client.personalInformation.passport.country_expedition || null,
+            expedition_states_id: client.personalInformation.passport.state_expedition || null,
+            expedition_city: client.personalInformation.passport.city_expedition || null
         }
 
         const languagesObj = {
@@ -640,7 +639,9 @@ const VisaDetails = ({loader}:IApp)=>{
                 birthdate: moment(relation.birthdate, 'DD/MM/YYYY').local().format('YYYY-MM-DD'),
                 has_visa: relation.hasVisa === 'No' ? false : true,
                 lives_in_usa: relation.livesInUsa === 'No' ? false : true,
-                citizen_status: relation.citizenStatus || null
+                citizen_status: relation.citizenStatus || null,
+                country_birth_id: relation.country_birth_id || null,
+                state_birth_id: relation.state_birth_id || null
             }
 
             return item;
@@ -792,7 +793,7 @@ const VisaDetails = ({loader}:IApp)=>{
             },
             process_details:{
                 id: client.generalInformation.details.id,
-                travel_date: client.generalInformation.details.travelDate,
+                travel_date: client.generalInformation.details.travel_date,
                 address_eeuu: client.generalInformation.details.addressEEUU,
                 travel_date_eeuu: client.generalInformation.details.travelDateEEUU
                     ? `${client.generalInformation.details.travelDateEEUU}-01`
@@ -801,19 +802,18 @@ const VisaDetails = ({loader}:IApp)=>{
                 travel_reason: client.generalInformation.details.travelReason,
                 cover_expenses: client.generalInformation.details.coverExpenses,
                 has_visit_eeuu: client.generalInformation.details.has_visit_eeuu,
-                last_visit_eeuu: client.generalInformation.details.lastVisit,
                 date_visit_eeuu: client.generalInformation.details.lastVisit,
                 time_visit_eeuu: client.generalInformation.details.dateLastVisit,
-                travel_before: client.generalInformation.details.has_visit_eeuu,
+                observations: client.generalInformation.details.observations,
+                travel_before: client.generalInformation.details.other_countries,
                 visa_approved: client.generalInformation.history.visaApproved,
-                travel_before_countries: client.generalInformation.details.other_countries,
+                travel_before_countries: client.generalInformation.details.travelCountries,
                 travel_countries: client.generalInformation.details.travelCountries
             },
             history:{
                 process_id: client.process_id,
                 has_tried_visa: client.generalInformation.history.tryProcedureVisa,
-                date: client.generalInformation.history.procedureDate,
-                observations: client.generalInformation.history.observations
+                date: client.generalInformation.history.procedureDate
             },
             social_networks: client.generalInformation.details.socialNetworks.map((social:any)=>{
                 let item = {
