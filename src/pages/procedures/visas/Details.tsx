@@ -445,6 +445,7 @@ const VisaDetails = ({loader}:IApp)=>{
                         generalInformation:{
                             ...data.generalInformation,
                             details:{
+                                ...data.generalInformation.details,
                                 id: item.process_details.id,
                                 travel_date: item.process_details.travel_date || '',
                                 has_visit_eeuu:  has_visit,
@@ -456,18 +457,28 @@ const VisaDetails = ({loader}:IApp)=>{
                                     zip: item.process_details.zip_eeuu || ''
                                 },
                                 travelDateEEUU: (item.process_details.travel_date_eeuu || '').slice(0, 7),
-                                timeEEUU: item.process_details.time_stay_eeuu || '', 
-                                travelReason: item.process_details.travel_reason || '', 
-                                coverExpenses: item.process_details.cover_expenses || '', 
+                                timeEEUU: item.process_details.time_stay_eeuu || '',
+                                travelReason: item.process_details.travel_reason || '',
+                                coverExpenses: item.process_details.cover_expenses || '',
                                 lastVisit: item.process_details.date_visit_eeuu ,
                                 dateLastVisit: item.process_details.time_visit_eeuu || '',
                                 timeLastVisit: item.process_details.date_visit_eeuu || '',
                                 observations: item.process_details.observations || '',
                                 other_countries: item.process_details.travel_before ? '1' : '0',
                                 travelCountries: item.process_details.travel_countries || '',
-                                clave_ds_160: item.process_details.clave_ds_160 || '',
-                                socialNetworks: item.social
+                                clave_ds_160: item.process_details.clave_ds_160 || ''
                             }
+                        }
+                    }
+                }
+
+                data = {
+                    ...data,
+                    generalInformation:{
+                        ...data.generalInformation,
+                        details:{
+                            ...data.generalInformation.details,
+                            socialNetworks: item.social || []
                         }
                     }
                 }
@@ -817,7 +828,10 @@ const VisaDetails = ({loader}:IApp)=>{
             }
         }
 
-        if(client.generalInformation.history.tryProcedureVisa === '1'){
+        const visaWasApproved = client.generalInformation.history.tryProcedureVisa === '1'
+            && client.generalInformation.history.visaApproved === '1';
+
+        if(visaWasApproved && client.generalInformation.visa.lastVisa){
             obj = {
                 ...obj,
                 visa:{
@@ -879,37 +893,54 @@ const VisaDetails = ({loader}:IApp)=>{
             const missing:string[] = [];
 
             if(isPersonalComplete(client)){
-                await updatePersonalInfo(client);
+                const savedPersonal = await updatePersonalInfo(client);
+
+                if(!savedPersonal){
+                    missing.push(SECTION_LABELS.personal);
+                }
             }else{
                 missing.push(SECTION_LABELS.personal);
             }
 
             if(isContactComplete(client)){
-                await updateContactInfo(client);
+                const savedContact = await updateContactInfo(client);
+
+                if(!savedContact){
+                    missing.push(SECTION_LABELS.contact);
+                }
             }else{
                 missing.push(SECTION_LABELS.contact);
             }
 
-            if(isFamiliarComplete(client)){
-                await saveUpdateRelationships(client);
-            }else{
+            if(!isFamiliarComplete(client)){
+                missing.push(SECTION_LABELS.familiar);
+            }
+
+            const savedFamiliar = await saveUpdateRelationships(client);
+
+            if(!savedFamiliar && !missing.includes(SECTION_LABELS.familiar)){
                 missing.push(SECTION_LABELS.familiar);
             }
 
             if(isJobComplete(client)){
-                await updateJobsSchools(client);
+                const savedJob = await updateJobsSchools(client);
+
+                if(!savedJob){
+                    missing.push(SECTION_LABELS.job);
+                }
             }else{
                 missing.push(SECTION_LABELS.job);
             }
 
+            const generalComplete = isGeneralComplete(client);
 
-            if(isGeneralComplete(client)){
-                const savedGeneral = await saveGeneralInfo(client, missing.length === 0);
+            if(!generalComplete){
+                missing.push(SECTION_LABELS.general);
+            }
 
-                if(!savedGeneral){
-                    missing.push(SECTION_LABELS.general);
-                }
-            }else{
+            const savedGeneral = await saveGeneralInfo(client, generalComplete && missing.length === 0);
+
+            if(!savedGeneral && !missing.includes(SECTION_LABELS.general)){
                 missing.push(SECTION_LABELS.general);
             }
 
