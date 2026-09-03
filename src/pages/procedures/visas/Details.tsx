@@ -933,15 +933,19 @@ const VisaDetails = ({loader}:IApp)=>{
             }
 
             const generalComplete = isGeneralComplete(client);
+            const hasMinimumGeneralData = !!client.generalInformation.residence.fullName
+                && !!client.generalInformation.residence.celPhone;
 
             if(!generalComplete){
                 missing.push(SECTION_LABELS.general);
             }
 
-            const savedGeneral = await saveGeneralInfo(client, generalComplete && missing.length === 0);
+            if(hasMinimumGeneralData){
+                const savedGeneral = await saveGeneralInfo(client, generalComplete && missing.length === 0);
 
-            if(!savedGeneral && !missing.includes(SECTION_LABELS.general)){
-                missing.push(SECTION_LABELS.general);
+                if(!savedGeneral && !missing.includes(SECTION_LABELS.general)){
+                    missing.push(SECTION_LABELS.general);
+                }
             }
 
             await saveSocialNetworks(client);
