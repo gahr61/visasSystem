@@ -57,6 +57,7 @@ export interface Roles {
 
 export interface Occupations {
     id:number,
-    name:string
+    name:string,
+    is_protected?: boolean
 }
 

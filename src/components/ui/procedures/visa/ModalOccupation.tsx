@@ -48,6 +48,7 @@ const ModalOccupation = forwardRef(({ onSave, hasPrimary }: Props, ref) => {
     const [editIndex, setEditIndex] = useState<number | undefined>(undefined);
     const [occupations, setOccupations] = useState<ISelectOptions[]>([]);
     const [showOtherOccupation, setShowOtherOccupation] = useState(false);
+    const [isRetired, setIsRetired] = useState(false);
 
     const getOccupations = async ()=>{
         const response = await occupationsList();
@@ -63,11 +64,14 @@ const ModalOccupation = forwardRef(({ onSave, hasPrimary }: Props, ref) => {
         if(occupation){
             setForm(occupation);
             setEditIndex(index);
-            setShowOtherOccupation(occupations.find(obj => obj.value === occupation.occupations_id)?.label === 'Otro');
+            const item = occupations.find(obj => obj.value === occupation.occupations_id);
+            setShowOtherOccupation(item?.label === 'Otro');
+            setIsRetired(item?.label === 'Jubilado');
         }else{
             setForm({ ...emptyForm, is_primary: !hasPrimary });
             setEditIndex(undefined);
             setShowOtherOccupation(false);
+            setIsRetired(false);
         }
 
         setOpen(true);
@@ -82,9 +86,11 @@ const ModalOccupation = forwardRef(({ onSave, hasPrimary }: Props, ref) => {
 
     const handleChangeOccupation = (value:any)=>{
         const item = occupations.find(obj => obj.value === value);
+        const retired = item?.label === 'Jubilado';
 
         setShowOtherOccupation(item?.label === 'Otro');
-        setForm({ ...form, occupations_id: value });
+        setIsRetired(retired);
+        setForm({ ...form, occupations_id: value, name: retired && !form.name ? 'JUBILADO' : form.name });
     }
 
     const handleChangeAddress = (address: any) => {
@@ -144,11 +150,11 @@ const ModalOccupation = forwardRef(({ onSave, hasPrimary }: Props, ref) => {
                         )}
                         <Col xs={24} lg={4}>
                             <label>Ingreso mensual</label>
-                            <Input type="number" id="salary" value={form.salary} onChange={handleChange} required />
+                            <Input type="number" id="salary" value={form.salary} onChange={handleChange} required={!isRetired} />
                         </Col>
                         <Col xs={24} lg={4}>
                             <label>Fecha de ingreso</label>
-                            <Input type="date" id="hireDate" value={form.hireDate} onChange={handleChange} required />
+                            <Input type="date" id="hireDate" value={form.hireDate} onChange={handleChange} required={!isRetired} />
                         </Col>
                         <Col xs={24} lg={4}>
                             <label>Antigüedad</label>
@@ -158,11 +164,11 @@ const ModalOccupation = forwardRef(({ onSave, hasPrimary }: Props, ref) => {
                     <Row>
                         <Col xs={24} lg={12}>
                             <label>Nombre de empleo o negocio</label>
-                            <Input id="name" value={form.name} onChange={handleChange} required />
+                            <Input id="name" value={form.name} onChange={handleChange} required={!isRetired} />
                         </Col>
                         <Col xs={24} lg={12}>
                             <label>Descripción de actividades</label>
-                            <Input id="activities_description" value={form.activities_description} onChange={handleChange} required />
+                            <Input id="activities_description" value={form.activities_description} onChange={handleChange} required={!isRetired} />
                         </Col>
                     </Row>
                     <Row>
@@ -176,7 +182,7 @@ const ModalOccupation = forwardRef(({ onSave, hasPrimary }: Props, ref) => {
                         </Col>
                     </Row>
                     <hr className="my-2" />
-                    <AddressForm address={form.address} onChange={handleChangeAddress} size="compact" />
+                    <AddressForm address={form.address} onChange={handleChangeAddress} size="compact" required={!isRetired} />
                 </Grid>
             </Modal.Body>
             <Modal.Footer>

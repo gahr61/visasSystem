@@ -29,18 +29,20 @@ const OccupationsList = ({loader}:IApp)=>{
         {key:'name', title:'Nombre', grow:5, render:(row: Occupations)=>row.name},
         {key:'', title:'Acciones', grow:1, render:(row: Occupations)=>
             <div className="flex gap-2">
-                <ButtonTable 
+                <ButtonTable
                     title="Editar"
                     controlId="edit"
                     icon={<FaPencil />}
                     onClick={()=>openModalForm(row.id)}
                 />
-                <ButtonTable 
-                    title="Eliminar"
-                    controlId="delete"
-                    icon={<FaTrashAlt />}
-                    onClick={()=>handleConfirm(row.id)}
-                />
+                {!row.is_protected && (
+                    <ButtonTable
+                        title="Eliminar"
+                        controlId="delete"
+                        icon={<FaTrashAlt />}
+                        onClick={()=>handleConfirm(row.id)}
+                    />
+                )}
             </div>
         },
     ];

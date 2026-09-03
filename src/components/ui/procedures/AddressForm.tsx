@@ -24,14 +24,15 @@ const WIDTHS = {
 type Props = {
     address: AddressValue,
     onChange: (address: AddressValue) => void,
-    size?: 'default' | 'compact'
+    size?: 'default' | 'compact',
+    required?: boolean
 }
 
 const emptyAddress: AddressValue = {
     street: '', noInt: '', noExt: '', postCode: '', colony: '', country: 42, state: '', city: ''
 }
 
-const AddressForm = ({ address, onChange, size = 'default' }: Props) => {
+const AddressForm = ({ address, onChange, size = 'default', required = true }: Props) => {
     const countries = useAddressStore(state => state.countries);
     const [states, setStates] = useState<ISelectOptions[]>([]);
     const idPrefix = useId();
@@ -65,7 +66,7 @@ const AddressForm = ({ address, onChange, size = 'default' }: Props) => {
         <Row>
             <Col xs={24} lg={w.street}>
                 <label>Calle</label>
-                <Input id={idPrefix+'street'} value={value.street} onChange={(e:any)=>handleChange('street', e.currentTarget.value)} required />
+                <Input id={idPrefix+'street'} value={value.street} onChange={(e:any)=>handleChange('street', e.currentTarget.value)} required={required} />
             </Col>
             <Col xs={24} lg={w.noInt}>
                 <label>No. Int</label>
@@ -73,27 +74,27 @@ const AddressForm = ({ address, onChange, size = 'default' }: Props) => {
             </Col>
             <Col xs={24} lg={w.noExt}>
                 <label>No. Ext.</label>
-                <Input id={idPrefix+'noExt'} value={value.noExt} onChange={(e:any)=>handleChange('noExt', e.currentTarget.value)} required />
+                <Input id={idPrefix+'noExt'} value={value.noExt} onChange={(e:any)=>handleChange('noExt', e.currentTarget.value)} required={required} />
             </Col>
             <Col xs={24} lg={w.postCode}>
                 <label>Código postal</label>
-                <Input id={idPrefix+'postCode'} value={value.postCode} onChange={(e:any)=>handleChange('postCode', e.currentTarget.value)} required maxLength={5} />
+                <Input id={idPrefix+'postCode'} value={value.postCode} onChange={(e:any)=>handleChange('postCode', e.currentTarget.value)} required={required} maxLength={5} />
             </Col>
             <Col xs={24} lg={w.colony}>
                 <label>Colonia</label>
-                <Input id={idPrefix+'colony'} value={value.colony} onChange={(e:any)=>handleChange('colony', e.currentTarget.value)} required />
+                <Input id={idPrefix+'colony'} value={value.colony} onChange={(e:any)=>handleChange('colony', e.currentTarget.value)} required={required} />
             </Col>
             <Col xs={24} lg={w.country}>
                 <label>País</label>
-                <SelectForm id={idPrefix+'country'} options={countries} value={value.country || 42} handleChange={(v)=>handleChange('country', v)} required />
+                <SelectForm id={idPrefix+'country'} options={countries} value={value.country || 42} handleChange={(v)=>handleChange('country', v)} required={required} />
             </Col>
             <Col xs={24} lg={w.state}>
                 <label>Estado</label>
-                <SelectForm id={idPrefix+'state'} options={states} value={value.state} handleChange={(v)=>handleChange('state', v)} required />
+                <SelectForm id={idPrefix+'state'} options={states} value={value.state} handleChange={(v)=>handleChange('state', v)} required={required} />
             </Col>
             <Col xs={24} lg={w.city}>
                 <label>Ciudad/Municipio</label>
-                <Input id={idPrefix+'city'} value={value.city} onChange={(e:any)=>handleChange('city', e.currentTarget.value)} required />
+                <Input id={idPrefix+'city'} value={value.city} onChange={(e:any)=>handleChange('city', e.currentTarget.value)} required={required} />
             </Col>
         </Row>
     )
