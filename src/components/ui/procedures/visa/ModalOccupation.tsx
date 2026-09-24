@@ -9,6 +9,9 @@ import { occupationsList } from "../../../../utils/services/occupations";
 import AddressForm from "../AddressForm";
 import moment from "moment";
 
+const isOccupationLabel = (label: string | undefined, target: string)=>
+    (label || '').trim().toLowerCase() === target.toLowerCase();
+
 const calculateAntiquity = (hireDate: string)=>{
     if(!hireDate) return '';
 
@@ -65,8 +68,8 @@ const ModalOccupation = forwardRef(({ onSave, hasPrimary }: Props, ref) => {
             setForm(occupation);
             setEditIndex(index);
             const item = occupations.find(obj => obj.value === occupation.occupations_id);
-            setShowOtherOccupation(item?.label === 'Otro');
-            setIsRetired(item?.label === 'Jubilado');
+            setShowOtherOccupation(isOccupationLabel(item?.label, 'Otro'));
+            setIsRetired(isOccupationLabel(item?.label, 'Jubilado'));
         }else{
             setForm({ ...emptyForm, is_primary: !hasPrimary });
             setEditIndex(undefined);
@@ -86,9 +89,9 @@ const ModalOccupation = forwardRef(({ onSave, hasPrimary }: Props, ref) => {
 
     const handleChangeOccupation = (value:any)=>{
         const item = occupations.find(obj => obj.value === value);
-        const retired = item?.label === 'Jubilado';
+        const retired = isOccupationLabel(item?.label, 'Jubilado');
 
-        setShowOtherOccupation(item?.label === 'Otro');
+        setShowOtherOccupation(isOccupationLabel(item?.label, 'Otro'));
         setIsRetired(retired);
         setForm({ ...form, occupations_id: value, name: retired && !form.name ? 'JUBILADO' : form.name });
     }
