@@ -36,7 +36,7 @@ const FamiliarInfo = ({
     const columns: Columns[] = [
         {key:'name', title:'Nombre', grow:3, render:(row: FamiliarForm) => row.full_name},
         {key:'parent', title:'Parentesco', grow:1, render:(row: FamiliarForm) => row.relationship},
-        {key:'birtdate', title:'F. Nacimiento', grow:1, render:(row: FamiliarForm) => row.birthdate},
+        {key:'birtdate', title:'F. Nacimiento', grow:1, render:(row: FamiliarForm) => row.birthdate || '—'},
         {key:'hasVisa', title:'Tiene visa?', grow:1, render:(row: FamiliarForm) => row.hasVisa},
         {key:'livesInUsa', title:'Vive en EEUU?', grow:1, render:(row: any) => row.livesInUsa},
         {key:'citizenStatus', title:'Residente/Ciudadano', grow:1, render:(row: FamiliarForm) => row.citizenStatus || '—'},
@@ -112,7 +112,7 @@ const FamiliarInfo = ({
             list.push({
                 full_name: familiarForm.full_name,
                 relationship: relationship,
-                birthdate: moment(familiarForm.birthdate).local().format('DD/MM/YYYY'),
+                birthdate: familiarForm.birthdate ? moment(familiarForm.birthdate).local().format('DD/MM/YYYY') : '',
                 hasVisa: familiarForm.has_visa === 1 ? 'Si' : 'No',
                 livesInUsa: familiarForm.lives_in_usa === 1 ? 'Si' : 'No',
                 citizenStatus: familiarForm.citizen_status

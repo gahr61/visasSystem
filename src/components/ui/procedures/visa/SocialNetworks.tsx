@@ -37,7 +37,7 @@ const SocialNetworks = ({
     const networkColumns:Columns[] = [
         {key:'network', title:'Red Social', grow:3, render:(row:any) => row.socialNetwork},
         {key:'username', title:'Nombre de usuario / Página', grow:3, render:(row:any) => row.username},
-        {key:'email', title:'Correo', grow:3, render:(row:any) => row.email},
+        {key:'email', title:'Correo', grow:3, render:(row:any) => row.email || '—'},
         {key:'actions', title:'', grow:1, render:(row:any) => <>
             <ButtonTable
                 controlId="delete"
@@ -62,11 +62,10 @@ const SocialNetworks = ({
 
         var valid = true;
 
-        Object.keys(socialForm).map((key)=>{
-            if(socialForm[key] === ''){
-                valid = false;
-            }
-        });
+        /** El correo es opcional; red social y usuario son obligatorios */
+        if(socialForm.socialNetwork === '' || socialForm.username === ''){
+            valid = false;
+        }
 
         if(valid){
             list.push({
@@ -90,7 +89,7 @@ const SocialNetworks = ({
                 email:''
             });
         }else{
-            Toast.fire('Alerta', 'Los campos red social, nombre de usuario y correo no deben estar vacios', 'error');
+            Toast.fire('Alerta', 'Los campos red social y nombre de usuario no deben estar vacios', 'error');
         }
     }
 
