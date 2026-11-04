@@ -10,9 +10,10 @@ type Props = {
     client: PassportSalesClientsInfo;
     onChange: (updated: PassportSalesClientsInfo) => void;
     onOpenSchedule: () => void;
+    readOnly?: boolean;
 }
 
-const PassportClientCard = ({ client, onChange, onOpenSchedule }: Props) => {
+const PassportClientCard = ({ client, onChange, onOpenSchedule, readOnly = false }: Props) => {
     const label = "text-xs text-gray-500 block mb-1";
     const info  = "text-sm text-gray-800";
 
@@ -90,6 +91,7 @@ const PassportClientCard = ({ client, onChange, onOpenSchedule }: Props) => {
                                 <select
                                     value={client.process_status || 'Inicio'}
                                     onChange={onStatusChange}
+                                    disabled={readOnly}
                                     className={selectClass}
                                 >
                                     <option value="Inicio">Inicio</option>
@@ -104,6 +106,7 @@ const PassportClientCard = ({ client, onChange, onOpenSchedule }: Props) => {
                                     id={"complete_" + client.process_id}
                                     checked={client.complete}
                                     onChange={onCompleteChange}
+                                    disabled={readOnly}
                                     className="h-4 w-4 cursor-pointer"
                                 />
                                 <label htmlFor={"complete_" + client.process_id} className="text-sm cursor-pointer">Completado</label>
@@ -116,6 +119,7 @@ const PassportClientCard = ({ client, onChange, onOpenSchedule }: Props) => {
                                     id={"observations_" + client.process_id}
                                     value={client.observations || ''}
                                     onChange={onObservationsChange}
+                                    disabled={readOnly}
                                     placeholder="Observaciones"
                                 />
                             </Col>
@@ -125,7 +129,7 @@ const PassportClientCard = ({ client, onChange, onOpenSchedule }: Props) => {
                     <fieldset className="mt-3">
                         <div className="flex items-center justify-between mb-2">
                             <legend className="text-base font-semibold">Cita</legend>
-                            <Button size="sm" onClick={onOpenSchedule}>Agendar cita</Button>
+                            {!readOnly && <Button size="sm" onClick={onOpenSchedule}>Agendar cita</Button>}
                         </div>
                         {client.schedule.length > 0 ? (
                             client.schedule.map((s, i) => (

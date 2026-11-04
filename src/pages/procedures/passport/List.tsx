@@ -14,9 +14,11 @@ import { IApp } from '../../../utils/interfaces/function';
 import { PassportProcedure, PassportListParams } from '../../../utils/interfaces/passportSales';
 import { passportSalesList, passportSalesDelete } from '../../../utils/services/sales/passport';
 import { swalConfirm } from '../../../utils/functions';
+import { usePermissionsStore } from '../../../utils/stores/usePermissionsStore';
 
 const PassportList = ({ loader }: IApp) => {
     const navigate = useNavigate();
+    const hasPermission = usePermissionsStore(state => state.hasPermission);
     const height = (window.innerHeight - 260) - (document.getElementById('header-content')?.offsetHeight || 60);
 
     const columns: Column[] = [
@@ -37,12 +39,14 @@ const PassportList = ({ loader }: IApp) => {
                         icon={<FaInfo />}
                         onClick={() => navigate('/procedures/passport/' + row.id + '/details')}
                     />
-                    <ButtonTable
-                        title="Eliminar"
-                        controlId="delete"
-                        icon={<FaTrashAlt />}
-                        onClick={() => onDelete(row.id)}
-                    />
+                    {hasPermission('procedure_passport_delete') && (
+                        <ButtonTable
+                            title="Eliminar"
+                            controlId="delete"
+                            icon={<FaTrashAlt />}
+                            onClick={() => onDelete(row.id)}
+                        />
+                    )}
                 </div>
             )
         },

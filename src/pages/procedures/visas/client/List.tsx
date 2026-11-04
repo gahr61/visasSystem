@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Col, Message, Row} from "rsuite";
 import moment from "moment";
 
 import { FaFileAlt } from "react-icons/fa";
-import { usePermissionsStore } from "../../../../utils/stores/usePermissionsStore";
 import { IApp } from "../../../../utils/interfaces/function";
 import Table, { Columns } from "../../../../components/common/Table";
 import { Procedure } from "../../../../utils/interfaces/procedure";
@@ -12,21 +11,9 @@ import ButtonTable from "../../../../components/common/ButtonTable";
 import { visasSalesClientList } from "../../../../utils/services/sales/visa";
 import Content from "../../../../components/common/Content";
 import Input from "../../../../components/common/Input";
-import { useUserStore } from "../../../../utils/stores/useUserStore";
 
 const VisasClientList = ({loader}:IApp)=>{
-    const userData = useUserStore(store => store.user);
-        
-    if(userData.role !== 'cliente'){
-        <Navigate to="/" replace />
-    }
-
-    const hasPermission = usePermissionsStore(state => state.hasPermission);
-
-    if(!hasPermission('procedure_visa')){
-        <Navigate to="/" />
-    }
-
+    // acceso restringido al rol cliente desde AppRoutes (PermissionRoute clientOnly)
     const navigate = useNavigate();
 
     const height = (window.innerHeight - 300 ) - (document.getElementById('header-content')?.offsetHeight || 60);
@@ -83,7 +70,7 @@ const VisasClientList = ({loader}:IApp)=>{
             <>
                 <Message type="info">
                     <div>
-                        En esta sección encontrarás el listado de todos tus trámites de visa registrados en nuestro sistema.
+                        En esta sección encontrarás tus trámites de visa en curso.
                     </div>
                     <ul>
                         <li>Para continuar con un trámite, haz clic en el botón “Completar información” que aparece junto a cada registro.</li>

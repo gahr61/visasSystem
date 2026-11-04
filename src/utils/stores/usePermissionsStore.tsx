@@ -10,22 +10,14 @@ interface PermissionsStore {
 
 const permissions:string = decript('permissions');
 
-export const usePermissionsStore = create<PermissionsStore>((set) => ({
+export const usePermissionsStore = create<PermissionsStore>((set, get) => ({
     permissions: permissions !== '' ? JSON.parse(permissions) : [],
     setPermissions: (list: string[]) => {
         set({permissions: list});
 
         encript('permissions', JSON.stringify(list));
     },
-    hasPermission:(value: string) =>{
-        const permissionsList = permissions !== '' ? JSON.parse(permissions) : [];
-
-        const permission = permissionsList.find((obj:string) => obj === value);
-
-        if(permission){
-            return true;
-        }
-
-        return false;
-    }
+    // read from the current state (not the value captured at module load),
+    // so permissions set at login apply without reloading the page
+    hasPermission:(value: string) => get().permissions.includes(value)
 }));

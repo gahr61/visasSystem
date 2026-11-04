@@ -9,7 +9,7 @@ import { IApp } from "../../../utils/interfaces/function";
 import { visasInfoDetails } from "../../../utils/services/sales/procedures";
 import { useIdleTimer } from "react-idle-timer";
 import moment from "moment";
-import { decript, encript, isValidForm, removeFromStorage, verifyRequiredFields } from "../../../utils/functions";
+import { encript, isValidForm, removeFromStorage, verifyRequiredFields } from "../../../utils/functions";
 import Toast from "../../../components/common/Toast";
 import Button from "../../../components/common/Button";
 import { Client } from "../../../utils/interfaces/client";
@@ -47,13 +47,14 @@ const VisaDetails = ({loader}:IApp)=>{
     const hasPermission = usePermissionsStore(state => state.hasPermission);
     const userData = useUserStore(store => store.user);
 
-    if(!hasPermission('procedure_visa_update')){
-        <Navigate to="/" />
-    }
+    const canEdit = userData.role === 'cliente' || hasPermission('procedure_visa_update');
 
     const navigate = useNavigate();
 
     const {id} = useParams();
+
+    // cache local de cambios sin guardar, separado por venta
+    const CACHE_KEY = 'clients_' + id;
 
     const height = (window.innerHeight - 170 ) - (document.getElementById('header-content')?.offsetHeight || 60);
 
@@ -218,41 +219,19 @@ const VisaDetails = ({loader}:IApp)=>{
     const [missingData, setMissingData] = useState<Record<number, string[]>>({});
 
     const onLoad = async ()=>{
-        const fromStorage = decript('clients', 'local');
-
-        if(fromStorage !== ''){
-            const cachedClients = JSON.parse(fromStorage).map((client:any) => ({
-                ...dataForm,
-                ...client,
-                personalInformation:{
-                    ...dataForm.personalInformation,
-                    ...client.personalInformation,
-                    spouse:{ ...dataForm.personalInformation.spouse, ...client.personalInformation?.spouse }
-                },
-                jobsSchools:{
-                    ...dataForm.jobsSchools,
-                    ...client.jobsSchools
-                },
-                generalInformation:{
-                    ...dataForm.generalInformation,
-                    ...client.generalInformation,
-                    details:{
-                        ...dataForm.generalInformation.details,
-                        ...client.generalInformation?.details,
-                        addressEEUU:{ ...dataForm.generalInformation.details.addressEEUU, ...client.generalInformation?.details?.addressEEUU }
-                    }
-                }
-            }));
-
-            setClients(cachedClients);
-            //return;
-        }
-
-
         loader.current?.handleShow('Cargando...')
         let response = await visasInfoDetails(id);
 
-        if(response && response.success){
+        if(!response || !response.success){
+            loader.current?.handleClose();
+            removeFromStorage(CACHE_KEY, 'local');
+            Toast.fire('Error', response?.message || 'No tienes acceso a este trámite', 'error');
+            navigate(userData.role === 'cliente' ? '/procedures/visa/client/list' : '/procedures/visa/list', { replace: true });
+            return;
+        }
+
+        // eslint-disable-next-line no-lone-blocks
+        {
             setSaleStatus(response.data.sale_status || '');
             setSaleType(response.data.sale_type || '');
 
@@ -312,7 +291,7 @@ const VisaDetails = ({loader}:IApp)=>{
                         ...data.familiarInformation,
                         relationships: otherRelationships.map((parent:any)=>({
                             ...parent,
-                            birthdate: moment(parent.birthdate).format('DD/MM/YYYY'),
+                            birthdate: parent.birthdate ? moment(parent.birthdate).format('DD/MM/YYYY') : '',
                             hasVisa: parent.has_visa ? 'Si' : 'No',
                             livesInUsa: parent.lives_in_usa ? 'Si' : 'No',
                             citizenStatus: parent.citizen_status || ''
@@ -487,7 +466,7 @@ const VisaDetails = ({loader}:IApp)=>{
             });
             
             setClients(clientsList);
-            encript('clients', JSON.stringify(clientsList), 'local');
+            encript(CACHE_KEY, JSON.stringify(clientsList), 'local');
             setCurrentKey('0');
         }
 
@@ -507,7 +486,7 @@ const VisaDetails = ({loader}:IApp)=>{
             return client;
         });
 
-        encript('clients', JSON.stringify(dataClients), 'local');
+        encript(CACHE_KEY, JSON.stringify(dataClients), 'local');
 
         setClients(dataClients);
     }
@@ -647,7 +626,7 @@ const VisaDetails = ({loader}:IApp)=>{
             const item = {
                 relationship: relation.relationship,
                 fullname: relation.full_name,
-                birthdate: moment(relation.birthdate, 'DD/MM/YYYY').local().format('YYYY-MM-DD'),
+                birthdate: relation.birthdate ? moment(relation.birthdate, 'DD/MM/YYYY').local().format('YYYY-MM-DD') : null,
                 has_visa: relation.hasVisa === 'No' ? false : true,
                 lives_in_usa: relation.livesInUsa === 'No' ? false : true,
                 citizen_status: relation.citizenStatus || null,
@@ -967,7 +946,7 @@ const VisaDetails = ({loader}:IApp)=>{
                 navigate('/procedures/visa/list');
             }
 
-            removeFromStorage('clients', 'local');
+            removeFromStorage(CACHE_KEY, 'local');
 
             return;
         }
@@ -982,7 +961,7 @@ const VisaDetails = ({loader}:IApp)=>{
             navigate('/procedures/visa/list');
         }
 
-        removeFromStorage('clients', 'local');
+        removeFromStorage(CACHE_KEY, 'local');
     }
 
     useIdleTimer({
@@ -991,8 +970,14 @@ const VisaDetails = ({loader}:IApp)=>{
     })
 
     useEffect(()=>{
-        onLoad();
+        if(canEdit){
+            onLoad();
+        }
     },[])
+
+    if(!canEdit){
+        return <Navigate to="/" replace />;
+    }
 
     return(
         <Content

@@ -105,13 +105,18 @@ const AppRoutes = (props:IApp)=>{
 
                         <Route element={<PermissionRoute permission="procedure_visa" />}>
                             <Route path="visa/list" element={<VisasList {...props} />} />
+                        </Route>
+                        {/* el cliente llena aquí la información de su trámite en curso; el API valida que sea suyo */}
+                        <Route element={<PermissionRoute permission="procedure_visa" allowClient />}>
                             <Route path="visa/:id/details" element={<VisaDetails {...props} />} />
                         </Route>
                         <Route element={<PermissionRoute permission="procedure_visa_create" />}>
                             <Route path="visa/new" element={<VisasNew {...props} />} />
                         </Route>
 
-                        <Route path="visa/client/list" element={<VisasClientList {...props} />} />
+                        <Route element={<PermissionRoute clientOnly />}>
+                            <Route path="visa/client/list" element={<VisasClientList {...props} />} />
+                        </Route>
                     </Route>
                 </Route>
                 

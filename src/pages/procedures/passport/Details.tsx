@@ -13,10 +13,12 @@ import PassportSaleEditModal  from "../../../components/ui/modals/PassportSaleEd
 import { IApp } from "../../../utils/interfaces/function";
 import { PassportSalesInfo, PassportSalesClientsInfo } from "../../../utils/interfaces/passportSales";
 import { passportSalesInfo, passportSalesUpdate } from "../../../utils/services/sales/passport";
+import { usePermissionsStore } from "../../../utils/stores/usePermissionsStore";
 
 const PassportDetails = ({ loader }: IApp) => {
     const navigate = useNavigate();
     const { id }   = useParams<{ id: string }>();
+    const canEdit  = usePermissionsStore(state => state.hasPermission)('procedure_passport_update');
 
     const scheduleRef  = useRef<any>(null);
     const editModalRef = useRef<any>(null);
@@ -101,13 +103,15 @@ const PassportDetails = ({ loader }: IApp) => {
                         <div className="flex-1">
                             <PassportSaleHeader info={info} />
                         </div>
-                        <Button
-                            size="sm"
-                            appearance="ghost"
-                            onClick={() => editModalRef.current?.handleShow(info)}
-                        >
-                            Editar
-                        </Button>
+                        {canEdit && (
+                            <Button
+                                size="sm"
+                                appearance="ghost"
+                                onClick={() => editModalRef.current?.handleShow(info)}
+                            >
+                                Editar
+                            </Button>
+                        )}
                     </div>
                 )}
 
@@ -122,6 +126,7 @@ const PassportDetails = ({ loader }: IApp) => {
                         >
                             <PassportClientCard
                                 client={client}
+                                readOnly={!canEdit}
                                 onChange={(updated) => onUpdateClient(index, updated)}
                                 onOpenSchedule={() => onOpenSchedule(client)}
                             />
@@ -131,7 +136,7 @@ const PassportDetails = ({ loader }: IApp) => {
 
                 <div className="my-3 flex justify-end gap-2">
                     <Button appearance="default" onClick={() => navigate('/procedures/passport/list')}>Volver</Button>
-                    <Button onClick={handleSave}>Guardar</Button>
+                    {canEdit && <Button onClick={handleSave}>Guardar</Button>}
                 </div>
             </>
         </Content>
