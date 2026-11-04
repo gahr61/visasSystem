@@ -8,6 +8,8 @@ interface Props {
     page: string;
     subpage: string;
     autoHeight?: boolean,
+    /** Caja de altura fija como flex column, para que una tabla con fillParent ocupe el sobrante */
+    fillHeight?: boolean,
     title?: string
 }
 const Content = ({
@@ -16,6 +18,7 @@ const Content = ({
     page,
     subpage,
     autoHeight = false,
+    fillHeight = false,
     title = ''
 }: Props)=>{
     const height = document.getElementById('header-content')?.offsetHeight || 60;
@@ -35,7 +38,8 @@ const Content = ({
                 xs={24} 
                 className=" border shadow-md rounded-lg px-4 py-6"
                 style={{
-                    height: autoHeight ? 'auto' : 'calc(100vh - '+(height + 70)+'px)'
+                    height: autoHeight ? 'auto' : 'calc(100vh - '+(height + 70)+'px)',
+                    ...(fillHeight && !autoHeight ? { display: 'flex', flexDirection: 'column', minHeight: 0 } : {})
                 }}
             >
                 {children}

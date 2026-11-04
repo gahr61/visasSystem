@@ -99,25 +99,13 @@ type Filters = {
 
 const VisasList = ({loader}:IApp)=>{
     const userData = useUserStore(store => store.user);
-        
-    if(userData.role === 'cliente'){
-        <Navigate to="/procedure/visa/client/list" replace />
-    }
-
     const hasPermission = usePermissionsStore(state => state.hasPermission);
-
-    if(!hasPermission('procedure_visa')){
-        <Navigate to="/" />
-    }
-
 
     const navigate = useNavigate();
     const ticketModal = useRef<ModalTicket>(null);
     const confirmModal = useRef<ModalConfirm>(null);
     const detailsModal = useRef<ModalDetails>(null);
 
-    const height = (window.innerHeight - 260) - (document.getElementById('header-content')?.offsetHeight || 60);
-    
     const columns:Column[]= [
         {key:'applicant', title:'No. Solicitantes', grow:1, render:(row: Procedure)=> row.no_applicants.toString() },
         {key:'client', title:'Cliente', grow:2, render:(row: Procedure)=> row.client },
@@ -481,12 +469,21 @@ const VisasList = ({loader}:IApp)=>{
         getList(filters, 1, 25);
     },[]);
 
+    if(userData.role === 'cliente'){
+        return <Navigate to="/procedures/visa/client/list" replace />;
+    }
+
+    if(!hasPermission('procedure_visa')){
+        return <Navigate to="/" replace />;
+    }
+
     return(
         <Content
             url="/procedures/visa/list"
             page="Visas"
             subpage="Listado"
             title="Visas - Listado"
+            fillHeight
         >
             <>
                 <Row className="mb-1">
@@ -528,7 +525,7 @@ const VisasList = ({loader}:IApp)=>{
                 <Table
                     columns={columns}
                     data={data}
-                    height={height}
+                    fillParent
                 />
 
                 <Row className="mt-2">
