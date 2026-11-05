@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { Message, Tabs } from "rsuite";
 
@@ -9,7 +9,7 @@ import { IApp } from "../../../utils/interfaces/function";
 import { visasInfoDetails } from "../../../utils/services/sales/procedures";
 import { useIdleTimer } from "react-idle-timer";
 import moment from "moment";
-import { encript, isValidForm, removeFromStorage, verifyRequiredFields } from "../../../utils/functions";
+import { isValidForm, removeFromStorage, verifyRequiredFields } from "../../../utils/functions";
 import Toast from "../../../components/common/Toast";
 import Button from "../../../components/common/Button";
 import { Client } from "../../../utils/interfaces/client";
@@ -53,8 +53,6 @@ const VisaDetails = ({loader}:IApp)=>{
 
     const {id} = useParams();
 
-    // cache local de cambios sin guardar, separado por venta
-    const CACHE_KEY = 'clients_' + id;
 
     const height = (window.innerHeight - 170 ) - (document.getElementById('header-content')?.offsetHeight || 60);
 
@@ -182,10 +180,10 @@ const VisaDetails = ({loader}:IApp)=>{
 
     const isJobComplete = (client:any) => (client.jobsSchools.occupations || []).length > 0;
 
+    // se evalúa con los datos de cada cliente, no con el formulario visible en pantalla
+    // (con varios clientes el DOM visible es de uno solo)
     const isGeneralComplete = (client:any) => {
-        const formIsValid = isValidForm('div.general-form');
-
-        if(!isRuleComplete(client.generalInformation, validationRules.generalInformation) || !formIsValid) return false;
+        if(!isRuleComplete(client.generalInformation, validationRules.generalInformation)) return false;
 
         const details = client.generalInformation.details;
         if(details.has_visit_eeuu === '1' && (!details.lastVisit || !details.dateLastVisit)){
@@ -217,6 +215,7 @@ const VisaDetails = ({loader}:IApp)=>{
     const [saleType, setSaleType] = useState('');
     const [showPrint, setShowPrint] = useState(false);
     const [missingData, setMissingData] = useState<Record<number, string[]>>({});
+    const savingRef = useRef(false);
 
     const onLoad = async ()=>{
         loader.current?.handleShow('Cargando...')
@@ -224,7 +223,6 @@ const VisaDetails = ({loader}:IApp)=>{
 
         if(!response || !response.success){
             loader.current?.handleClose();
-            removeFromStorage(CACHE_KEY, 'local');
             Toast.fire('Error', response?.message || 'No tienes acceso a este trámite', 'error');
             navigate(userData.role === 'cliente' ? '/procedures/visa/client/list' : '/procedures/visa/list', { replace: true });
             return;
@@ -235,10 +233,14 @@ const VisaDetails = ({loader}:IApp)=>{
             setSaleStatus(response.data.sale_status || '');
             setSaleType(response.data.sale_type || '');
 
-            let data = dataForm;
             let clientsList:any = [];
 
             response.data.clients.forEach((item:any)=>{
+                // cada solicitante parte de un formulario vacío: si se reutilizara el del
+                // anterior, heredaría su domicilio/residencia/historial (y sus IDs) cuando
+                // este no los tenga, y al guardar se los quitaría al otro trámite
+                let data:any = JSON.parse(JSON.stringify(dataForm));
+
                 const spouseRelationships = ['esposo', 'esposa', 'conyuge'];
                 const spouseEntry = item.parents.find((parent:any) => spouseRelationships.includes(parent.relationship));
                 const otherRelationships = item.parents.filter((parent:any) => !spouseRelationships.includes(parent.relationship));
@@ -396,7 +398,7 @@ const VisaDetails = ({loader}:IApp)=>{
                                 id: item.process_history.id,
                                 tryProcedureVisa: item.process_history.has_tried_visa ? '1' : '0',
                                 procedureDate: item.process_history.date,
-                                visaApproved: item.process_details.visa_approved ? '1' : '0'
+                                visaApproved: item.process_details?.visa_approved ? '1' : '0'
                             }
                         }
                     }
@@ -466,7 +468,6 @@ const VisaDetails = ({loader}:IApp)=>{
             });
             
             setClients(clientsList);
-            encript(CACHE_KEY, JSON.stringify(clientsList), 'local');
             setCurrentKey('0');
         }
 
@@ -474,7 +475,7 @@ const VisaDetails = ({loader}:IApp)=>{
     }
 
     const onIdle = ()=>{
-        handleSubmit();
+        handleSubmit(true);
     }
 
     const updateClient = (data:any, index:number)=>{
@@ -486,14 +487,10 @@ const VisaDetails = ({loader}:IApp)=>{
             return client;
         });
 
-        encript(CACHE_KEY, JSON.stringify(dataClients), 'local');
-
         setClients(dataClients);
     }
 
-    const updatePersonalInfo = async (client:any)=>{
-        let valid = true;
-        
+    const updatePersonalInfo = async (client:any):Promise<boolean>=>{
         //update clients
         const clientObj:Client = {
             names: client.personalInformation.names,
@@ -538,13 +535,18 @@ const VisaDetails = ({loader}:IApp)=>{
             languagesRequest
         ]);
 
-        if(clientResponse.value.success && passportResponse.value.success && languagesResponse.value.success){
-            valid = true;
+        const results = [clientResponse, passportResponse, languagesResponse].map((result:any)=>
+            result.status === 'fulfilled' ? result.value : { success:false, message: 'Error de conexión' }
+        );
 
-            return valid;
+        if(results.every((result:any)=> result?.success)){
+            return true;
         }
 
-        Toast.fire('Error', clientResponse.value.message+' - '+passportResponse.value.message, 'error');
+        const errors = results.filter((result:any)=> !result?.success).map((result:any)=> result?.message).filter(Boolean);
+        Toast.fire('Error', errors.join(' - '), 'error');
+
+        return false;
     };
 
     const updateContactInfo = async (client:any)=>{
@@ -856,18 +858,23 @@ const VisaDetails = ({loader}:IApp)=>{
 
     const VISIBLE_STEP_FORMS = ['div.personal-form', 'div.address-form', 'div.general-form'];
 
-    const handleSubmit = async ()=>{
-        const visibleFormIsValid = VISIBLE_STEP_FORMS.every((selector)=> isValidForm(selector));
+    /**
+     * Guarda las secciones que estén completas y reporta las pendientes.
+     * No bloquea por el formulario visible: así se puede guardar el avance parcial.
+     * @param auto guardado automático por inactividad: no navega fuera de la pantalla
+     */
+    const handleSubmit = async (auto:boolean = false)=>{
+        if(savingRef.current) return;
+        savingRef.current = true;
 
-        if(!visibleFormIsValid){
-            Toast.fire('Error', 'Completa los campos requeridos del formulario que estás visualizando', 'error');
-            return;
-        }
+        // solo marca en rojo los campos requeridos vacíos del paso visible
+        VISIBLE_STEP_FORMS.forEach((selector)=> isValidForm(selector));
 
-        loader.current?.handleShow('Guardando...');
+        loader.current?.handleShow(auto ? 'Guardando avance...' : 'Guardando...');
 
         const missingByClient:Record<number, string[]> = {};
 
+        try{
         await Promise.all(clients.map(async (client:any, index:number)=>{
             const missing:string[] = [];
 
@@ -933,9 +940,20 @@ const VisaDetails = ({loader}:IApp)=>{
                 missingByClient[index] = missing;
             }
         }));
+        }catch(error){
+            console.log(error);
+            Toast.fire('Error', 'Ocurrió un error al guardar, intenta de nuevo', 'error');
+            return;
+        }finally{
+            loader.current?.handleClose();
+            savingRef.current = false;
+        }
 
         setMissingData(missingByClient);
-        loader.current?.handleClose();
+
+        if(auto){
+            return;
+        }
 
         if(Object.keys(missingByClient).length === 0){
             Toast.fire('Correcto', 'Se guardaron los datos correctamente', 'success');
@@ -945,8 +963,6 @@ const VisaDetails = ({loader}:IApp)=>{
             }else{
                 navigate('/procedures/visa/list');
             }
-
-            removeFromStorage(CACHE_KEY, 'local');
 
             return;
         }
@@ -960,8 +976,6 @@ const VisaDetails = ({loader}:IApp)=>{
         }else{
             navigate('/procedures/visa/list');
         }
-
-        removeFromStorage(CACHE_KEY, 'local');
     }
 
     useIdleTimer({
@@ -970,6 +984,9 @@ const VisaDetails = ({loader}:IApp)=>{
     })
 
     useEffect(()=>{
+        // versiones anteriores guardaban aquí datos de clientes sin cifrar por venta
+        removeFromStorage('clients', 'local');
+
         if(canEdit){
             onLoad();
         }
@@ -1008,7 +1025,7 @@ const VisaDetails = ({loader}:IApp)=>{
                     )}
                     <Tabs activeKey={currentKey} onSelect={setCurrentKey}>
                         {clients.map((client, index)=>
-                            <Tabs.Tab key={index} eventKey={index.toString()} title={'Cliente '+index + 1}>
+                            <Tabs.Tab key={index} eventKey={index.toString()} title={'Cliente ' + (index + 1)}>
                                 <DetailsForm
                                     loader={loader}
                                     client={client}
@@ -1022,7 +1039,7 @@ const VisaDetails = ({loader}:IApp)=>{
                     <div className="my-3 flex justify-end gap-2">
                         <Button appearance="default" onClick={()=>handleCancel()}>Cancelar</Button>
                         <Button appearance="ghost" onClick={() => setShowPrint(true)}>Vista previa</Button>
-                        <Button onClick={handleSubmit}>Guardar</Button>
+                        <Button onClick={()=>handleSubmit()}>Guardar</Button>
                     </div>
                 </div>
             </>
