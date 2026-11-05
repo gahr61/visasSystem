@@ -14,6 +14,7 @@ import { IApp } from "../../../utils/interfaces/function";
 import { PassportSalesInfo, PassportSalesClientsInfo } from "../../../utils/interfaces/passportSales";
 import { passportSalesInfo, passportSalesUpdate } from "../../../utils/services/sales/passport";
 import { usePermissionsStore } from "../../../utils/stores/usePermissionsStore";
+import { FaPen } from "react-icons/fa6";
 
 const PassportDetails = ({ loader }: IApp) => {
     const navigate = useNavigate();
@@ -27,13 +28,22 @@ const PassportDetails = ({ loader }: IApp) => {
     const [clients, setClients] = useState<PassportSalesClientsInfo[]>([]);
     const [activeKey, setActiveKey] = useState('0');
 
-    const onLoad = async () => {
+    /**
+     * @param keepEdits conserva los cambios sin guardar de las pestañas (estatus,
+     * completado, observaciones) al recargar tras guardar un modal
+     */
+    const onLoad = async (keepEdits: boolean = false) => {
         loader.current?.handleShow('Cargando...');
         const response = await passportSalesInfo(Number(id));
         loader.current?.handleClose();
         if (response?.success) {
             setInfo(response.data);
-            setClients(response.data.clients);
+            setClients(prev => response.data.clients.map(fresh => {
+                const local = keepEdits ? prev.find(c => c.process_id === fresh.process_id) : undefined;
+                return local
+                    ? { ...fresh, process_status: local.process_status, complete: local.complete, observations: local.observations }
+                    : fresh;
+            }));
         }
     };
 
@@ -89,13 +99,13 @@ const PassportDetails = ({ loader }: IApp) => {
                     ref={scheduleRef}
                     loader={loader}
                     salesId={Number(id)}
-                    onSaved={onLoad}
+                    onSaved={() => onLoad(true)}
                 />
                 <PassportSaleEditModal
                     ref={editModalRef}
                     loader={loader}
                     salesId={Number(id)}
-                    onSaved={onLoad}
+                    onSaved={() => onLoad(true)}
                 />
 
                 {info && (
@@ -104,13 +114,22 @@ const PassportDetails = ({ loader }: IApp) => {
                             <PassportSaleHeader info={info} />
                         </div>
                         {canEdit && (
-                            <Button
-                                size="sm"
-                                appearance="ghost"
-                                onClick={() => editModalRef.current?.handleShow(info)}
-                            >
-                                Editar
-                            </Button>
+                            <div className="flex gap-2">
+                                <Button
+                                    size="sm"
+                                    appearance="ghost"
+                                    onClick={() => navigate('/procedures/passport/' + id + '/edit')}
+                                >
+                                    <span className="inline-flex items-center gap-1"><FaPen /> Editar trámite</span>
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    appearance="ghost"
+                                    onClick={() => editModalRef.current?.handleShow(info)}
+                                >
+                                    Estatus y abono
+                                </Button>
+                            </div>
                         )}
                     </div>
                 )}
@@ -129,6 +148,7 @@ const PassportDetails = ({ loader }: IApp) => {
                                 readOnly={!canEdit}
                                 onChange={(updated) => onUpdateClient(index, updated)}
                                 onOpenSchedule={() => onOpenSchedule(client)}
+                                onEdit={() => navigate('/procedures/passport/' + id + '/edit')}
                             />
                         </Tabs.Tab>
                     )}

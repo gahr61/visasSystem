@@ -33,6 +33,7 @@ interface Props extends IApp {
 
 const PassportSaleEditModal = forwardRef(({ loader, salesId, onSaved }: Props, ref) => {
     const [open, setOpen]   = useState(false);
+    const [total, setTotal] = useState(0);
     const [form, setForm]   = useState<EditForm>({
         billing:      { names: '', lastname1: '', lastname2: '', email: '', phone: '' },
         sale_process: { advance_payment: 0, payable: 0, contact: '' },
@@ -40,6 +41,10 @@ const PassportSaleEditModal = forwardRef(({ loader, salesId, onSaved }: Props, r
     });
 
     const handleShow = (info: PassportSalesInfo) => {
+        const saleTotal = parseFloat(info.total) || 0;
+        const advance   = parseFloat(info.advance_payment) || 0;
+
+        setTotal(saleTotal);
         setForm({
             billing: {
                 names:     info.names,
@@ -49,9 +54,9 @@ const PassportSaleEditModal = forwardRef(({ loader, salesId, onSaved }: Props, r
                 phone:     info.phone
             },
             sale_process: {
-                advance_payment: parseFloat(info.advance_payment),
-                payable:         parseFloat(info.payable),
-                contact:         info.contact
+                advance_payment: advance,
+                payable:         Math.round((saleTotal - advance) * 100) / 100,
+                contact:         info.contact || ''
             },
             status: info.status
         });
@@ -65,15 +70,27 @@ const PassportSaleEditModal = forwardRef(({ loader, salesId, onSaved }: Props, r
         setForm(prev => ({ ...prev, billing: { ...prev.billing, [name]: value } }));
     };
 
-    const onProcessChange = (e: React.FormEvent<HTMLInputElement>) => {
-        const { name, value } = e.currentTarget;
+    /** el saldo siempre es total - abono (el API lo recalcula igual) */
+    const onAdvanceChange = (e: React.FormEvent<HTMLInputElement>) => {
+        const advance = parseFloat(e.currentTarget.value) || 0;
         setForm(prev => ({
             ...prev,
-            sale_process: { ...prev.sale_process, [name]: name === 'contact' ? value : parseFloat(value) || 0 }
+            sale_process: {
+                ...prev.sale_process,
+                advance_payment: advance,
+                payable: Math.round((total - advance) * 100) / 100
+            }
         }));
     };
 
     const handleSubmit = async () => {
+        const advance = form.sale_process.advance_payment;
+
+        if (advance < 0 || advance > total) {
+            Toast.fire('Error', 'El abono debe estar entre $0 y el total de la venta ($' + total + ')', 'error');
+            return;
+        }
+
         loader.current?.handleShow('Guardando...');
         const response = await passportSalesUpdate(salesId, {
             billing:      form.billing,
@@ -133,11 +150,11 @@ const PassportSaleEditModal = forwardRef(({ loader, salesId, onSaved }: Props, r
                         <Row>
                             <Col xs={24} md={8}>
                                 <label className="text-xs text-gray-500 mb-1 block">Abono inicial</label>
-                                <Input name="advance_payment" type="number" value={form.sale_process.advance_payment.toString()} onChange={onProcessChange} required />
+                                <Input name="advance_payment" type="number" min={0} max={total} value={form.sale_process.advance_payment.toString()} onChange={onAdvanceChange} required />
                             </Col>
                             <Col xs={24} md={8}>
                                 <label className="text-xs text-gray-500 mb-1 block">Por pagar</label>
-                                <Input name="payable" type="number" value={form.sale_process.payable.toString()} onChange={onProcessChange} required />
+                                <Input name="payable" type="number" value={form.sale_process.payable.toString()} disabled />
                             </Col>
                             <Col xs={24} md={8}>
                                 <label className="text-xs text-gray-500 mb-1 block">Medio de contacto</label>

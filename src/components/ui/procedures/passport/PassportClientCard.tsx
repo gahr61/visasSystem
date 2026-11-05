@@ -3,17 +3,22 @@ import Button from "../../../common/Button";
 import Input from "../../../common/Input";
 import { PassportSalesClientsInfo } from "../../../../utils/interfaces/passportSales";
 import moment from "moment";
+import { FaPen } from "react-icons/fa6";
 
 const selectClass = "py-1 px-2 block w-full border border-gray-300 outline-0 rounded-lg text-sm h-[1.85rem] bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 cursor-pointer";
+
+/** valores de process_status.status en la BD */
+const PROCESS_STATUSES = ['Inicio', 'Por pagar', 'Informado', 'Pagado', 'Entregado', 'Finalizado'];
 
 type Props = {
     client: PassportSalesClientsInfo;
     onChange: (updated: PassportSalesClientsInfo) => void;
     onOpenSchedule: () => void;
+    onEdit?: () => void;
     readOnly?: boolean;
 }
 
-const PassportClientCard = ({ client, onChange, onOpenSchedule, readOnly = false }: Props) => {
+const PassportClientCard = ({ client, onChange, onOpenSchedule, onEdit, readOnly = false }: Props) => {
     const label = "text-xs text-gray-500 block mb-1";
     const info  = "text-sm text-gray-800";
 
@@ -34,7 +39,10 @@ const PassportClientCard = ({ client, onChange, onOpenSchedule, readOnly = false
             <Row>
                 <Col xs={24} md={12}>
                     <fieldset>
-                        <legend className="text-base font-semibold mb-2">Datos del solicitante</legend>
+                        <div className="flex items-center justify-between mb-2">
+                            <legend className="text-base font-semibold">Datos del solicitante</legend>
+                            {!readOnly && onEdit && <Button size="sm" appearance="ghost" onClick={onEdit}><span className="inline-flex items-center gap-1"><FaPen /> Editar datos</span></Button>}
+                        </div>
                         <div className="grid grid-cols-2 gap-y-2 gap-x-3 text-sm">
                             <div>
                                 <span className={label}>Nombre</span>
@@ -58,7 +66,7 @@ const PassportClientCard = ({ client, onChange, onOpenSchedule, readOnly = false
                             </div>
                             <div>
                                 <span className={label}>Tipo</span>
-                                <span className={info}>{client.subtype}</span>
+                                <span className={info}>{client.subtype}{client.option_type ? ' - ' + client.option_type : ''}</span>
                             </div>
                         </div>
 
@@ -94,10 +102,7 @@ const PassportClientCard = ({ client, onChange, onOpenSchedule, readOnly = false
                                     disabled={readOnly}
                                     className={selectClass}
                                 >
-                                    <option value="Inicio">Inicio</option>
-                                    <option value="Informado">Informado</option>
-                                    <option value="Entregado">Entregado</option>
-                                    <option value="Finalizado">Finalizado</option>
+                                    {PROCESS_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
                                 </select>
                             </Col>
                             <Col xs={24} md={10} className="flex items-center gap-2 mt-4">
