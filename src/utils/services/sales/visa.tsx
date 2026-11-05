@@ -1,7 +1,7 @@
 import { fetchRequest } from "../../functions";
 import { IResponse, IPaginatedResponse } from "../../interfaces/function";
 import { Procedure, VisaAccount } from "../../interfaces/procedure";
-import { SalesInfo } from "../../interfaces/sales";
+import { SaleEditData, SaleEditPayload, SalesInfo } from "../../interfaces/sales";
 
 export type VisaListParams = {
     page?: number;
@@ -33,6 +33,17 @@ export const visasSalesList = (params?: VisaListParams): Promise<IPaginatedRespo
 
 export const visasSalesClientList = ():Promise<IResponse<Procedure[]>> => {
     return fetchRequest({url:'sales/visa/client/list'});
+}
+
+/** datos de una venta (visa o pasaporte) en el formato del formulario de alta */
+export const salesEditData = (id: number): Promise<IResponse<SaleEditData>> => {
+    return fetchRequest({ url: 'sales/' + id + '/edit' });
+}
+
+/** guarda la edición de una venta con el formulario de alta */
+export const salesEditUpdate = (procedure: 'Visa' | 'Pasaporte', id: number, obj: SaleEditPayload): Promise<IResponse<undefined>> => {
+    const url = procedure === 'Visa' ? 'sales/visa/' + id + '/update' : 'sales/passport/' + id + '/update';
+    return fetchRequest({ url, method: 'PUT', body: obj });
 }
 
 export const visasSalesDelete = (id: number): Promise<IResponse<undefined>> => {

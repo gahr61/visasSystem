@@ -3,7 +3,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { Col, Pagination, Row, Tooltip, Whisper } from "rsuite";
 
 import { FaFileAlt, FaPrint, FaTrashAlt } from "react-icons/fa";
-import { FaCheck, FaEnvelope, FaInfo, FaShare } from "react-icons/fa6";
+import { FaCheck, FaEnvelope, FaInfo, FaPen, FaShare } from "react-icons/fa6";
 
 import Content from "../../../components/common/Content";
 import ButtonTable from "../../../components/common/ButtonTable";
@@ -127,6 +127,15 @@ const VisasList = ({loader}:IApp)=>{
                     onClick={()=>onOpenInfo(row.id)}
                 />
 
+                {hasPermission('procedure_visa_update') && (
+                    <ButtonTable
+                        title="Editar venta"
+                        controlId="edit_sale"
+                        icon={<FaPen />}
+                        onClick={()=>onEditSale(row.id)}
+                    />
+                )}
+
                 <ButtonTable
                     title="Vista previa / Imprimir"
                     controlId="print"
@@ -141,7 +150,8 @@ const VisasList = ({loader}:IApp)=>{
                     icon={<FaFileAlt />}
                     options={[
                         {key:1, label:'Enviar formulario'},
-                        {key:2, label:'Llenar formulario'}
+                        // el formulario de detalle requiere procedure_visa_update (igual que el API)
+                        ...(hasPermission('procedure_visa_update') ? [{key:2, label:'Llenar formulario'}] : [])
                     ]}
                     //onClick={()=>navigate('/procedures/visa/'+row.id+'/details')}
                     onSelect={(option)=>onOpenDetails(row, option)}
@@ -255,6 +265,10 @@ const VisasList = ({loader}:IApp)=>{
 
     const onOpenInfo = (id: number) => {
         detailsModal.current?.handleShow(id);
+    }
+
+    const onEditSale = (id: number) => {
+        navigate('/procedures/visa/' + id + '/edit');
     }
 
     const onSendTicket = (row: Procedure, option:number)=>{

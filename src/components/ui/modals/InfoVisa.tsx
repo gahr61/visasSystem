@@ -5,7 +5,7 @@ import { visasSalesInfo } from "../../../utils/services/sales/visa";
 import { IApp } from "../../../utils/interfaces/function";
 import moment from "moment";
 import { encryptString, formatPrice } from "../../../utils/functions";
-import { FaDollarSign } from "react-icons/fa6";
+import { FaDollarSign, FaPen } from "react-icons/fa6";
 import ButtonTable from "../../common/ButtonTable";
 import { AiOutlineFileSearch } from "react-icons/ai";
 import { RiUserAddLine } from "react-icons/ri";
@@ -18,6 +18,7 @@ import ModalDS160 from "./DS160Form";
 import ModalAccount from "./AccountData";
 import ModalSchedule from "./Schedule";
 import ModalPaymentProcedure from "./PaymentProcedure";
+import { usePermissionsStore } from "../../../utils/stores/usePermissionsStore";
 
 type ModalUpdateRef = {
     handleShow:(list:any)=>void
@@ -32,6 +33,7 @@ const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
     const accountRef = useRef<ModalUpdateRef>(null);
     const scheduleRef = useRef<ModalUpdateRef>(null);
     const paymentRef = useRef<ModalPaymentRef>(null);
+    const canEdit = usePermissionsStore(state => state.hasPermission)('procedure_visa_update');
 
     const navigate = useNavigate();
 
@@ -267,6 +269,16 @@ const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
                                     <span>{sale.date}</span>
                                 </div>
                             </Col>
+                            {canEdit && (
+                                <Col xs={24} lg={4}>
+                                    <ButtonTable
+                                        controlId="edit_sale"
+                                        title="Editar venta"
+                                        icon={<FaPen />}
+                                        onClick={()=>{ setOpen(false); navigate('/procedures/visa/'+sale.id+'/edit'); }}
+                                    />
+                                </Col>
+                            )}
                             {/* <Col xs={24} lg={4}>
                                 <ButtonTable 
                                     controlId="aditiona_service"
@@ -313,7 +325,7 @@ const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
                                 <div className="flex flex-col">
                                     <label className="font-semibold">Nombre</label>
                                     <span>
-                                        {`${sale.names} ${sale.lastname1} ${sale.lastname2 !== null && ( sale.lastname2)}`}
+                                        {`${sale.names} ${sale.lastname1}${sale.lastname2 ? ' ' + sale.lastname2 : ''}`}
                                     </span>
                                 </div>
                             </Col>
@@ -326,7 +338,7 @@ const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
                             <Col xs={24} lg={6}>
                                 <div className="flex flex-col">
                                     <label className="font-semibold">Teléfono</label>
-                                    <span>{sale.date}</span>
+                                    <span>{sale.phone}</span>
                                 </div>
                             </Col>
                         </Row>
@@ -401,6 +413,7 @@ const ModalInfoVisa = forwardRef(({loader}:IApp, ref) => {
             loader={loader}
             ref={paymentRef}
         />
+
         </>
     )
 });

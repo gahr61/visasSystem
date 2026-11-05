@@ -45,6 +45,7 @@ import VisaDetails from "./pages/procedures/visas/Details";
 import VisaConfirm from "./pages/procedures/visas/Confirm";
 import OccupationsList from "./pages/config/system/Occupations";
 import VisasClientList from "./pages/procedures/visas/client/List";
+import SaleEdit from "./pages/procedures/SaleEdit";
 
 
 const AppRoutes = (props:IApp)=>{
@@ -102,6 +103,9 @@ const AppRoutes = (props:IApp)=>{
                         <Route element={<PermissionRoute permission="procedure_passport_create" />}>
                             <Route path="passport/new" element={<PassportNew {...props} />} />
                         </Route>
+                        <Route element={<PermissionRoute permission="procedure_passport_update" />}>
+                            <Route path="passport/:id/edit" element={<SaleEdit {...props} procedure="Pasaporte" />} />
+                        </Route>
 
                         <Route element={<PermissionRoute permission="procedure_visa" />}>
                             <Route path="visa/list" element={<VisasList {...props} />} />
@@ -112,6 +116,9 @@ const AppRoutes = (props:IApp)=>{
                         </Route>
                         <Route element={<PermissionRoute permission="procedure_visa_create" />}>
                             <Route path="visa/new" element={<VisasNew {...props} />} />
+                        </Route>
+                        <Route element={<PermissionRoute permission="procedure_visa_update" />}>
+                            <Route path="visa/:id/edit" element={<SaleEdit {...props} procedure="Visa" />} />
                         </Route>
 
                         <Route element={<PermissionRoute clientOnly />}>

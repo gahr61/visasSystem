@@ -198,6 +198,24 @@ export type PassportUpdateClientItem = {
     observations?: string | null;
     complete?: boolean;
     process_status?: string;
+    client?: {
+        names: string;
+        lastname1: string;
+        lastname2: string;
+        curp: string;
+        birthdate: string;
+        phone: string;
+    };
+    process?: {
+        subtype: string;
+        age_type: string;
+        option_type: string | null;
+    };
+    passport?: {
+        number: string;
+        expedition_date: string | null;
+        expiration_date: string | null;
+    };
 }
 
 export type PassportUpdatePayload = {

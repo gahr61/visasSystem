@@ -22,7 +22,9 @@ interface Props {
     errorPhone: string,
     setErrorPhone: (value: string) => void,
     errors: string[],
-    setErrors: (value: string[]) => void
+    setErrors: (value: string[]) => void,
+    /** edición: los primeros N solicitantes ya existen en la venta y no se pueden eliminar */
+    lockedCount?: number
 }
 
 const ProcedureForm = ({
@@ -33,7 +35,8 @@ const ProcedureForm = ({
     errorPhone,
     setErrorPhone,
     errors,
-    setErrors
+    setErrors,
+    lockedCount = 0
 }:Props)=>{
     const options = [
         {value:'Familiar', label:'Familiar'},
@@ -74,7 +77,8 @@ const ProcedureForm = ({
                     value:false
                 },
                 expiredYears:{
-                    title:'Vencida +4 años',
+                    // debe coincidir con el enum process.option_type ('Vencido +4 años')
+                    title:'Vencido +4 años',
                     value:false
                 }
             }
@@ -237,7 +241,18 @@ const ProcedureForm = ({
     }
 
     const validateProcedureSelection = (value: string)=>{
-        if(value === 'Personal'){
+        // en edición no se pueden quitar solicitantes existentes
+        if(lockedCount > 0){
+            if(value === '' || (value === 'Individual' && formData.length > 1)){
+                Toast.fire('Error', 'La venta tiene varios solicitantes, no puede cambiar a Individual', 'error');
+                return;
+            }
+
+            setProcedureType(value);
+            return;
+        }
+
+        if(value === 'Individual'){
             if(formData.length > 1){
                 swalConfirm({
                     title:'Alerta',
@@ -247,6 +262,7 @@ const ProcedureForm = ({
                         let data = formData[0];
 
                         setFormData([data]);
+                        setProcedureType(value);
                     }
                 });
             }else{
@@ -320,7 +336,7 @@ const ProcedureForm = ({
                                                 <div className="inline-block p-1">
                                                     <span>{item.title+' '+(index+1)}</span>
                                                 </div>
-                                                {index > 0 && (
+                                                {index > 0 && index >= lockedCount && (
                                                     <div className="ml-3">
                                                         <FaTrashAlt className="cursor-pointer" onClick={()=>onDeleteClient(index)} />
                                                     </div>

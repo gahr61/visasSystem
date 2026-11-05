@@ -22,6 +22,8 @@ interface Props {
     setErrorPhone: (value: string) => void;
     errors: string[];
     setErrors: (value: string[]) => void;
+    /** edición: los primeros N solicitantes ya existen en la venta y no se pueden eliminar */
+    lockedCount?: number;
 }
 
 const defaultEntry = (): PassportEntry => ({
@@ -46,7 +48,8 @@ const PassportProcedureForm = ({
     procedureType, setProcedureType,
     formData, setFormData,
     errorPhone, setErrorPhone,
-    errors, setErrors
+    errors, setErrors,
+    lockedCount = 0
 }: Props) => {
     const typeOptions = [
         { value: 'Individual', label: 'Individual' },
@@ -109,6 +112,16 @@ const PassportProcedureForm = ({
     };
 
     const onTypeChange = (value: string) => {
+        // en edición no se pueden quitar solicitantes existentes
+        if (lockedCount > 0) {
+            if (value === '' || (value === 'Individual' && formData.length > 1)) {
+                Toast.fire('Error', 'La venta tiene varios solicitantes, no puede cambiar a Individual', 'error');
+                return;
+            }
+            setProcedureType(value);
+            return;
+        }
+
         if (value === 'Individual' && formData.length > 1) {
             swalConfirm({
                 title: 'Alerta',
@@ -170,7 +183,7 @@ const PassportProcedureForm = ({
                                         title={
                                             <div className="flex items-center">
                                                 <span className="inline-block p-1">{item.title + ' ' + (index + 1)}</span>
-                                                {index > 0 && (
+                                                {index > 0 && index >= lockedCount && (
                                                     <FaTrashAlt className="ml-3 cursor-pointer" onClick={() => onDeleteClient(index)} />
                                                 )}
                                             </div>

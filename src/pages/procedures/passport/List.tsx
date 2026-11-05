@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Col, Pagination, Row } from 'rsuite';
-import { FaInfo } from 'react-icons/fa6';
+import { FaInfo, FaPen } from 'react-icons/fa6';
 import { FaTrashAlt } from 'react-icons/fa';
 
 import Content from '../../../components/common/Content';
@@ -39,6 +39,14 @@ const PassportList = ({ loader }: IApp) => {
                         icon={<FaInfo />}
                         onClick={() => navigate('/procedures/passport/' + row.id + '/details')}
                     />
+                    {hasPermission('procedure_passport_update') && (
+                        <ButtonTable
+                            title="Editar venta"
+                            controlId="edit_sale"
+                            icon={<FaPen />}
+                            onClick={() => onEditSale(row.id)}
+                        />
+                    )}
                     {hasPermission('procedure_passport_delete') && (
                         <ButtonTable
                             title="Eliminar"
@@ -84,6 +92,10 @@ const PassportList = ({ loader }: IApp) => {
         setFilters(newFilters);
         setPage(1);
         getList(newFilters, 1, perPage);
+    };
+
+    const onEditSale = (id: number) => {
+        navigate('/procedures/passport/' + id + '/edit');
     };
 
     const onDelete = (id: number) => {
