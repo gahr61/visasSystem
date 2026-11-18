@@ -8,6 +8,7 @@ import Toast from "../../components/common/Toast";
 import ProcedureForm from "../../components/ui/procedures/ProcedureForm";
 import PassportProcedureForm from "../../components/ui/procedures/passport/PassportProcedureForm";
 import EditPaymentForm from "../../components/ui/procedures/EditPaymentForm";
+import BillingForm from "../../components/ui/procedures/BillingForm";
 
 import { IApp } from "../../utils/interfaces/function";
 import { EditPaymentData, SaleEditApplicant, SaleEditClient, SaleEditData, SaleEditPayload } from "../../utils/interfaces/sales";
@@ -266,15 +267,16 @@ const SaleEdit = ({ loader, procedure }: Props) => {
     const buildPayload = (withPayment: boolean): SaleEditPayload => {
         const applicants = formData.map(entry => toApplicant(entry, procedure));
 
+        // quien realiza el trámite (su teléfono es el de WhatsApp) siempre se envía
         const payload: SaleEditPayload = {
             type:        procedureType,
+            billing:     payment.billing,
+            contact:     payment.contact || undefined,
             clients:     applicants.filter(a => a.process_id),
             new_clients: applicants.filter(a => !a.process_id)
         };
 
         if (withPayment) {
-            payload.billing = payment.billing;
-            payload.contact = payment.contact;
             payload.pricing = { sales_concepts_id: payment.concept, total: parseFloat(payment.total) || 0 };
 
             const amount = parseFloat(payment.amount) || 0;
@@ -305,14 +307,34 @@ const SaleEdit = ({ loader, procedure }: Props) => {
         Toast.fire('Error', response?.message || 'No se pudo guardar', 'error');
     };
 
+    /** datos de quien realiza el trámite */
+    const validateBilling = (): boolean => {
+        if (!isValidForm('div.billing-form')) {
+            Toast.fire('Error', 'Capture los datos de quien realiza el trámite', 'error');
+            return false;
+        }
+
+        if (errorEmail !== '') {
+            Toast.fire('Error', 'El correo de quien realiza el trámite no es válido', 'error');
+            return false;
+        }
+
+        if (payment.billing.phone.replace(/\D/g, '').length !== 10) {
+            Toast.fire('Error', 'El teléfono de quien realiza el trámite debe tener 10 dígitos', 'error');
+            return false;
+        }
+
+        return true;
+    };
+
     /** sin cambios de precio: guardar directo */
     const onSave = () => {
-        if (validateApplicants()) save(false);
+        if (validateBilling() && validateApplicants()) save(false);
     };
 
     /** con cambios de precio: pasar a verificar el pago */
     const onNext = () => {
-        if (!validateApplicants()) return;
+        if (!validateBilling() || !validateApplicants()) return;
         setErrorPhone('');
         setShowPayment(true);
     };
@@ -320,11 +342,6 @@ const SaleEdit = ({ loader, procedure }: Props) => {
     const onSavePayment = () => {
         if (!isValidForm('div.edit-payment-form')) {
             Toast.fire('Error', 'Campos requeridos', 'error');
-            return;
-        }
-
-        if (errorEmail !== '') {
-            Toast.fire('Error', 'Existen errores en los datos capturados, verifique la información', 'error');
             return;
         }
 
@@ -363,10 +380,18 @@ const SaleEdit = ({ loader, procedure }: Props) => {
                         paid={sale.paid}
                         data={payment}
                         setData={setPayment}
+                    />
+                ) : (
+                  <>
+                    <BillingForm
+                        procedure={procedure}
+                        data={payment}
+                        setData={setPayment}
                         errorEmail={errorEmail}
                         setErrorEmail={setErrorEmail}
                     />
-                ) : isVisa ? (
+                    <Divider className="my-3" />
+                  {isVisa ? (
                     <ProcedureForm
                         procedureType={procedureType}
                         setProcedureType={setProcedureType}
@@ -390,6 +415,8 @@ const SaleEdit = ({ loader, procedure }: Props) => {
                         setErrors={setErrors}
                         lockedCount={originalCount}
                     />
+                  )}
+                  </>
                 ))}
 
                 <Grid fluid>

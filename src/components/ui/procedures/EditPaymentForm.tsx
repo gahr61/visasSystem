@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Col, Divider, Grid, Row } from "rsuite";
+import { Col, Grid, Row } from "rsuite";
 
 import Input from "../../common/Input";
 import SelectForm, { ISelectOptions } from "../../common/Select";
@@ -9,17 +9,6 @@ import { EditPaymentData } from "../../../utils/interfaces/sales";
 import {
     conceptsPassportMinimumPayment, conceptsPassportPrices, conceptsVisaPrices
 } from "../../../utils/services/concepts";
-
-const CONTACTS: ISelectOptions[] = [
-    { value: 'Correo electrónico', label: 'Correo electrónico' },
-    { value: 'Familiar/amistad', label: 'Familiar/amistad' },
-    { value: 'Otro', label: 'Otro' },
-    { value: 'Recomendación', label: 'Recomendación' },
-    { value: 'Redes sociales', label: 'Redes sociales' },
-    { value: 'Teléfono', label: 'Teléfono' },
-    { value: 'Volante', label: 'Volante' },
-    { value: 'Visita presencial', label: 'Visita presencial' },
-];
 
 const PAYMENT_METHODS: ISelectOptions[] = [
     { value: 'Depósito Bancario', label: 'Depósito Bancario' },
@@ -38,8 +27,6 @@ interface Props {
     paid: number;
     data: EditPaymentData;
     setData: (data: EditPaymentData) => void;
-    errorEmail: string;
-    setErrorEmail: (value: string) => void;
 }
 
 const num = (value: string | number) => {
@@ -48,10 +35,10 @@ const num = (value: string | number) => {
 };
 
 /**
- * Paso de pago de la edición de una venta (mismo flujo que el alta): datos de quien
- * realiza el trámite, concepto y total recalculado, pagado a la fecha y abono adicional
+ * Paso de pago de la edición de una venta (mismo flujo que el alta): concepto y total
+ * recalculado, pagado a la fecha y abono adicional
  */
-const EditPaymentForm = ({ procedure, applicants, paid, data, setData, errorEmail, setErrorEmail }: Props) => {
+const EditPaymentForm = ({ procedure, applicants, paid, data, setData }: Props) => {
     const [concepts, setConcepts] = useState<Concept[]>([]);
 
     const priceOf = (list: Concept[], id: string) => num(list.find(c => String(c.value) === String(id))?.price ?? 0);
@@ -90,11 +77,6 @@ const EditPaymentForm = ({ procedure, applicants, paid, data, setData, errorEmai
         setData({ ...data, concept: value, price, total: String(Math.round(price * applicants * 100) / 100) });
     };
 
-    const onBillingChange = (e: React.FormEvent<HTMLInputElement>) => {
-        const { name, value } = e.currentTarget;
-        setData({ ...data, billing: { ...data.billing, [name]: value } });
-    };
-
     const onChange = (e: React.FormEvent<HTMLInputElement>) => {
         const { name, value } = e.currentTarget;
         setData({ ...data, [name]: value });
@@ -117,46 +99,6 @@ const EditPaymentForm = ({ procedure, applicants, paid, data, setData, errorEmai
         <Grid fluid>
             <Row className="edit-payment-form">
                 <Col xs={24}>
-                    <fieldset>
-                        <legend className="text-lg">Datos de quien realiza el trámite</legend>
-                        <Row>
-                            <Col xs={24} lg={4}>
-                                <label>Nombre(s)</label>
-                                <Input id="names" value={data.billing.names} onChange={onBillingChange} required />
-                            </Col>
-                            <Col xs={24} lg={4}>
-                                <label>Apellido paterno</label>
-                                <Input id="lastname1" value={data.billing.lastname1} onChange={onBillingChange} required />
-                            </Col>
-                            <Col xs={24} lg={4}>
-                                <label>Apellido materno</label>
-                                <Input id="lastname2" value={data.billing.lastname2} onChange={onBillingChange} />
-                            </Col>
-                            <Col xs={24} lg={6}>
-                                <label>
-                                    Correo electrónico
-                                    {procedure === 'Pasaporte' && <span className="text-xs text-gray-400"> (opcional)</span>}
-                                </label>
-                                <span className="text-xs text-red-400 ms-2">{errorEmail}</span>
-                                <Input
-                                    id="email" type="email" value={data.billing.email}
-                                    onChange={onBillingChange} setErrorEmail={setErrorEmail}
-                                    required={procedure === 'Visa'}
-                                />
-                            </Col>
-                            <Col xs={24} lg={3}>
-                                <label>Teléfono</label>
-                                <Input id="phone" type="tel" value={data.billing.phone} onChange={onBillingChange} required />
-                            </Col>
-                            <Col xs={24} lg={3}>
-                                <label>Medio de contacto</label>
-                                <SelectForm id="contact" options={CONTACTS} value={data.contact} handleChange={(v: string) => onSelect('contact', v)} required />
-                            </Col>
-                        </Row>
-                    </fieldset>
-
-                    <Divider />
-
                     <fieldset>
                         <legend className="text-lg">Pago</legend>
                         <table className="min-w-full divide-y divide-gray-200">

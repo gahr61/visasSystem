@@ -10,6 +10,7 @@ import ButtonTable from "../../../components/common/ButtonTable";
 import Input from "../../../components/common/Input";
 import Button from "../../../components/common/Button";
 import Table from "../../../components/common/Table";
+import Toast from "../../../components/common/Toast";
 import ModalSendVisaTicket from "../../../components/ui/modals/SendVisaTicket";
 import ModalConfirmVisaPayment from "../../../components/ui/modals/ConfirmVisaPayment";
 import ModalInfoVisa from "../../../components/ui/modals/InfoVisa";
@@ -465,7 +466,13 @@ const VisasList = ({loader}:IApp)=>{
     };
 
     const handleSendMessageApp = (phone: string)=>{
-        const number = phone.replace(/-/g, '');
+        // teléfono de quien realiza el trámite: solo dígitos, últimos 10 (sin lada de país)
+        const number = (phone || '').replace(/\D/g, '').slice(-10);
+
+        if(number.length !== 10){
+            Toast.fire('Error', 'El teléfono de quien realiza el trámite no es válido. Corríjalo en Editar venta.', 'error');
+            return;
+        }
 
         const phoneNumber = '521'+number;
        
